@@ -23,7 +23,6 @@
   // ── BOOT ───────────────────────────────────────────────
   function boot() {
     injectFonts();
-    injectCSS();
     applyBranding();
     initDefaults();
     render();
