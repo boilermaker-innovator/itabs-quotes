@@ -3,27 +3,374 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iTabs Quotes — Demo</title>
+<title>iTabs Quotes — Interactive Quote Estimators for Trades</title>
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="iTabs Quotes — Interactive Quote Estimators for Trades">
+<meta property="og:description" content="Config-driven quote widgets for Australian trades businesses. One engine, infinite trades. Customers learn while quoting.">
+<meta property="og:url" content="https://boilermaker-innovator.github.io/itabs-quotes/">
+<meta name="description" content="Interactive quote estimator widgets for Australian trades businesses. Fencing, gates, and more. One engine, infinite trades.">
+<meta name="theme-color" content="#f59e0b">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
 <style>
+:root {
+  --bg: #0c1117;
+  --bg-card: #151c25;
+  --bg-hover: #1a2332;
+  --border: #222d3a;
+  --amber: #f59e0b;
+  --amber-glow: rgba(245, 158, 11, 0.12);
+  --green: #4ade80;
+  --blue: #3b82f6;
+  --text: #e8ecf1;
+  --text-dim: #8896a7;
+  --text-muted: #5a6a7d;
+  --radius: 16px;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: #0c1117; color: #e8ecf1; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.wrap { text-align: center; padding: 40px 20px; }
-h1 { font-size: 2rem; margin-bottom: 8px; background: linear-gradient(135deg, #f59e0b, #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-p { color: #8896a7; margin-bottom: 30px; }
-.links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-a { display: block; padding: 20px 32px; background: #151c25; border: 2px solid #222d3a; border-radius: 14px; color: #e8ecf1; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.2s; }
-a:hover { border-color: #f59e0b; background: #1a2332; }
-a span { display: block; font-size: 0.8rem; color: #8896a7; font-weight: 400; margin-top: 4px; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ── Header ── */
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.logo-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.logo-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--amber);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0c1117;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.logo-text {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.logo-text span {
+  color: var(--amber);
+}
+
+h1 {
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-dim);
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ── Demo Cards ── */
+.demos {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.demo-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+
+.demo-card:hover {
+  background: var(--bg-hover);
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+.demo-dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.demo-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.demo-name {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.demo-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.demo-badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.demo-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-muted);
+}
+
+.demo-badge.live {
+  background: rgba(74, 222, 128, 0.12);
+  color: var(--green);
+}
+
+.demo-arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.demo-card:hover .demo-arrow {
+  color: var(--text);
+}
+
+/* ── How it works ── */
+.how-it-works {
+  margin-bottom: 48px;
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.step-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.step-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--amber);
+  margin-bottom: 10px;
+}
+
+.step-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.footer p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.footer a {
+  color: var(--amber);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .container { padding: 28px 16px 48px; }
+  .logo-text { font-size: 24px; }
+  h1 { font-size: 18px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .demo-card { padding: 16px; }
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>iTabs Quotes</h1>
-  <p>Config-driven quote estimator widgets for trades businesses</p>
-  <div class="links">
-    <a href="fencing.html">🏗️ Fencing<span>Sliders, toggles, per-metre pricing</span></a>
-    <a href="gateworld.html">🚪 Gateworld<span>Multi-select, per-unit pricing</span></a>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="logo-mark">
+      <div class="logo-icon">iQ</div>
+      <div class="logo-text">iTabs <span>Quotes</span></div>
+    </div>
+    <h1>Interactive quote estimators for Australian trades businesses. One engine, infinite trades.</h1>
   </div>
+
+  <!-- Live Demos -->
+  <div class="section-label">Live Demos</div>
+  <div class="demos">
+
+    <a href="fosters-fencing.html" class="demo-card">
+      <div class="demo-dot" style="background: rgba(74, 222, 128, 0.12); color: #4ade80;">&#9878;</div>
+      <div class="demo-info">
+        <div class="demo-name">Fosters Fencing Perth</div>
+        <div class="demo-desc">Colorbond, aluminium, timber, pool & security fencing</div>
+        <div class="demo-badges">
+          <span class="demo-badge">Fencing</span>
+          <span class="demo-badge">Per-metre pricing</span>
+          <span class="demo-badge">Perth</span>
+        </div>
+      </div>
+      <div class="demo-arrow">&#8250;</div>
+    </a>
+
+    <a href="skilled-fencing.html" class="demo-card">
+      <div class="demo-dot" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">&#9878;</div>
+      <div class="demo-info">
+        <div class="demo-name">Skilled Fencing Perth</div>
+        <div class="demo-desc">Colorbond, aluminium slats, pool fencing & custom gates</div>
+        <div class="demo-badges">
+          <span class="demo-badge">Fencing</span>
+          <span class="demo-badge">Per-metre pricing</span>
+          <span class="demo-badge">Perth</span>
+        </div>
+      </div>
+      <div class="demo-arrow">&#8250;</div>
+    </a>
+
+  </div>
+
+  <!-- How it works -->
+  <div class="how-it-works">
+    <div class="section-label">How it works for the tradie</div>
+    <div class="steps-grid">
+      <div class="step-box">
+        <div class="step-num">01</div>
+        <div class="step-icon">📱</div>
+        <div class="step-title">Customer quotes themselves</div>
+        <div class="step-desc">Picks options, sees a ballpark price. No login, no app.</div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">02</div>
+        <div class="step-icon">📋</div>
+        <div class="step-title">You get a spec sheet</div>
+        <div class="step-desc">Every selection emailed to you. No more 20 questions on the phone.</div>
+      </div>
+      <div class="step-box">
+        <div class="step-num">03</div>
+        <div class="step-icon">🧠</div>
+        <div class="step-title">Educated leads</div>
+        <div class="step-desc">i-buttons teach customers about coastal tips, bushfire zones & more.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Engine demos -->
+  <div class="section-label">Engine Demos</div>
+  <div class="demos">
+    <a href="fencing.html" class="demo-card">
+      <div class="demo-dot" style="background: var(--amber-glow); color: var(--amber);">&#9881;</div>
+      <div class="demo-info">
+        <div class="demo-name">Generic Fencing Template</div>
+        <div class="demo-desc">Base config — sliders, toggles, per-metre pricing</div>
+        <div class="demo-badges">
+          <span class="demo-badge">Template</span>
+        </div>
+      </div>
+      <div class="demo-arrow">&#8250;</div>
+    </a>
+
+    <a href="gateworld.html" class="demo-card">
+      <div class="demo-dot" style="background: var(--amber-glow); color: var(--amber);">&#9881;</div>
+      <div class="demo-info">
+        <div class="demo-name">Gateworld Gate Estimator</div>
+        <div class="demo-desc">10-step select flow, pre/post adjustments, per-unit pricing</div>
+        <div class="demo-badges">
+          <span class="demo-badge">Template</span>
+        </div>
+      </div>
+      <div class="demo-arrow">&#8250;</div>
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>Built by <a href="https://itabs.ai">iTabs</a> — one engine, infinite trades.<br>
+    Want one for your business? Get in touch.</p>
+  </div>
+
 </div>
+
 </body>
 </html>
