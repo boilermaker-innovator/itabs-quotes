@@ -57,9 +57,10 @@ const WIDGET_CONFIG = {
   },
 
   header: {
+    icon: "🏗️",
     headline: "How much will my fence cost?",
-    subheadline: "Answer a few questions and get a ballpark price in 60 seconds. No login. No spam.",
-    trustLine: "Skilled Fencing Perth — est. 2012 — Bayswater, WA",
+    subtitle: "Answer a few questions and get a ballpark price in 60 seconds. No login. No spam.",
+    badge: "Skilled Fencing Perth — est. 2012 — Bayswater, WA",
   },
 
   steps: [
@@ -135,8 +136,12 @@ const WIDGET_CONFIG = {
             label: "Height",
             unit: "",
             min: 0, max: 3, step: 1, default: 2,
-            valueMap: { 0: "0.9m", 1: "1.2m", 2: "1.8m", 3: "2.1m" },
-            numericMap: { 0: 0.9, 1: 1.2, 2: 1.8, 3: 2.1 },
+            valueMap: [
+              { value: 0, label: "0.9m (low)", numericValue: 0.9 },
+              { value: 1, label: "1.2m (front fence)", numericValue: 1.2 },
+              { value: 2, label: "1.8m (standard)", numericValue: 1.8 },
+              { value: 3, label: "2.1m (extra tall)", numericValue: 2.1 },
+            ],
           }
         ]
       },
