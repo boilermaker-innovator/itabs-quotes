@@ -48,11 +48,14 @@ const WIDGET_CONFIG = {
     darkBackground: "#070e0b",
     borderColor: "#1c3329",
     textColor: "#e8f0ec",
-    textSecondary: "#7fa393",
-    textMuted: "#5a7d6d",
+    mutedText: "#7fa393",
+    dimText: "#5a7d6d",
+    successColor: "#22c55e",
+    errorColor: "#ef4444",
+    infoColor: "#3b82f6",
     googleFontsUrl: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
     fontFamily: "'Plus Jakarta Sans', sans-serif",
-    monoFamily: "'JetBrains Mono', monospace",
+    monoFont: "'JetBrains Mono', monospace",
     borderRadius: "14px",
   },
 
@@ -328,7 +331,6 @@ const WIDGET_CONFIG = {
     poweredByUrl: "https://itabs.ai",
   }
 };
-</script>
 </script>
 
 <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -1460,7 +1462,7 @@ function updateQuoteSummary() {
         const v = state.sliders[s.id];
         return v ? v.label : '';
       }).filter(Boolean);
-      if (vals.length) lines.push(`ðŸ“ ${step.title}: <strong>${vals.join(' × ')}</strong>`);
+      if (vals.length) lines.push(`📐 ${step.title}: <strong>${vals.join(' × ')}</strong>`);
     }
     if (step.input.type === 'toggle_group') {
       const active = step.input.toggles.filter(t => state.toggles[t.id]);
@@ -1522,7 +1524,7 @@ async function submitLead() {
   });
 
   if (missingRequired) {
-    alert('Just need the required fields filled in ðŸ‘');
+    alert('Just need the required fields filled in 👍');
     return;
   }
 
