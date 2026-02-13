@@ -409,7 +409,7 @@ const WIDGET_CONFIG = {
 </script>
 
 <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-     ENGINE â€” Everything below here is generic. Do not edit per client.
+     ENGINE — Everything below here is generic. Do not edit per client.
      â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 
 <script>
@@ -429,7 +429,7 @@ document.title = WIDGET_CONFIG.header.headline + ' | ' + WIDGET_CONFIG.business.
 </script>
 
 <style>
-/* â•â•â• CSS VARIABLES â€” Set from config via JS â•â•â• */
+/* â•â•â• CSS VARIABLES — Set from config via JS â•â•â• */
 :root {
   --bg-main: #0c1117;
   --bg-card: #151c25;
@@ -847,7 +847,7 @@ function render() {
 
   // Footer
   if (C.footer && C.footer.showPoweredBy) {
-    html += `<div class="powered-by">Powered by <a href="${C.footer.poweredByUrl}" target="_blank">iTabs</a> Â· Interactive tools that convert</div>`;
+    html += `<div class="powered-by">Powered by <a href="${C.footer.poweredByUrl}" target="_blank">iTabs</a> · Interactive tools that convert</div>`;
   }
 
   app.innerHTML = html;
@@ -866,7 +866,7 @@ function renderHeader() {
 
 function renderSocialProof() {
   const sp = C.socialProof;
-  const stars = 'â˜…'.repeat(Math.floor(sp.rating));
+  const stars = '\u2605'.repeat(Math.floor(sp.rating));
   return `
     <div class="social-proof">
       <span class="sp-stars">${stars}</span>
@@ -965,7 +965,7 @@ function renderEstimateSection(index) {
       <div class="itab-content${isOpen ? ' show' : ''}" id="${sectionId}-content">
         <div class="estimate-box">
           <div class="est-label">${C.pricing.displayMode === 'from' ? 'Estimated from' : 'Estimated range'}</div>
-          <div class="est-range" id="estRange">â€”</div>
+          <div class="est-range" id="estRange">—</div>
           <div class="est-note" id="estNote">Complete the sections above to see your estimate</div>
           <div class="estimate-breakdown" id="estBreakdown"></div>
         </div>
@@ -1015,7 +1015,7 @@ function renderLeadSection(index) {
           ${lc.submitNote ? `<div style="text-align:center;margin-top:12px;font-size:0.75rem;color:var(--text-muted)">${lc.submitNote}</div>` : ''}
         </div>
         <div class="success-message" id="successMsg" style="display:none;">
-          <div class="check-icon">âœ…</div>
+          <div class="check-icon">✅</div>
           <h3>${lc.successMessage}</h3>
           <p>${lc.successSubtext}</p>
         </div>
@@ -1051,7 +1051,7 @@ function renderSelect(step, sectionId, input) {
         </div>
         ${opt.description ? `<div class="option-desc">${opt.description}</div>` : ''}
         ${tagsHtml ? `<div class="option-tags">${tagsHtml}</div>` : ''}
-        <span class="option-check">âœ“ Selected</span>
+        <span class="option-check">✓ Selected</span>
       </div>`;
   });
   html += '</div>';
@@ -1072,12 +1072,12 @@ function renderMultiSelect(step, sectionId, input) {
           ${opt.priceHint ? `<span class="option-price">${opt.priceHint}</span>` : ''}
         </div>
         ${opt.description ? `<div class="option-desc">${opt.description}</div>` : ''}
-        <span class="option-check">âœ“ Selected</span>
+        <span class="option-check">✓ Selected</span>
       </div>`;
   });
   html += '</div>';
   if (input.optional) {
-    html += `<button class="tab" style="margin-top:10px;width:100%;text-align:center;" onclick="skipStep(${C.steps.indexOf(step)})">Skip â€” none needed</button>`;
+    html += `<button class="tab" style="margin-top:10px;width:100%;text-align:center;" onclick="skipStep(${C.steps.indexOf(step)})">Skip — none needed</button>`;
   }
   return html;
 }
@@ -1226,7 +1226,7 @@ function selectOption(stepId, value, stepIndex, autoAdvance) {
 
   // Update preview
   const opt = step.input.options.find(o => o.value === value);
-  document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">âœ“ ${opt ? opt.label : value}</span>`;
+  document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">✓ ${opt ? opt.label : value}</span>`;
 
   updateEstimate();
   updateQuoteSummary();
@@ -1280,7 +1280,7 @@ function updateSlider(sliderId, stepId, stepIndex, rawValue) {
     if (s.valueMap) return val.numeric + 'm';
     return val.raw + (s.unit || '');
   });
-  document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">âœ“ ${previews.join(' Ã— ')}</span>`;
+  document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">✓ ${previews.join(' × ')}</span>`;
 
   updateEstimate();
   updateQuoteSummary();
@@ -1300,7 +1300,7 @@ function toggleExtra(toggleId, stepId, stepIndex) {
 
   if (activeCount > 0) {
     document.getElementById(sectionId + '-preview').innerHTML =
-      `<span class="selected">âœ“ ${activeCount} extra${activeCount > 1 ? 's' : ''} added</span>`;
+      `<span class="selected">✓ ${activeCount} extra${activeCount > 1 ? 's' : ''} added</span>`;
     document.getElementById(sectionId).classList.add('completed');
     state.completedSections.add(sectionId);
   } else {
@@ -1379,7 +1379,7 @@ function calculateEstimate() {
     if (baseStep) {
       baseStep.input.sliders.forEach(s => {
         if (s.id !== p.quantitySource && state.sliders[s.id]) {
-          baseLine += ` Ã— ${state.sliders[s.id].numeric}m`;
+          baseLine += ` × ${state.sliders[s.id].numeric}m`;
         }
       });
     }
@@ -1464,7 +1464,7 @@ function updateEstimate() {
   if (!rangeEl) return; // Not yet rendered
 
   if (!est) {
-    rangeEl.textContent = 'â€”';
+    rangeEl.textContent = '—';
     noteEl.textContent = 'Complete the sections above to see your estimate';
     breakdownEl.innerHTML = '';
     if (previewEl) previewEl.textContent = C.estimate.preview;
@@ -1484,7 +1484,7 @@ function updateEstimate() {
   }
 
   if (previewEl) {
-    previewEl.innerHTML = `<span class="selected">âœ“ ${rangeText}</span>`;
+    previewEl.innerHTML = `<span class="selected">✓ ${rangeText}</span>`;
   }
 }
 
@@ -1498,19 +1498,19 @@ function updateQuoteSummary() {
   C.steps.forEach(step => {
     if (step.input.type === 'select' && state.answers[step.id]) {
       const opt = findOption(step.id, state.answers[step.id]);
-      lines.push(`${opt ? opt.icon : 'â€¢'} ${step.title}: <strong>${opt ? opt.label : state.answers[step.id]}</strong>`);
+      lines.push(`${opt ? opt.icon : '•'} ${step.title}: <strong>${opt ? opt.label : state.answers[step.id]}</strong>`);
     }
     if (step.input.type === 'slider_group') {
       const vals = step.input.sliders.map(s => {
         const v = state.sliders[s.id];
         return v ? v.label : '';
       }).filter(Boolean);
-      if (vals.length) lines.push(`ðŸ“ ${step.title}: <strong>${vals.join(' Ã— ')}</strong>`);
+      if (vals.length) lines.push(`ðŸ“ ${step.title}: <strong>${vals.join(' × ')}</strong>`);
     }
     if (step.input.type === 'toggle_group') {
       const active = step.input.toggles.filter(t => state.toggles[t.id]);
       if (active.length) {
-        lines.push(`âž• Extras: ${active.map(t => t.icon + ' ' + t.label).join(', ')}`);
+        lines.push(`➕ Extras: ${active.map(t => t.icon + ' ' + t.label).join(', ')}`);
       }
     }
   });
@@ -1626,7 +1626,7 @@ async function submitLead() {
   const sectionId = `section-${leadSectionIndex}`;
   document.getElementById(sectionId).classList.add('completed');
   state.completedSections.add(sectionId);
-  document.getElementById(sectionId + '-preview').innerHTML = '<span class="selected">âœ“ Sent!</span>';
+  document.getElementById(sectionId + '-preview').innerHTML = '<span class="selected">✓ Sent!</span>';
   updateProgress();
 }
 
@@ -1634,7 +1634,7 @@ async function submitLead() {
 function getPreview(step) {
   if (step.input.type === 'select' && state.answers[step.id]) {
     const opt = step.input.options.find(o => o.value === state.answers[step.id]);
-    return `<span class="selected">âœ“ ${opt ? opt.label : state.answers[step.id]}</span>`;
+    return `<span class="selected">✓ ${opt ? opt.label : state.answers[step.id]}</span>`;
   }
   return step.preview;
 }
