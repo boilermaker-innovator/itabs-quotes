@@ -1,0 +1,209 @@
+{
+  "trade": {
+    "id": "fencing",
+    "name": "Fencing",
+    "region": "Perth, WA"
+  },
+
+  "business": {
+    "name": "Perth Fencing Pros",
+    "logo": "",
+    "phone": "",
+    "colors": {
+      "primary": "#F59E0B",
+      "secondary": "#FFFFFF",
+      "accent": "#F59E0B"
+    }
+  },
+
+  "settings": {
+    "showPricing": true,
+    "pricingDisclaimer": "Estimates are approximate and may vary based on site conditions, soil type, and access. A site visit is usually required for an accurate quote.",
+    "currency": "AUD",
+    "currencySymbol": "$",
+    "summaryTitle": "How much is my fence?"
+  },
+
+  "steps": [
+    {
+      "id": "fence_type",
+      "title": "What type of fence do you need?",
+      "type": "single_select",
+      "required": true,
+      "helpText": "Most Perth homes use Colorbond for low maintenance — it handles the heat, won't rot, and comes in heaps of colours. Timber gives a classic look but needs staining every 2–3 years. Aluminium suits pool fencing or a modern street frontage.",
+      "options": [
+        {
+          "id": "colorbond",
+          "label": "Colorbond Steel",
+          "description": "Low maintenance, durable steel fencing. Most popular in Perth.",
+          "pricing": { "type": "per_unit", "amount": 95, "unit": "metre" }
+        },
+        {
+          "id": "timber",
+          "label": "Timber",
+          "description": "Classic wooden fence panels. Great look, needs more upkeep.",
+          "pricing": { "type": "per_unit", "amount": 110, "unit": "metre" }
+        },
+        {
+          "id": "aluminium",
+          "label": "Aluminium",
+          "description": "Modern, rust-proof. Popular for pool fencing and front yards.",
+          "pricing": { "type": "per_unit", "amount": 130, "unit": "metre" }
+        },
+        {
+          "id": "hardifence",
+          "label": "HardieFence",
+          "description": "Cement composite panels. Solid, quiet, low maintenance.",
+          "pricing": { "type": "per_unit", "amount": 140, "unit": "metre" }
+        }
+      ]
+    },
+    {
+      "id": "length",
+      "title": "How many metres of fencing?",
+      "type": "number_input",
+      "required": true,
+      "helpText": "A standard Perth residential block is about 50m total perimeter. Just measure the sections you need fenced — most people don't do the whole lot. If you're not sure, pace it out (one big step ≈ 1 metre).",
+      "min": 1,
+      "max": 200,
+      "step": 1,
+      "unit": "metres",
+      "default": 20,
+      "pricing": { "type": "multiplier" }
+    },
+    {
+      "id": "height",
+      "title": "What height fence?",
+      "type": "single_select",
+      "required": true,
+      "helpText": "Standard boundary fences in Perth are 1.8m (6 foot). Under the WA Dividing Fences Act, your neighbour generally shares the cost of a standard 1.8m fence. Anything taller is your cost. Pool fencing must be at least 1.2m by law.",
+      "options": [
+        {
+          "id": "standard",
+          "label": "1.8m — Standard height",
+          "description": "Most common. Meets Dividing Fences Act for cost sharing.",
+          "pricing": { "type": "fixed", "amount": 0 }
+        },
+        {
+          "id": "pool",
+          "label": "1.2m — Pool fence height",
+          "description": "Minimum for WA pool fencing compliance.",
+          "pricing": { "type": "fixed", "amount": 0 }
+        },
+        {
+          "id": "extra",
+          "label": "2.1m+ — Extra height",
+          "description": "More privacy or security. Common near busy roads.",
+          "pricing": { "type": "fixed", "amount": 300 }
+        }
+      ]
+    },
+    {
+      "id": "gate",
+      "title": "Do you need a gate?",
+      "type": "single_select",
+      "required": true,
+      "helpText": "WA law requires a self-closing, self-latching gate for pool fencing. For boundary fencing, a pedestrian gate gives side access. Double gates let you get a trailer or bobcat through.",
+      "options": [
+        {
+          "id": "none",
+          "label": "No gate needed",
+          "pricing": { "type": "fixed", "amount": 0 }
+        },
+        {
+          "id": "pedestrian",
+          "label": "Pedestrian gate",
+          "description": "Standard single gate for foot access.",
+          "pricing": { "type": "fixed", "amount": 450 }
+        },
+        {
+          "id": "double",
+          "label": "Double gate",
+          "description": "Wide gate for vehicle or trailer access.",
+          "pricing": { "type": "fixed", "amount": 850 }
+        },
+        {
+          "id": "both",
+          "label": "Both — pedestrian + double gate",
+          "description": "Side access plus vehicle access.",
+          "pricing": { "type": "fixed", "amount": 1250 }
+        }
+      ]
+    },
+    {
+      "id": "access",
+      "title": "What's the site access like?",
+      "type": "single_select",
+      "required": true,
+      "helpText": "This matters because the fencer may need to get materials, a bobcat, or a post hole borer to the work area. Narrow access means more hand-digging which adds time and cost.",
+      "options": [
+        {
+          "id": "easy",
+          "label": "Easy — wide side access or open yard",
+          "description": "Machinery can get straight to the fence line.",
+          "pricing": { "type": "fixed", "amount": 0 }
+        },
+        {
+          "id": "moderate",
+          "label": "Moderate — narrow side gate",
+          "description": "Materials can get through but tight for machinery.",
+          "pricing": { "type": "fixed", "amount": 200 }
+        },
+        {
+          "id": "difficult",
+          "label": "Difficult — no side access or rear only",
+          "description": "Everything carried by hand. More labour required.",
+          "pricing": { "type": "fixed", "amount": 500 }
+        }
+      ]
+    },
+    {
+      "id": "removal",
+      "title": "Is there an old fence to remove?",
+      "type": "single_select",
+      "required": false,
+      "helpText": "If there's an existing fence, it usually needs to come out before the new one goes in. The fencer will remove it and take it to the tip. Asbestos fencing (common in older Perth homes) requires specialist removal — mention it in the notes if you think it might be asbestos.",
+      "options": [
+        {
+          "id": "no",
+          "label": "No — new fence only",
+          "pricing": { "type": "fixed", "amount": 0 }
+        },
+        {
+          "id": "yes",
+          "label": "Yes — remove and dispose of old fence",
+          "pricing": { "type": "per_unit", "amount": 15, "unit": "metre" }
+        }
+      ]
+    },
+    {
+      "id": "notes",
+      "title": "Anything else the fencer should know?",
+      "type": "text_input",
+      "required": false,
+      "helpText": "Mention things like sloping ground, retaining walls, trees near the fence line, limestone rock, sandy soil, or if you think the old fence might be asbestos.",
+      "placeholder": "e.g. Ground slopes about 1m from front to back, there's a big tree near the back corner, neighbour has agreed to split the cost"
+    }
+  ],
+
+  "contact": {
+    "title": "Your Details",
+    "fields": [
+      { "id": "name", "label": "Name", "type": "text", "required": true },
+      { "id": "phone", "label": "Phone", "type": "tel", "required": true },
+      { "id": "email", "label": "Email", "type": "email", "required": false },
+      { "id": "suburb", "label": "Suburb", "type": "text", "required": true, "placeholder": "e.g. Joondalup, Fremantle, Armadale" }
+    ]
+  },
+
+  "summary": {
+    "title": "Your Fence Quote Request",
+    "description": "Here's a summary of what you need. Copy this and send it to any fencing company for a quick quote.",
+    "includeEstimate": true,
+    "ctaText": "📋 Copy Quote Summary"
+  },
+
+  "delivery": {
+    "method": "display"
+  }
+}
