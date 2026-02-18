@@ -652,16 +652,21 @@ function buildConfig() {
     basePrices[val] = { low, high };
   });
 
-  // Build pricing extras from toggle steps
+  // Build pricing extras from toggle steps + AI pricing data
   const extras = [];
   steps.filter(s => s.type === 'toggle_group').forEach(step => {
     step.toggles.forEach(tg => {
-      extras.push({
-        id: tg.id,
-        type: 'fixed',
-        low: 0, high: 0,
-        breakdownLabel: tg.label,
-      });
+      // Check if AI provided pricing for this extra
+      const aiExtra = window._aiExtras?.find(e => e.id === tg.id);
+      if (aiExtra) {
+        const ext = { id: tg.id, type: aiExtra.type || 'fixed', breakdownLabel: aiExtra.breakdownLabel || tg.label };
+        if (aiExtra.type === 'fixed') { ext.low = aiExtra.low || 0; ext.high = aiExtra.high || 0; }
+        else if (aiExtra.type === 'per_unit') { ext.lowPerUnit = aiExtra.lowPerUnit || 0; ext.highPerUnit = aiExtra.highPerUnit || 0; }
+        else if (aiExtra.type === 'percentage') { ext.lowPercent = aiExtra.lowPercent || 0; ext.highPercent = aiExtra.highPercent || 0; }
+        extras.push(ext);
+      } else {
+        extras.push({ id: tg.id, type: 'fixed', low: 0, high: 0, breakdownLabel: tg.label });
+      }
     });
   });
 
@@ -818,6 +823,7 @@ function saveToLocal() {
     fields: {},
     aiTips: window._aiTips || [],
     aiServices: window._aiServices || [],
+    aiExtras: window._aiExtras || [],
   };
   // Save all input values
   document.querySelectorAll('#builder input, #builder select, #builder textarea').forEach(el => {
@@ -847,6 +853,7 @@ function loadFromLocal() {
   // Restore AI data
   if (data.aiTips) window._aiTips = data.aiTips;
   if (data.aiServices) window._aiServices = data.aiServices;
+  if (data.aiExtras) window._aiExtras = data.aiExtras;
   toast('📂 Draft loaded!');
 }
 
@@ -979,49 +986,110 @@ async function aiAnalyzeURL() {
 
   const prompt = `You are helping build an interactive quote estimator widget for an Australian trades business.
 
-I'm going to give you a website URL. Use Google Search to find information about this business. Then extract the following and return it as JSON:
+Use Google Search to find information about this business website, then build a COMPLETE widget config.
 
 URL: ${url}
 
-Return this exact JSON structure (fill in what you can find, leave empty string for unknowns):
+Return this EXACT JSON structure. Fill in EVERYTHING you can — use realistic Australian pricing if exact prices aren't on the site:
 {
   "business": {
     "name": "",
     "phone": "",
     "location": "",
     "website": "${url}",
-    "tagline": "",
-    "trade": ""
+    "tagline": "short description of services",
+    "trade": "single word like fencing, concreting, painting, patios, landscaping, electrical, plumbing"
   },
   "branding": {
-    "primaryColor": "",
-    "secondaryColor": ""
+    "primaryColor": "#hex from their site branding",
+    "secondaryColor": "#slightly darker version"
   },
-  "services": [
-    { "value": "service_id", "label": "Service Name", "icon": "emoji", "description": "brief description", "priceHint": "$X–$Y per unit if known" }
-  ],
+  "header": {
+    "icon": "relevant emoji",
+    "headline": "How much is my [trade]?",
+    "subtitle": "Tap through to get a ballpark price for your [trade] project. Takes about 60 seconds.",
+    "badge": "📍 Prices based on [their location] — 2025",
+    "disclaimer": "Estimates are approximate. Final pricing confirmed after site inspection."
+  },
   "suggestedSteps": [
     {
-      "id": "step_id",
-      "title": "Question for the customer?",
+      "id": "service_type",
+      "title": "What type of [trade] work?",
       "type": "select",
       "options": [
-        { "value": "opt_id", "label": "Option Name", "icon": "emoji", "description": "", "priceHint": "" }
+        { "value": "snake_case_id", "label": "Display Name", "icon": "emoji", "description": "helpful 1-line description", "priceHint": "$X–$Y/unit" }
+      ]
+    },
+    {
+      "id": "measurements",
+      "title": "How much [trade] work?",
+      "type": "slider_group",
+      "sliders": [
+        { "id": "length_m", "label": "Length (metres)", "min": 5, "max": 100, "default": 20, "step": 1, "unit": "m", "markers": ["5m", "50m", "100m"] }
+      ]
+    },
+    {
+      "id": "site_conditions",
+      "title": "What are the site conditions?",
+      "type": "select",
+      "options": [
+        { "value": "easy", "label": "Easy access", "icon": "✅", "description": "Flat ground, good access", "priceHint": "" },
+        { "value": "moderate", "label": "Some challenges", "icon": "⚠️", "description": "Slope or limited access", "priceHint": "+10-15%" },
+        { "value": "difficult", "label": "Difficult site", "icon": "🔴", "description": "Steep slope, tight access, rocky ground", "priceHint": "+20-30%" }
+      ]
+    },
+    {
+      "id": "extras",
+      "title": "Any extras or add-ons?",
+      "type": "toggle_group",
+      "toggles": [
+        { "id": "extra_id", "label": "Extra name", "icon": "emoji", "costHint": "+$X–$Y" }
       ]
     }
   ],
+  "pricing": {
+    "unit": "metre or sqm or unit",
+    "unitLabel": "per metre or per sqm or per unit",
+    "basePriceStepId": "service_type",
+    "quantitySourceId": "length_m",
+    "basePrices": {
+      "option_value_1": { "low": 80, "high": 120 },
+      "option_value_2": { "low": 100, "high": 180 }
+    },
+    "extras": [
+      { "id": "matches toggle id", "type": "fixed", "low": 200, "high": 400, "breakdownLabel": "Display label" }
+    ],
+    "minimumPrice": 500,
+    "roundTo": 50
+  },
+  "estimate": {
+    "title": "Your Estimate",
+    "preview": "Complete above to see price",
+    "note": "Based on typical [location] pricing — your actual quote may differ."
+  },
+  "leadCapture": {
+    "title": "Get your actual quote",
+    "preview": "Free, no obligation",
+    "heading": "We've got your specs.",
+    "subheading": "Drop your details and we'll get back to you with an exact price — usually within 24 hours.",
+    "submitText": "📩 Send My Quote Request",
+    "successMessage": "Quote request sent!",
+    "successSubtext": "We'll be in touch within 24 hours.",
+    "emailSubject": "New [Trade] Enquiry from [Business Name]"
+  },
   "tips": [
-    { "icon": "emoji", "title": "Tip title", "text": "Helpful tip text relevant to this trade in their area" }
+    { "icon": "emoji", "title": "Tip title", "text": "Helpful tip text with local Australian knowledge" }
   ]
 }
 
-IMPORTANT:
-- "trade" should be a single word like "fencing", "concreting", "painting", "patios", "landscaping", "electrical", "plumbing" etc
-- For suggestedSteps, think about what a customer needs to decide when getting a quote for this trade. Include 4-6 steps.
-- For tips, include local Australian knowledge, regulations, money-saving advice. Include 3-5 tips.
-- For branding colours, try to identify the dominant brand colour from the website.
-- For services, list the main services this business offers.
-- Return ONLY the JSON, no other text.`;
+CRITICAL RULES:
+- basePrices keys MUST exactly match the option values in the basePriceStepId step
+- quantitySourceId MUST match a slider id from a slider_group step
+- extras ids MUST match toggle ids from a toggle_group step
+- Use realistic Australian pricing ranges — research typical costs for this trade
+- Include 4-6 steps covering: type of work, measurements, site conditions, extras
+- Include 3-5 tips with local knowledge, regulations, money-saving advice
+- Return ONLY valid JSON, no other text or markdown`;
 
   const result = await callGemini(prompt, true);
   btn.innerHTML = '🔍 Analyze';
@@ -1075,12 +1143,38 @@ function applyAIData(data) {
   }
 
   // Header
-  if (data.business?.trade) {
+  if (data.header) {
+    if (data.header.icon) document.getElementById('hdr-icon').value = data.header.icon;
+    if (data.header.headline) document.getElementById('hdr-headline').value = data.header.headline;
+    if (data.header.subtitle) document.getElementById('hdr-subtitle').value = data.header.subtitle;
+    if (data.header.badge) document.getElementById('hdr-badge').value = data.header.badge;
+    if (data.header.disclaimer) document.getElementById('hdr-disclaimer').value = data.header.disclaimer;
+  } else if (data.business?.trade) {
     const trade = data.business.trade;
     document.getElementById('hdr-headline').value = `How much is my ${trade}?`;
     document.getElementById('hdr-subtitle').value = `Tap through to get a ballpark price for your ${trade} project. Takes about 60 seconds.`;
     document.getElementById('hdr-badge').value = `📍 Prices based on ${data.business.location || 'Perth, WA'} — 2025`;
-    document.getElementById('lead-subject').value = `New ${trade.charAt(0).toUpperCase() + trade.slice(1)} Enquiry`;
+  }
+
+  // Estimate section
+  if (data.estimate) {
+    if (data.estimate.title) document.getElementById('est-title').value = data.estimate.title;
+    if (data.estimate.preview) document.getElementById('est-preview').value = data.estimate.preview;
+    if (data.estimate.note) document.getElementById('est-note').value = data.estimate.note;
+  }
+
+  // Lead capture
+  if (data.leadCapture) {
+    if (data.leadCapture.title) document.getElementById('lead-title').value = data.leadCapture.title;
+    if (data.leadCapture.preview) document.getElementById('lead-preview').value = data.leadCapture.preview;
+    if (data.leadCapture.heading) document.getElementById('lead-heading').value = data.leadCapture.heading;
+    if (data.leadCapture.subheading) document.getElementById('lead-subheading').value = data.leadCapture.subheading;
+    if (data.leadCapture.submitText) document.getElementById('lead-submit').value = data.leadCapture.submitText;
+    if (data.leadCapture.successMessage) document.getElementById('lead-success').value = data.leadCapture.successMessage;
+    if (data.leadCapture.successSubtext) document.getElementById('lead-success-sub').value = data.leadCapture.successSubtext;
+    if (data.leadCapture.emailSubject) document.getElementById('lead-subject').value = data.leadCapture.emailSubject;
+  } else if (data.business?.trade) {
+    document.getElementById('lead-subject').value = `New ${data.business.trade.charAt(0).toUpperCase() + data.business.trade.slice(1)} Enquiry`;
   }
 
   // Steps from suggested
@@ -1103,8 +1197,22 @@ function applyAIData(data) {
           description: opt.description || '',
           priceHint: opt.priceHint || '',
         })),
-        sliders: ss.sliders || [],
-        toggles: ss.toggles || [],
+        sliders: (ss.sliders || []).map(sl => ({
+          id: sl.id || 'slider_' + stepCounter,
+          label: sl.label || 'Value',
+          min: sl.min || 1,
+          max: sl.max || 100,
+          default: sl.default || 20,
+          step: sl.step || 1,
+          unit: sl.unit || '',
+          markers: sl.markers || [],
+        })),
+        toggles: (ss.toggles || []).map(tg => ({
+          id: tg.id || 'toggle_' + stepCounter,
+          label: tg.label || 'Extra',
+          icon: tg.icon || '➕',
+          costHint: tg.costHint || '',
+        })),
         autoAdvance: ss.type === 'select',
         optional: ss.type === 'multi_select' || ss.type === 'toggle_group',
         columns: ss.columns || 1,
@@ -1130,6 +1238,43 @@ function applyAIData(data) {
 
     renderSteps();
     updatePricingDropdowns();
+
+    // Now fill in pricing AFTER steps are rendered and dropdowns updated
+    if (data.pricing) {
+      // Set unit fields
+      if (data.pricing.unit) document.getElementById('price-unit').value = data.pricing.unit;
+      if (data.pricing.unitLabel) document.getElementById('price-unit-label').value = data.pricing.unitLabel;
+      if (data.pricing.minimumPrice) document.getElementById('price-min').value = data.pricing.minimumPrice;
+      if (data.pricing.roundTo) document.getElementById('price-round').value = data.pricing.roundTo;
+
+      // Set base price step dropdown
+      if (data.pricing.basePriceStepId) {
+        const baseSel = document.getElementById('price-base-step');
+        baseSel.value = data.pricing.basePriceStepId;
+        updateBasePrices();
+
+        // Now fill in the base price values
+        if (data.pricing.basePrices) {
+          setTimeout(() => {
+            Object.entries(data.pricing.basePrices).forEach(([val, prices]) => {
+              const row = document.querySelector(`[data-bp-value="${val}"]`);
+              if (row) {
+                const lowInput = row.querySelector('.bp-low');
+                const highInput = row.querySelector('.bp-high');
+                if (lowInput && prices.low) lowInput.value = prices.low;
+                if (highInput && prices.high) highInput.value = prices.high;
+              }
+            });
+          }, 100);
+        }
+      }
+
+      // Set quantity source dropdown
+      if (data.pricing.quantitySourceId) {
+        const qtySel = document.getElementById('price-qty-source');
+        qtySel.value = data.pricing.quantitySourceId;
+      }
+    }
   }
 
   // Store tips for later use (saved in a global)
@@ -1143,9 +1288,16 @@ function applyAIData(data) {
     window._aiServices = data.services;
   }
 
-  // Open the business section to show results
-  document.getElementById('sec-business').classList.add('open');
-  document.getElementById('sec-steps').classList.add('open');
+  // Store extras pricing for export
+  if (data.pricing?.extras && data.pricing.extras.length > 0) {
+    window._aiExtras = data.pricing.extras;
+    aiLog('💰 ' + data.pricing.extras.length + ' extras with pricing stored', 'ok');
+  }
+
+  // Open all sections to show results
+  ['sec-business', 'sec-branding', 'sec-header', 'sec-steps', 'sec-pricing', 'sec-lead'].forEach(id => {
+    document.getElementById(id).classList.add('open');
+  });
 }
 
 async function aiSuggestSteps() {
