@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Estimator</title>
+
+<!-- ============================================================
+     iTabs Quotes — Paving WA (Earthly Elegance)
+     Config-driven interactive quote estimator
+     ============================================================ -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// WIDGET CONFIG — Paving WA / Earthly Elegance
+// ═══════════════════════════════════════════════════════════════
+const WIDGET_CONFIG = {
+
+  business: {
+    name: "Paving WA",
+    tagline: "Expert Paving & Landscaping — Perth",
+    phone: "0439 680 983",
+    email: "admin@pavingwa.com.au",
+    logo: "",
+    website: "https://pavingwa.com.au",
+    location: "Perth, WA",
+    socials: { facebook: "https://www.facebook.com/profile.php?id=61576558060768", instagram: "https://instagram.com/pavingwa", google: "" }
+  },
+
+  branding: {
+    mode: "dark",
+    primaryColor: "#D4A574",
+    secondaryColor: "#B8863A",
+    backgroundColor: "#0F0E0C",
+    cardBackground: "#1A1815",
+    hoverBackground: "#221F1A",
+    darkBackground: "#0A0908",
+    borderColor: "#2D2924",
+    textColor: "#EAE4DA",
+    mutedText: "#9B9285",
+    dimText: "#6B6358",
+    successColor: "#22c55e",
+    errorColor: "#ef4444",
+    infoColor: "#3b82f6",
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+    monoFont: "'JetBrains Mono', monospace",
+    borderRadius: "14px",
+    googleFontsUrl: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap",
+  },
+
+  header: {
+    icon: "\uD83E\uDDF1",
+    headline: "How much will my paving cost?",
+    subtitle: "Get a ballpark price for your paving project in about 60 seconds. No login, no spam.",
+    badge: "\uD83D\uDCCD Prices based on Perth, WA \u2014 2026",
+    disclaimer: "Estimates are approximate. Final pricing confirmed after a free site visit.",
+  },
+
+  steps: [
+    // ── STEP 1: Project Type ──
+    {
+      id: "project_type",
+      title: "What do you need?",
+      preview: "Tap to choose",
+      input: {
+        type: "select",
+        columns: 1,
+        autoAdvance: true,
+        options: [
+          {
+            value: "new_paving",
+            label: "New Paving",
+            icon: "\uD83E\uDDF1",
+            description: "Fresh paving installation \u2014 driveways, patios, paths, pool surrounds, or full backyard.",
+            priceHint: "$55\u2013$130/m\u00B2",
+            tags: [
+              { text: "Most Common", highlight: true },
+              { text: "Supply + Install" }
+            ]
+          },
+          {
+            value: "repairs",
+            label: "Paving Repairs",
+            icon: "\uD83D\uDD27",
+            description: "Sunken pavers, root damage, re-laying, or patching sections. No job too small.",
+            priceHint: "From $40/m\u00B2",
+            tags: [
+              { text: "Quick turnaround" },
+              { text: "No job too small" }
+            ]
+          },
+          {
+            value: "artificial_turf",
+            label: "Artificial Turf",
+            icon: "\uD83C\uDF3F",
+            description: "Low-maintenance synthetic grass. Year-round green, no mowing, no watering.",
+            priceHint: "$60\u2013$100/m\u00B2",
+            tags: [
+              { text: "Zero maintenance" },
+              { text: "All year round" }
+            ]
+          },
+          {
+            value: "landscaping",
+            label: "Landscaping / Other",
+            icon: "\uD83C\uDFE1",
+            description: "Full yard transformations, garden beds, retaining walls, or something else entirely.",
+            priceHint: "Quote on inspection",
+            tags: [
+              { text: "Custom quote" }
+            ]
+          }
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "What We Do",
+          type: "mixed",
+          content: [
+            {
+              type: "paragraph",
+              text: "Paving WA handles everything from small paving repairs to full driveway installs and backyard transformations. 15+ years experience across Perth."
+            },
+            {
+              type: "key_point",
+              label: "Not sure what you need?",
+              text: "Pick the closest option \u2014 Dan and the team will sort out the details when they get back to you. No wrong answers here."
+            }
+          ]
+        }
+      ],
+    },
+
+    // ── STEP 2: Area Type ──
+    {
+      id: "area_type",
+      title: "What area are you paving?",
+      preview: "Where\u2019s the work?",
+      input: {
+        type: "select",
+        columns: 2,
+        autoAdvance: true,
+        options: [
+          { value: "driveway", label: "Driveway", icon: "\uD83D\uDE97", description: "Vehicle-rated base. Built to handle daily traffic.", tags: [{ text: "Heavy duty" }] },
+          { value: "patio", label: "Patio / Alfresco", icon: "\u2615", description: "Entertaining areas, outdoor dining, covered or open.", tags: [{ text: "Most popular" , highlight: true}] },
+          { value: "pathway", label: "Pathways / Side Access", icon: "\uD83D\uDEB6", description: "Walkways, side of house, garden paths." },
+          { value: "pool", label: "Pool Surround", icon: "\uD83C\uDFCA", description: "Non-slip, heat-resistant. Drainage required.", tags: [{ text: "Slip-resistant" }] },
+          { value: "backyard", label: "Full Backyard", icon: "\uD83C\uDF33", description: "Complete outdoor transformation \u2014 paving, turf, the lot." },
+          { value: "other", label: "Other / Mixed", icon: "\uD83D\uDCCB", description: "Multiple areas, commercial, or something unique." },
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "Area Guide",
+          type: "tips",
+          tips: [
+            {
+              icon: "\uD83D\uDE97",
+              title: "Driveways",
+              text: "Need a thicker compacted base (100mm+ roadbase) to handle vehicle weight. This adds to cost but is essential for longevity. Standard double driveway is around 40\u201360m\u00B2."
+            },
+            {
+              icon: "\uD83C\uDFCA",
+              title: "Pool surrounds",
+              text: "Must use slip-resistant pavers and proper drainage away from the pool. Travertine and limestone are popular choices \u2014 they stay cooler underfoot in Perth summers."
+            },
+            {
+              icon: "\u2615",
+              title: "Patios & entertaining",
+              text: "The most common paving job in Perth. A typical patio is 20\u201340m\u00B2. French pattern travertine or herringbone brick are the go-to styles."
+            }
+          ]
+        }
+      ],
+    },
+
+    // ── STEP 3: Material ──
+    {
+      id: "material",
+      title: "What paver material?",
+      preview: "Choose your style",
+      input: {
+        type: "select",
+        columns: 1,
+        autoAdvance: true,
+        options: [
+          {
+            value: "brick",
+            label: "Brick Pavers",
+            icon: "\uD83E\uDDF1",
+            description: "Classic, durable, huge range of colours. The Perth staple. Clay or concrete brick in herringbone, basketweave, or stacked.",
+            priceHint: "$70\u2013$95/m\u00B2",
+            tags: [
+              { text: "Most Popular", highlight: true },
+              { text: "Great value" }
+            ]
+          },
+          {
+            value: "concrete",
+            label: "Concrete Pavers",
+            icon: "\u2B1C",
+            description: "Affordable and versatile. Comes in many shapes, sizes, and finishes. Good for large areas and driveways.",
+            priceHint: "$55\u2013$80/m\u00B2",
+            tags: [
+              { text: "Budget-friendly" },
+              { text: "Versatile" }
+            ]
+          },
+          {
+            value: "travertine",
+            label: "Travertine",
+            icon: "\u2728",
+            description: "Premium natural stone with an elegant, textured finish. Stays cool underfoot \u2014 perfect for pools and entertaining.",
+            priceHint: "$90\u2013$130/m\u00B2",
+            tags: [
+              { text: "Premium", highlight: true },
+              { text: "Stays cool" }
+            ]
+          },
+          {
+            value: "limestone",
+            label: "Limestone",
+            icon: "\uD83C\uDFD6\uFE0F",
+            description: "Light, coastal feel. Naturally cool and slip-resistant. A WA favourite for outdoor areas and pool surrounds.",
+            priceHint: "$50\u2013$80/m\u00B2",
+            tags: [
+              { text: "Coastal vibe" },
+              { text: "Naturally cool" }
+            ]
+          },
+          {
+            value: "natural_stone",
+            label: "Natural Stone",
+            icon: "\uD83E\uDEA8",
+            description: "Granite, bluestone, sandstone, or flagstone. High-end, unique look. Each piece is one-of-a-kind.",
+            priceHint: "$85\u2013$120/m\u00B2",
+            tags: [
+              { text: "Luxury" },
+              { text: "Unique finish" }
+            ]
+          },
+          {
+            value: "unsure",
+            label: "Not Sure Yet",
+            icon: "\uD83E\uDD14",
+            description: "No worries \u2014 Dan can recommend the best option for your space, style, and budget.",
+            priceHint: "We\u2019ll advise",
+            tags: [
+              { text: "Free advice" }
+            ]
+          }
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "Compare",
+          type: "comparison_table",
+          columns: ["Feature", "Brick", "Concrete", "Travertine", "Limestone"],
+          rows: [
+            ["Price Range", "$70\u2013$95", "$55\u2013$80", "$90\u2013$130", "$50\u2013$80"],
+            ["Durability", "Excellent", "Good", "Excellent", "Good"],
+            ["Heat (barefoot)", "Warm", "Warm", "Cool", "Cool"],
+            ["Slip Resistance", "Good", "Good", "Excellent", "Excellent"],
+            ["Maintenance", "Low", "Low", "Seal every 3\u20135yr", "Seal every 2\u20133yr"],
+            ["Coastal Safe?", "Yes", "Yes", "Yes", "Yes"],
+            ["Best For", "Driveways", "Budget jobs", "Pools & patios", "Pool surrounds"],
+          ],
+          cellStyles: {
+            "Excellent": "positive", "Cool": "positive", "Low": "positive", "Yes": "positive",
+            "Warm": "neutral",
+            "Seal every 3\u20135yr": "neutral", "Seal every 2\u20133yr": "negative",
+          }
+        },
+        {
+          tabLabel: "Perth Tips",
+          type: "tips",
+          tips: [
+            {
+              icon: "\u2600\uFE0F",
+              title: "Perth heat matters",
+              text: "Dark pavers get scorching hot in summer. If you\u2019re paving near the pool or where kids play barefoot, go lighter colours or natural stone (travertine/limestone) which stays noticeably cooler."
+            },
+            {
+              icon: "\uD83C\uDFD6\uFE0F",
+              title: "Near the coast?",
+              text: "Salt air doesn\u2019t damage pavers like it does metal fencing, but sealing is extra important in coastal suburbs like Scarborough, Fremantle, and Cottesloe to prevent salt staining."
+            },
+            {
+              icon: "\uD83C\uDFA8",
+              title: "French pattern is trending",
+              text: "The multi-size random layout (French pattern) is hugely popular in Perth right now, especially with travertine. It gives a high-end European look \u2014 Paving WA specialises in it."
+            },
+          ]
+        },
+      ],
+    },
+
+    // ── STEP 4: Pattern Style ──
+    {
+      id: "pattern",
+      title: "What laying pattern?",
+      preview: "Choose the look",
+      input: {
+        type: "select",
+        columns: 2,
+        autoAdvance: true,
+        options: [
+          { value: "herringbone", label: "Herringbone", icon: "\u2B29", description: "Interlocking zigzag. Classic, strong, great for driveways.", tags: [{ text: "Best for driveways", highlight: true }] },
+          { value: "french", label: "French Pattern", icon: "\uD83C\uDFA8", description: "Random multi-size layout. Elegant, natural look.", tags: [{ text: "Trending in Perth" }] },
+          { value: "basketweave", label: "Basketweave", icon: "\uD83E\uDDF6", description: "Alternating pairs. Traditional charm." },
+          { value: "running_bond", label: "Running Bond", icon: "\u2594", description: "Staggered rows like brickwork. Clean and simple." },
+          { value: "stack_bond", label: "Stack Bond", icon: "\u25A6", description: "Grid pattern. Modern, minimal look." },
+          { value: "designers_choice", label: "You Decide", icon: "\uD83D\uDC4D", description: "Let the team recommend based on your space." },
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "Pattern Guide",
+          type: "mixed",
+          content: [
+            {
+              type: "key_point",
+              label: "Herringbone = strongest",
+              text: "The interlocking pattern distributes weight evenly. It\u2019s the go-to for driveways and any area with vehicle traffic. Also looks great on patios."
+            },
+            {
+              type: "key_point",
+              label: "French pattern = most elegant",
+              text: "Uses 4 different paver sizes in a random-looking layout. Takes more skill to lay (and costs a bit more) but the result is stunning. Paving WA is known for their French pattern work."
+            },
+            {
+              type: "tip",
+              icon: "\uD83D\uDCA1",
+              title: "Pattern affects price",
+              text: "Simpler patterns (stack bond, running bond) are quicker to lay. Complex patterns (French, herringbone) take more cuts and more time, adding roughly $5\u2013$15/m\u00B2 to labour."
+            }
+          ]
+        }
+      ],
+    },
+
+    // ── STEP 5: Area Size ──
+    {
+      id: "size",
+      title: "How big is the area?",
+      preview: "Area in m\u00B2",
+      input: {
+        type: "slider_group",
+        sliders: [
+          {
+            id: "area_m2",
+            label: "Total area (square metres)",
+            min: 5,
+            max: 200,
+            default: 35,
+            step: 5,
+            unit: "m\u00B2",
+            markers: ["5m\u00B2", "Small ~20m\u00B2", "Avg ~40m\u00B2", "Large 100m\u00B2", "200m\u00B2"],
+          }
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "Measuring Tips",
+          type: "mixed",
+          content: [
+            {
+              type: "paragraph",
+              text: "Measure length \u00D7 width in metres to get square metres. For an L-shaped area, split it into two rectangles and add them together. Or use Google Maps \u2014 right-click and 'Measure distance' to trace the outline."
+            },
+            {
+              type: "tip",
+              icon: "\uD83D\uDCCF",
+              title: "Common Perth sizes",
+              text: "Single driveway: 25\u201340m\u00B2. Double driveway: 45\u201365m\u00B2. Standard patio: 20\u201340m\u00B2. Side path: 8\u201315m\u00B2. Pool surround: 30\u201350m\u00B2. Full backyard: 60\u2013150m\u00B2."
+            },
+            {
+              type: "key_point",
+              label: "Don\u2019t stress about exact numbers",
+              text: "This is for a ballpark estimate. The team will do a proper site measure when they come out \u2014 that\u2019s free and no obligation."
+            }
+          ]
+        }
+      ],
+    },
+
+    // ── STEP 6: Site Conditions ──
+    {
+      id: "site_condition",
+      title: "Current site condition?",
+      preview: "What\u2019s there now?",
+      input: {
+        type: "select",
+        columns: 1,
+        autoAdvance: true,
+        options: [
+          { value: "clear", label: "Clear / Bare Ground", icon: "\u2705", description: "Sand, dirt, or already prepped. Minimal removal needed.", tags: [{ text: "Cheapest prep" }] },
+          { value: "grass", label: "Grass / Lawn", icon: "\uD83C\uDF3F", description: "Natural lawn or weeds to be removed before paving.", priceHint: "+$8\u2013$12/m\u00B2" },
+          { value: "old_pavers", label: "Old Pavers to Remove", icon: "\uD83E\uDDF1", description: "Existing paving that needs pulling up and disposing.", priceHint: "+$12\u2013$18/m\u00B2" },
+          { value: "concrete", label: "Old Concrete to Remove", icon: "\uD83D\uDEA7", description: "Existing concrete slab that needs breaking up and removal. The most intensive prep.", priceHint: "+$20\u2013$30/m\u00B2", tags: [{ text: "Most prep work" }] },
+          { value: "mixed", label: "Mixed / Not Sure", icon: "\uD83E\uDD37", description: "Multiple surfaces, or you\u2019re not sure. We\u2019ll sort it on site.", priceHint: "+$10\u2013$20/m\u00B2" },
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "Prep Info",
+          type: "mixed",
+          content: [
+            {
+              type: "paragraph",
+              text: "Site preparation is often the hidden cost in paving. Removing old surfaces and building a solid base is what makes paving last decades instead of years."
+            },
+            {
+              type: "key_point",
+              label: "Perth sandy soil = cheaper prep",
+              text: "Good news \u2014 Perth\u2019s sandy soil is actually easier (and cheaper) to work with than clay or rocky ground. Drainage is naturally good, and compaction is straightforward."
+            },
+            {
+              type: "tip",
+              icon: "\u267B\uFE0F",
+              title: "Old pavers can sometimes be reused",
+              text: "If your existing pavers are in decent condition, they can sometimes be cleaned and re-laid in a different pattern. Ask Dan about this \u2014 it can save a fair bit."
+            }
+          ]
+        }
+      ],
+    },
+
+    // ── STEP 7: Extras ──
+    {
+      id: "extras",
+      title: "Any extras?",
+      preview: "Add-ons & site factors",
+      input: {
+        type: "toggle_group",
+        toggles: [
+          { id: "slope", label: "Sloping / Uneven Ground", icon: "\uD83D\uDCC8", costHint: "Adds ~10\u201320%" },
+          { id: "tight_access", label: "Tight Access (no machinery)", icon: "\uD83D\uDEAB", costHint: "Adds ~10\u201315%" },
+          { id: "sealing", label: "Paver Sealing", icon: "\uD83D\uDCA7", costHint: "Adds ~$10\u2013$15/m\u00B2" },
+          { id: "drainage", label: "Drainage / Soakwell", icon: "\uD83D\uDEB0", costHint: "Adds ~$800\u2013$1,500" },
+          { id: "edging", label: "Garden Edging / Borders", icon: "\uD83C\uDF3B", costHint: "Adds ~$15\u2013$25/m" },
+          { id: "steps", label: "Steps / Level Changes", icon: "\uD83E\uDE9C", costHint: "Adds ~$500\u2013$1,200" },
+          { id: "retaining", label: "Retaining Wall", icon: "\uD83E\uDDF1", costHint: "Adds ~$1,500\u2013$3,000" },
+        ]
+      },
+      hints: [
+        {
+          tabLabel: "Extras Guide",
+          type: "mixed",
+          content: [
+            {
+              type: "key_point",
+              label: "Sealing",
+              text: "Recommended for travertine, limestone, and natural stone. Protects against stains, moss, and salt damage. Not essential for standard brick or concrete pavers but does make cleaning easier."
+            },
+            {
+              type: "key_point",
+              label: "Drainage",
+              text: "Essential for pool surrounds and low-lying areas. Perth\u2019s sandy soil helps, but proper drainage prevents water pooling on your new pavers. Council may require soakwells for larger paved areas."
+            },
+            {
+              type: "tip",
+              icon: "\uD83D\uDCC8",
+              title: "Sloping blocks",
+              text: "Slopes add cost because pavers need to be cut to follow the grade, and you may need a small retaining wall or step to manage level changes. Common in Perth Hills suburbs."
+            }
+          ]
+        }
+      ],
+    },
+  ],
+
+  estimate: {
+    title: "Your ballpark estimate",
+    preview: "Based on your selections",
+    note: "Supply & install \u2022 incl. GST \u2022 Perth metro",
+    hints: [
+      {
+        type: "key_point",
+        label: "How accurate is this?",
+        text: "This is a rough guide based on average Perth pricing in 2026. Your actual quote depends on site conditions, exact measurements, soil type, and specific product choices. Dan will confirm everything on the free site visit."
+      },
+      {
+        type: "tip",
+        icon: "\uD83D\uDCF1",
+        title: "Want to talk it through?",
+        text: "Give Dan a call or text on 0439 680 983. He\u2019s happy to chat through options and give you a quick verbal estimate."
+      }
+    ]
+  },
+
+  // ── PRICING LOGIC ──
+  pricing: {
+    unit: "per_m2",
+    unitLabel: "per m\u00B2",
+    basePriceStep: "material",
+    basePrices: {
+      brick:         { low: 70,  high: 95 },
+      concrete:      { low: 55,  high: 80 },
+      travertine:    { low: 90,  high: 130 },
+      limestone:     { low: 50,  high: 80 },
+      natural_stone: { low: 85,  high: 120 },
+      unsure:        { low: 65,  high: 90 },
+    },
+
+    quantitySource: "area_m2",
+
+    // Adjustments added to per-m² base BEFORE quantity multiplication
+    preAdjustments: [
+      {
+        source: "pattern",
+        type: "additive",
+        values: { herringbone: 5, french: 12, basketweave: 3, running_bond: 0, stack_bond: -3, designers_choice: 5 }
+      },
+      {
+        source: "site_condition",
+        type: "additive",
+        values: { clear: 0, grass: 10, old_pavers: 15, concrete: 25, mixed: 15 }
+      },
+      {
+        source: "project_type",
+        type: "additive",
+        values: { new_paving: 0, repairs: -20, artificial_turf: 0, landscaping: 0 }
+      }
+    ],
+
+    // Multipliers applied to (base + preAdjustments) before quantity
+    multipliers: [
+      {
+        source: "area_type",
+        type: "select_map",
+        values: { driveway: 1.15, patio: 1.0, pathway: 0.95, pool: 1.10, backyard: 1.0, other: 1.05 }
+      },
+      {
+        source: "project_type",
+        type: "select_map",
+        values: { new_paving: 1.0, repairs: 0.7, artificial_turf: 0.85, landscaping: 1.0 }
+      }
+    ],
+
+    // No postAdjustments needed
+    postAdjustments: [],
+
+    // Toggle extras
+    extras: [
+      { id: "slope", type: "percentage", lowPercent: 10, highPercent: 20, breakdownLabel: "Sloping ground" },
+      { id: "tight_access", type: "percentage", lowPercent: 10, highPercent: 15, breakdownLabel: "Restricted access" },
+      { id: "sealing", type: "per_unit", lowPerUnit: 10, highPerUnit: 15, breakdownLabel: "Paver sealing" },
+      { id: "drainage", type: "fixed", low: 800, high: 1500, breakdownLabel: "Drainage / soakwell" },
+      { id: "edging", type: "fixed", low: 400, high: 800, breakdownLabel: "Garden edging" },
+      { id: "steps", type: "fixed", low: 500, high: 1200, breakdownLabel: "Steps / level changes" },
+      { id: "retaining", type: "fixed", low: 1500, high: 3000, breakdownLabel: "Retaining wall" },
+    ],
+
+    showBreakdown: true,
+    roundTo: 50,
+    minimumPrice: 500,
+  },
+
+  // ── LEAD CAPTURE ──
+  leadCapture: {
+    enabled: true,
+    title: "Get your actual quote",
+    preview: "Free, no obligation",
+    heading: "We\u2019ve got your specs.",
+    subheading: "Drop your details and Dan will get back to you with an exact price \u2014 usually within 24 hours.",
+    showSummary: true,
+    fields: [
+      { id: "name", label: "Your name", type: "text", placeholder: "e.g. Sarah", required: true },
+      { id: "phone", label: "Phone", type: "tel", placeholder: "e.g. 0412 345 678", required: true },
+      { id: "email", label: "Email", type: "email", placeholder: "e.g. sarah@email.com", required: false },
+      { id: "suburb", label: "Suburb", type: "text", placeholder: "e.g. Joondalup", required: false },
+      { id: "notes", label: "Anything else we should know?", type: "textarea", placeholder: "e.g. Want to match neighbour\u2019s paving, tree roots near the area, have photos to share...", required: false },
+    ],
+    submitText: "\uD83D\uDCE9 Send My Quote Request",
+    submitNote: "No spam. Just your quote from Dan.",
+    successMessage: "Quote request sent!",
+    successSubtext: "Dan will be in touch within 24 hours. If it\u2019s urgent, call or text 0439 680 983.",
+    delivery: {
+      method: "web3forms",
+      web3formsKey: "99a11c15-5c61-4765-99c5-673adec64b16",
+      notifyEmail: "admin@pavingwa.com.au",
+      emailSubject: "New Paving Enquiry \u2014 Paving WA",
+    }
+  },
+
+  socialProof: {
+    enabled: true,
+    rating: 5.0,
+    reviewCount: 5,
+    badges: ["15+ Years Experience", "Perth Local", "Free Quotes"],
+  },
+
+  footer: {
+    showPoweredBy: true,
+    poweredByUrl: "https://itabs.ai",
+  }
+};
+</script>
+
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     ENGINE v1.1 â€” Generic. Do not edit per client.
+     
+     v1.1 changes:
+     - Added preAdjustments / postAdjustments for select-based price modifiers
+     - Added select_map multiplier type (multiplier from select answer, not slider)
+     - quantitySource can be null for per-unit pricing (e.g. gates)
+     - columns: 3 support for select grids
+     â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+
+<script>
+if (WIDGET_CONFIG.branding.googleFontsUrl) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = WIDGET_CONFIG.branding.googleFontsUrl;
+  document.head.appendChild(link);
+  const preconnect = document.createElement('link');
+  preconnect.rel = 'preconnect';
+  preconnect.href = 'https://fonts.googleapis.com';
+  document.head.prepend(preconnect);
+}
+document.title = WIDGET_CONFIG.header.headline + ' | ' + WIDGET_CONFIG.business.name;
+</script>
+
+<style>
+:root {
+  --bg-main: #0c1117;
+  --bg-card: #151c25;
+  --bg-hover: #1a2332;
+  --bg-dark: #0a0e14;
+  --border: #222d3a;
+  --brand-primary: #f59e0b;
+  --brand-secondary: #d97706;
+  --brand-glow: rgba(245, 158, 11, 0.15);
+  --accent-green: #22c55e;
+  --accent-blue: #3b82f6;
+  --accent-red: #ef4444;
+  --text-primary: #e8ecf1;
+  --text-secondary: #8896a7;
+  --text-muted: #5a6a7d;
+  --font-main: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 14px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-main);
+  background: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 520px; margin: 0 auto; padding: 20px 16px 40px; }
+
+/* Header */
+.header { text-align: center; padding: 30px 0 25px; }
+.header-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.header h1 {
+  font-size: 1.6rem; font-weight: 800; margin-bottom: 6px;
+  background: linear-gradient(135deg, var(--brand-primary), #fbbf24);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.header p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+.header .badge-line {
+  display: inline-block; background: var(--bg-card); border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; color: var(--text-muted); margin-top: 12px;
+}
+
+/* Progress */
+.progress-label { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.75rem; color: var(--text-muted); }
+.progress-bar { background: var(--bg-card); border-radius: 10px; height: 6px; margin-bottom: 25px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary)); border-radius: 10px; width: 0%; transition: width 0.5s ease; }
+
+/* Sections */
+.itab-section { background: var(--bg-card); border-radius: var(--radius); margin-bottom: 14px; overflow: hidden; border: 1px solid var(--border); transition: all 0.3s ease; scroll-margin-top: 16px; }
+.itab-section:hover { border-color: rgba(245, 158, 11, 0.3); }
+.itab-section.completed { border-color: var(--accent-green); }
+.itab-section.completed .itab-number { background: var(--accent-green); }
+.itab-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; cursor: pointer; transition: background 0.2s; }
+.itab-header:hover { background: var(--bg-hover); }
+.itab-title { display: flex; align-items: center; gap: 12px; }
+.itab-number { width: 34px; height: 34px; background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #000; flex-shrink: 0; }
+.itab-name { font-size: 1rem; font-weight: 600; }
+.itab-preview { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.itab-preview .selected { color: var(--accent-green); font-weight: 500; }
+.i-button { width: 32px; height: 32px; background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border: none; border-radius: 8px; color: #000; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; font-family: serif; font-style: italic; flex-shrink: 0; }
+.i-button:hover { transform: scale(1.1); box-shadow: 0 0 20px var(--brand-glow); }
+.i-button.active { background: var(--accent-green); color: white; }
+.itab-content { display: none; padding: 0 16px 18px; border-top: 1px solid var(--border); }
+.itab-content.show { display: block; animation: fadeInUp 0.3s ease; }
+
+/* Tabs */
+.tabs { display: flex; gap: 6px; padding: 14px 0; border-bottom: 1px solid var(--border); margin-bottom: 14px; flex-wrap: wrap; }
+.tab { padding: 7px 14px; background: var(--bg-hover); border: none; border-radius: 8px; color: var(--text-secondary); cursor: pointer; font-family: var(--font-main); font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+.tab:hover { color: var(--text-primary); }
+.tab.active { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); color: #000; font-weight: 600; }
+.tab-panel { display: none; }
+.tab-panel.show { display: block; }
+.tab-panel h3 { color: var(--brand-primary); margin-bottom: 10px; font-size: 1rem; }
+.tab-panel p { color: var(--text-secondary); margin-bottom: 12px; line-height: 1.6; font-size: 0.9rem; }
+
+/* Select options */
+.option-grid { display: grid; gap: 10px; margin: 10px 0; }
+.option-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.option-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.option-card { background: var(--bg-dark); border: 2px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s; }
+.option-card:hover { border-color: var(--brand-primary); background: var(--bg-hover); }
+.option-card.selected { border-color: var(--accent-green); background: rgba(34, 197, 94, 0.05); }
+.option-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.option-name { font-weight: 700; font-size: 1rem; }
+.option-price { font-family: var(--font-mono); font-size: 0.85rem; color: var(--brand-primary); font-weight: 500; }
+.option-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+.option-check { display: none; color: var(--accent-green); font-weight: 700; font-size: 0.85rem; margin-top: 6px; }
+.option-card.selected .option-check { display: inline; }
+.option-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.option-tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; background: var(--bg-hover); color: var(--text-muted); }
+.option-tag.highlight { background: rgba(245, 158, 11, 0.15); color: var(--brand-primary); }
+
+/* Compact option for 3-col */
+.cols-3 .option-card { padding: 12px 10px; text-align: center; }
+.cols-3 .option-top { flex-direction: column; gap: 2px; }
+.cols-3 .option-name { font-size: 0.85rem; }
+.cols-3 .option-price { font-size: 0.75rem; }
+.cols-3 .option-desc { display: none; }
+.cols-3 .option-check { font-size: 0.75rem; }
+
+/* Sliders */
+.slider-group { margin: 16px 0; }
+.slider-label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.slider-label span { color: var(--text-secondary); font-size: 0.9rem; }
+.slider-value { font-family: var(--font-mono); color: var(--brand-primary); font-weight: 600; }
+input[type="range"] { width: 100%; -webkit-appearance: none; appearance: none; height: 8px; background: var(--bg-dark); border-radius: 4px; outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-radius: 50%; cursor: pointer; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
+input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border-radius: 50%; cursor: pointer; border: none; }
+.slider-markers { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; }
+
+/* Toggles */
+.toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-info .toggle-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; }
+.toggle-info .toggle-cost { font-size: 0.8rem; color: var(--text-muted); }
+.toggle-switch { width: 48px; height: 26px; background: var(--bg-dark); border-radius: 13px; border: 2px solid var(--border); cursor: pointer; position: relative; transition: all 0.3s; flex-shrink: 0; }
+.toggle-switch.on { background: var(--accent-green); border-color: var(--accent-green); }
+.toggle-knob { width: 18px; height: 18px; background: white; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: all 0.3s; }
+.toggle-switch.on .toggle-knob { left: 24px; }
+
+/* Estimate */
+.estimate-box { background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(217, 119, 6, 0.05)); border: 2px solid var(--brand-primary); border-radius: var(--radius); padding: 24px; margin: 20px 0; text-align: center; }
+.est-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.est-range { font-family: var(--font-mono); font-size: 2rem; font-weight: 700; color: var(--brand-primary); margin-bottom: 4px; }
+.est-note { color: var(--text-muted); font-size: 0.78rem; }
+.estimate-breakdown { margin-top: 16px; text-align: left; }
+.breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(245, 158, 11, 0.1); font-size: 0.85rem; }
+.breakdown-row:last-child { border-bottom: none; }
+.breakdown-row .br-label { color: var(--text-secondary); }
+.breakdown-row .br-value { font-family: var(--font-mono); color: var(--text-primary); font-weight: 500; }
+
+/* Hints */
+.key-point { background: var(--bg-dark); border-left: 4px solid var(--brand-primary); padding: 12px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+.key-point .kp-label { color: var(--brand-primary); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.key-point p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0; }
+.tip-card { background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 0.85rem; }
+.tip-card .tip-title { font-weight: 600; color: var(--accent-blue); margin-bottom: 4px; }
+.tip-card p { color: var(--text-secondary); margin-bottom: 0; font-size: 0.83rem; }
+.warning-card { border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); border-radius: 10px; padding: 12px 14px; margin: 10px 0; font-size: 0.85rem; }
+.warning-card .warning-title { font-weight: 600; color: var(--accent-red); margin-bottom: 4px; }
+.warning-card p { color: var(--text-secondary); margin-bottom: 0; font-size: 0.83rem; }
+
+/* Comparison table */
+.compare-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.82rem; }
+.compare-table th { text-align: left; padding: 10px 8px; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid var(--border); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.compare-table td { padding: 10px 8px; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+.compare-table td:first-child { font-weight: 600; color: var(--text-primary); }
+.compare-table .positive { color: var(--accent-green); }
+.compare-table .negative { color: var(--accent-red); }
+
+/* Lead form */
+.form-group { margin-bottom: 12px; text-align: left; }
+.form-group label { display: block; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px; font-weight: 500; }
+.form-group input, .form-group textarea { width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-family: var(--font-main); font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group textarea:focus { border-color: var(--brand-primary); }
+.form-group textarea { resize: vertical; min-height: 70px; }
+.submit-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); border: none; border-radius: 10px; color: #000; font-family: var(--font-main); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px var(--brand-glow); }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.summary-box { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 0.83rem; }
+.summary-label { font-weight: 600; color: var(--brand-primary); margin-bottom: 8px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.summary-content { color: var(--text-secondary); line-height: 1.8; }
+.success-message { text-align: center; padding: 30px 20px; animation: fadeInUp 0.4s ease; }
+.success-message .check-icon { font-size: 3rem; margin-bottom: 12px; }
+.success-message h3 { color: var(--accent-green); margin-bottom: 8px; }
+.success-message p { color: var(--text-secondary); font-size: 0.9rem; }
+
+/* Social proof */
+.social-proof { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 12px 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+.sp-stars { color: var(--brand-primary); letter-spacing: 1px; }
+.sp-rating { color: var(--brand-primary); font-weight: 600; }
+.sp-badge { background: var(--bg-hover); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; white-space: nowrap; }
+
+/* Footer */
+.powered-by { text-align: center; padding: 30px 0 10px; font-size: 0.75rem; color: var(--text-muted); }
+.powered-by a { color: var(--brand-primary); text-decoration: none; font-weight: 600; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+const C = WIDGET_CONFIG;
+const state = {
+  answers: {},
+  sliders: {},
+  toggles: {},
+  openSection: null,
+  completedSections: new Set(),
+};
+
+function applyBranding() {
+  const b = C.branding; const r = document.documentElement.style;
+  r.setProperty('--bg-main', b.backgroundColor); r.setProperty('--bg-card', b.cardBackground);
+  r.setProperty('--bg-hover', b.hoverBackground); r.setProperty('--bg-dark', b.darkBackground);
+  r.setProperty('--border', b.borderColor); r.setProperty('--brand-primary', b.primaryColor);
+  r.setProperty('--brand-secondary', b.secondaryColor); r.setProperty('--text-primary', b.textColor);
+  r.setProperty('--text-secondary', b.mutedText); r.setProperty('--text-muted', b.dimText);
+  r.setProperty('--accent-green', b.successColor); r.setProperty('--accent-red', b.errorColor);
+  r.setProperty('--accent-blue', b.infoColor); r.setProperty('--font-main', b.fontFamily);
+  r.setProperty('--font-mono', b.monoFont); r.setProperty('--radius', b.borderRadius);
+}
+
+function init() {
+  applyBranding(); initDefaults(); render();
+  setTimeout(() => toggleSection(0), 300);
+}
+
+function initDefaults() {
+  C.steps.forEach(step => {
+    if (step.input.type === 'slider_group') {
+      step.input.sliders.forEach(s => {
+        const raw = s.default;
+        if (s.valueMap) {
+          const mapped = s.valueMap.find(v => v.value === raw);
+          state.sliders[s.id] = { raw, numeric: mapped ? mapped.numericValue : raw, label: mapped ? mapped.label : raw + (s.unit || '') };
+        } else {
+          state.sliders[s.id] = { raw, numeric: raw, label: raw + (s.unit || '') };
+        }
+      });
+    }
+    if (step.input.type === 'toggle_group') {
+      step.input.toggles.forEach(t => { state.toggles[t.id] = false; });
+    }
+  });
+}
+
+// â”€â”€ RENDER â”€â”€
+function render() {
+  const app = document.getElementById('app');
+  let html = renderHeader();
+  if (C.socialProof && C.socialProof.enabled) html += renderSocialProof();
+  const totalSections = C.steps.length + (C.estimate ? 1 : 0) + (C.leadCapture && C.leadCapture.enabled ? 1 : 0);
+  html += `<div class="progress-label"><span>Your quote</span><span id="progressText">0 of ${totalSections}</span></div><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>`;
+  C.steps.forEach((step, i) => { html += renderSection(step, i); });
+  if (C.estimate) html += renderEstimateSection(C.steps.length);
+  if (C.leadCapture && C.leadCapture.enabled) html += renderLeadSection(C.steps.length + (C.estimate ? 1 : 0));
+  if (C.footer && C.footer.showPoweredBy) html += `<div class="powered-by">Powered by <a href="${C.footer.poweredByUrl}" target="_blank">iTabs</a> Â· Interactive tools that convert</div>`;
+  app.innerHTML = html;
+}
+
+function renderHeader() {
+  const h = C.header;
+  return `<div class="header"><div class="header-icon">${h.icon}</div><h1>${h.headline}</h1><p>${h.subtitle}</p>${h.badge ? `<span class="badge-line">${h.badge}</span>` : ''}</div>`;
+}
+
+function renderSocialProof() {
+  const sp = C.socialProof;
+  return `<div class="social-proof"><span class="sp-stars">${'\u2605'.repeat(Math.floor(sp.rating))}</span><span class="sp-rating">${sp.rating} from ${sp.reviewCount} reviews</span>${sp.badges.map(b => `<span class="sp-badge">${b}</span>`).join('')}</div>`;
+}
+
+function renderSection(step, index) {
+  const sectionId = `section-${index}`;
+  const completed = state.completedSections.has(sectionId) ? ' completed' : '';
+  const isOpen = state.openSection === sectionId;
+  const preview = getPreview(step);
+  const inputTabLabel = step.input.type === 'toggle_group' ? 'Add Extras' : step.input.type === 'slider_group' ? 'Set Size' : 'Choose';
+  const hintTabs = step.hints || [];
+
+  let contentHtml = '';
+  if (hintTabs.length > 0) {
+    contentHtml += `<div class="tabs"><button class="tab active" onclick="showTab(this, '${sectionId}-input')">${inputTabLabel}</button>`;
+    hintTabs.forEach((h, hi) => { contentHtml += `<button class="tab" onclick="showTab(this, '${sectionId}-hint-${hi}')">${h.tabLabel}</button>`; });
+    contentHtml += `</div>`;
+  }
+  contentHtml += `<div class="tab-panel show" id="${sectionId}-input">${renderInput(step, sectionId)}`;
+  if (step.warnings) step.warnings.forEach(w => {
+    contentHtml += `<div class="warning-card" id="${sectionId}-warning-${w.condition.replace(/[^a-z0-9]/gi,'')}" style="display:none;"><div class="warning-title">${w.icon} ${w.title}</div><p>${w.text}</p></div>`;
+  });
+  contentHtml += `</div>`;
+  hintTabs.forEach((hint, hi) => { contentHtml += `<div class="tab-panel" id="${sectionId}-hint-${hi}">${renderHint(hint)}</div>`; });
+
+  return `<div class="itab-section${completed}" id="${sectionId}"><div class="itab-header" onclick="toggleSection(${index})"><div class="itab-title"><span class="itab-number">${index + 1}</span><div><div class="itab-name">${step.title}</div><div class="itab-preview" id="${sectionId}-preview">${preview}</div></div></div><button class="i-button" id="${sectionId}-btn">i</button></div><div class="itab-content${isOpen ? ' show' : ''}" id="${sectionId}-content">${contentHtml}</div></div>`;
+}
+
+function renderEstimateSection(index) {
+  const sectionId = `section-${index}`;
+  const est = C.estimate;
+  const isOpen = state.openSection === sectionId;
+  const completed = state.completedSections.has(sectionId) ? ' completed' : '';
+  let hintsHtml = '';
+  if (est.hints) est.hints.forEach(h => { hintsHtml += renderHintItem(h); });
+  return `<div class="itab-section${completed}" id="${sectionId}"><div class="itab-header" onclick="toggleSection(${index})"><div class="itab-title"><span class="itab-number">${index + 1}</span><div><div class="itab-name">${est.title}</div><div class="itab-preview" id="${sectionId}-preview">${est.preview}</div></div></div><button class="i-button" id="${sectionId}-btn">i</button></div><div class="itab-content${isOpen ? ' show' : ''}" id="${sectionId}-content"><div class="estimate-box"><div class="est-label">Estimated range</div><div class="est-range" id="estRange">â€”</div><div class="est-note" id="estNote">Complete the sections above to see your estimate</div><div class="estimate-breakdown" id="estBreakdown"></div></div>${hintsHtml}</div></div>`;
+}
+
+function renderLeadSection(index) {
+  const sectionId = `section-${index}`;
+  const lc = C.leadCapture;
+  const isOpen = state.openSection === sectionId;
+  const completed = state.completedSections.has(sectionId) ? ' completed' : '';
+  let fieldsHtml = '';
+  lc.fields.forEach(f => {
+    const req = f.required ? ' *' : '';
+    fieldsHtml += f.type === 'textarea'
+      ? `<div class="form-group"><label>${f.label}${req}</label><textarea id="form-${f.id}" placeholder="${f.placeholder}"></textarea></div>`
+      : `<div class="form-group"><label>${f.label}${req}</label><input type="${f.type}" id="form-${f.id}" placeholder="${f.placeholder}"></div>`;
+  });
+  return `<div class="itab-section${completed}" id="${sectionId}"><div class="itab-header" onclick="toggleSection(${index})"><div class="itab-title"><span class="itab-number">${index + 1}</span><div><div class="itab-name">${lc.title}</div><div class="itab-preview" id="${sectionId}-preview">${lc.preview}</div></div></div><button class="i-button" id="${sectionId}-btn">i</button></div><div class="itab-content${isOpen ? ' show' : ''}" id="${sectionId}-content"><div id="leadFormContainer"><p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:16px;">${lc.subheading}</p>${lc.showSummary ? `<div class="summary-box"><div class="summary-label">Your specs</div><div class="summary-content" id="quoteSummary">Select your options above first</div></div>` : ''}${fieldsHtml}<button class="submit-btn" id="submitBtn" onclick="submitLead()">${lc.submitText}</button>${lc.submitNote ? `<div style="text-align:center;margin-top:12px;font-size:0.75rem;color:var(--text-muted)">${lc.submitNote}</div>` : ''}</div><div class="success-message" id="successMsg" style="display:none;"><div class="check-icon">âœ…</div><h3>${lc.successMessage}</h3><p>${lc.successSubtext}</p></div></div></div>`;
+}
+
+// â”€â”€ INPUTS â”€â”€
+function renderInput(step, sectionId) {
+  const input = step.input;
+  switch (input.type) {
+    case 'select': return renderSelect(step, sectionId, input);
+    case 'multi_select': return renderMultiSelect(step, sectionId, input);
+    case 'slider_group': return renderSliders(step, sectionId, input);
+    case 'toggle_group': return renderToggles(step, sectionId, input);
+    default: return '';
+  }
+}
+
+function renderSelect(step, sectionId, input) {
+  const cols = input.columns || 1;
+  const colsClass = cols > 1 ? ` cols-${cols}` : '';
+  let html = `<div class="option-grid${colsClass}">`;
+  input.options.forEach(opt => {
+    const selected = state.answers[step.id] === opt.value ? ' selected' : '';
+    const tags = opt.tags ? opt.tags.map(t => `<span class="option-tag${t.highlight ? ' highlight' : ''}">${t.text}</span>`).join('') : '';
+    html += `<div class="option-card${selected}" onclick="selectOption('${step.id}','${opt.value}',${C.steps.indexOf(step)},${input.autoAdvance || false})"><div class="option-top"><span class="option-name">${opt.icon} ${opt.label}</span>${opt.priceHint ? `<span class="option-price">${opt.priceHint}</span>` : ''}</div>${opt.description ? `<div class="option-desc">${opt.description}</div>` : ''}${tags ? `<div class="option-tags">${tags}</div>` : ''}<span class="option-check">âœ“ Selected</span></div>`;
+  });
+  return html + '</div>';
+}
+
+function renderMultiSelect(step, sectionId, input) {
+  if (!state.answers[step.id]) state.answers[step.id] = [];
+  const cols = input.columns || 1;
+  const colsClass = cols > 1 ? ` cols-${cols}` : '';
+  let html = `<div class="option-grid${colsClass}">`;
+  input.options.forEach(opt => {
+    const selected = state.answers[step.id].includes(opt.value) ? ' selected' : '';
+    html += `<div class="option-card${selected}" onclick="toggleMultiOption('${step.id}','${opt.value}',this)"><div class="option-top"><span class="option-name">${opt.icon} ${opt.label}</span>${opt.priceHint ? `<span class="option-price">${opt.priceHint}</span>` : ''}</div>${opt.description ? `<div class="option-desc">${opt.description}</div>` : ''}<span class="option-check">âœ“ Selected</span></div>`;
+  });
+  html += '</div>';
+  if (input.optional) html += `<button class="tab" style="margin-top:10px;width:100%;text-align:center;" onclick="skipStep(${C.steps.indexOf(step)})">Skip â€” none needed</button>`;
+  return html;
+}
+
+function renderSliders(step, sectionId, input) {
+  let html = '';
+  input.sliders.forEach(s => {
+    const current = state.sliders[s.id];
+    const displayValue = current ? current.label : s.default + (s.unit || '');
+    html += `<div class="slider-group"><div class="slider-label"><span>${s.label}</span><span class="slider-value" id="slider-val-${s.id}">${displayValue}</span></div><input type="range" id="slider-${s.id}" min="${s.min}" max="${s.max}" value="${s.default}" step="${s.step}" oninput="updateSlider('${s.id}','${step.id}',${C.steps.indexOf(step)},this.value)">${s.markers ? `<div class="slider-markers">${s.markers.map(m => `<span>${m}</span>`).join('')}</div>` : ''}</div>`;
+  });
+  return html;
+}
+
+function renderToggles(step, sectionId, input) {
+  return input.toggles.map(t => {
+    const isOn = state.toggles[t.id] ? ' on' : '';
+    return `<div class="toggle-row"><div class="toggle-info"><div class="toggle-name">${t.icon} ${t.label}</div><div class="toggle-cost">${t.costHint}</div></div><div class="toggle-switch${isOn}" id="toggle-${t.id}" onclick="toggleExtra('${t.id}','${step.id}',${C.steps.indexOf(step)})"><div class="toggle-knob"></div></div></div>`;
+  }).join('');
+}
+
+// â”€â”€ HINTS â”€â”€
+function renderHint(hint) {
+  switch (hint.type) {
+    case 'comparison_table': return renderComparisonTable(hint);
+    case 'tips': return hint.tips.map(t => `<div class="tip-card"><div class="tip-title">${t.icon} ${t.title}</div><p>${t.text}</p></div>`).join('');
+    case 'mixed': return hint.content.map(item => renderHintItem(item)).join('');
+    case 'custom_html': return hint.content;
+    default: return '';
+  }
+}
+
+function renderComparisonTable(hint) {
+  let html = '<table class="compare-table"><thead><tr>';
+  hint.columns.forEach(c => { html += `<th>${c}</th>`; });
+  html += '</tr></thead><tbody>';
+  hint.rows.forEach(row => {
+    html += '<tr>';
+    row.forEach(cell => {
+      const style = hint.cellStyles && hint.cellStyles[cell];
+      html += `<td${style ? ` class="${style}"` : ''}>${cell}</td>`;
+    });
+    html += '</tr>';
+  });
+  return html + '</tbody></table>';
+}
+
+function renderHintItem(item) {
+  switch (item.type) {
+    case 'paragraph': return `<p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:12px;">${item.text}</p>`;
+    case 'key_point': return `<div class="key-point"><div class="kp-label">${item.label}</div><p>${item.text}</p></div>`;
+    case 'tip': return `<div class="tip-card"><div class="tip-title">${item.icon} ${item.title}</div><p>${item.text}</p></div>`;
+    default: return '';
+  }
+}
+
+// â”€â”€ INTERACTIONS â”€â”€
+function toggleSection(index) {
+  const sectionId = `section-${index}`;
+  const content = document.getElementById(sectionId + '-content');
+  const btn = document.getElementById(sectionId + '-btn');
+  const isOpen = content && content.classList.contains('show');
+  document.querySelectorAll('.itab-content').forEach(c => c.classList.remove('show'));
+  document.querySelectorAll('.i-button').forEach(b => b.classList.remove('active'));
+  if (!isOpen && content) {
+    content.classList.add('show');
+    if (btn) btn.classList.add('active');
+    state.openSection = sectionId;
+    state.completedSections.add(sectionId);
+    updateProgress();
+    setTimeout(() => { document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+  } else {
+    state.openSection = null;
+  }
+}
+
+function showTab(btn, panelId) {
+  const container = btn.closest('.itab-content');
+  container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('show'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('show');
+}
+
+function selectOption(stepId, value, stepIndex, autoAdvance) {
+  state.answers[stepId] = value;
+  const sectionId = `section-${stepIndex}`;
+  const section = document.getElementById(sectionId);
+  const step = C.steps[stepIndex];
+  const cards = section.querySelectorAll(`#${sectionId}-input .option-card`);
+  step.input.options.forEach((opt, i) => {
+    if (cards[i]) cards[i].classList.toggle('selected', opt.value === value);
+  });
+  section.classList.add('completed');
+  state.completedSections.add(sectionId);
+  const opt = step.input.options.find(o => o.value === value);
+  document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">âœ“ ${opt ? opt.label : value}</span>`;
+  updateEstimate(); updateQuoteSummary(); updateProgress(); checkWarnings();
+  if (autoAdvance) setTimeout(() => toggleSection(stepIndex + 1), 400);
+}
+
+function toggleMultiOption(stepId, value, el) {
+  if (!state.answers[stepId]) state.answers[stepId] = [];
+  const idx = state.answers[stepId].indexOf(value);
+  if (idx > -1) { state.answers[stepId].splice(idx, 1); el.classList.remove('selected'); }
+  else { state.answers[stepId].push(value); el.classList.add('selected'); }
+  updateEstimate(); updateQuoteSummary();
+}
+
+function updateSlider(sliderId, stepId, stepIndex, rawValue) {
+  const step = C.steps[stepIndex];
+  const sliderConfig = step.input.sliders.find(s => s.id === sliderId);
+  const raw = parseFloat(rawValue);
+  if (sliderConfig.valueMap) {
+    const mapped = sliderConfig.valueMap.find(v => v.value === raw);
+    state.sliders[sliderId] = { raw, numeric: mapped ? mapped.numericValue : raw, label: mapped ? mapped.label : raw + (sliderConfig.unit || '') };
+  } else {
+    state.sliders[sliderId] = { raw, numeric: raw, label: raw + (sliderConfig.unit || '') };
+  }
+  document.getElementById(`slider-val-${sliderId}`).textContent = state.sliders[sliderId].label;
+  const sectionId = `section-${stepIndex}`;
+  document.getElementById(sectionId).classList.add('completed');
+  state.completedSections.add(sectionId);
+  const previews = step.input.sliders.map(s => { const v = state.sliders[s.id]; return s.valueMap ? v.numeric + 'm' : v.raw + (s.unit || ''); });
+  document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">âœ“ ${previews.join(' Ã— ')}</span>`;
+  updateEstimate(); updateQuoteSummary(); updateProgress(); checkWarnings();
+}
+
+function toggleExtra(toggleId, stepId, stepIndex) {
+  state.toggles[toggleId] = !state.toggles[toggleId];
+  document.getElementById(`toggle-${toggleId}`).classList.toggle('on');
+  const sectionId = `section-${stepIndex}`;
+  const step = C.steps[stepIndex];
+  const activeCount = step.input.toggles.filter(t => state.toggles[t.id]).length;
+  if (activeCount > 0) {
+    document.getElementById(sectionId + '-preview').innerHTML = `<span class="selected">âœ“ ${activeCount} extra${activeCount > 1 ? 's' : ''} added</span>`;
+    document.getElementById(sectionId).classList.add('completed');
+    state.completedSections.add(sectionId);
+  } else {
+    document.getElementById(sectionId + '-preview').textContent = step.preview;
+    document.getElementById(sectionId).classList.remove('completed');
+    state.completedSections.delete(sectionId);
+  }
+  updateEstimate(); updateQuoteSummary(); updateProgress();
+}
+
+function skipStep(stepIndex) { toggleSection(stepIndex + 1); }
+
+// â”€â”€ PRICING ENGINE v1.1 â”€â”€
+function getSliderNumeric(sliderId) { return state.sliders[sliderId] ? state.sliders[sliderId].numeric : 0; }
+
+function applyAdjustments(low, high, adjustments) {
+  if (!adjustments) return { low, high };
+  adjustments.forEach(adj => {
+    const answer = state.answers[adj.source];
+    if (answer !== undefined && adj.type === 'additive') {
+      const val = adj.values[answer] !== undefined ? adj.values[answer] : (adj.values._default || 0);
+      low += val;
+      high += val;
+    }
+  });
+  return { low, high };
+}
+
+function calculateEstimate() {
+  const p = C.pricing;
+  const primaryAnswer = state.answers[p.basePriceStep];
+  if (!primaryAnswer || !p.basePrices[primaryAnswer]) return null;
+
+  const base = p.basePrices[primaryAnswer];
+  let low = base.low;
+  let high = base.high;
+
+  // 1. Pre-multiplier adjustments (e.g. style +$200, colour +$300)
+  const pre = applyAdjustments(low, high, p.preAdjustments);
+  low = pre.low; high = pre.high;
+
+  // 2. Multipliers (from sliders OR selects)
+  if (p.multipliers) {
+    p.multipliers.forEach(m => {
+      let mult = 1;
+      if (m.type === 'value_map' && state.sliders[m.source]) {
+        const numericVal = getSliderNumeric(m.source);
+        mult = m.values[numericVal] !== undefined ? m.values[numericVal] : 1;
+      } else if (m.type === 'select_map' && state.answers[m.source] !== undefined) {
+        mult = m.values[state.answers[m.source]] !== undefined ? m.values[state.answers[m.source]] : 1;
+      }
+      low *= mult;
+      high *= mult;
+    });
+  }
+
+  // 3. Multiply by quantity (if applicable)
+  const quantity = p.quantitySource && state.sliders[p.quantitySource] ? state.sliders[p.quantitySource].numeric : 1;
+  low = Math.round(low * quantity);
+  high = Math.round(high * quantity);
+
+  // 4. Post-multiplier adjustments (e.g. job_type +$500 or -$1800)
+  const post = applyAdjustments(low, high, p.postAdjustments);
+  low = post.low; high = post.high;
+
+  // Build breakdown
+  const breakdown = [];
+  const primaryOpt = findOption(p.basePriceStep, primaryAnswer);
+  let baseLine = primaryOpt ? primaryOpt.label : primaryAnswer;
+  if (p.quantitySource && state.sliders[p.quantitySource]) {
+    baseLine += ` (${state.sliders[p.quantitySource].raw}${getSliderUnit(p.quantitySource)})`;
+  }
+  breakdown.push({ label: baseLine, low, high });
+
+  // 5. Extras
+  let runningLow = low, runningHigh = high;
+  if (p.extras) {
+    p.extras.forEach(extra => {
+      if (!state.toggles[extra.id]) return;
+      let extLow = 0, extHigh = 0;
+      switch (extra.type) {
+        case 'fixed': extLow = extra.low; extHigh = extra.high; break;
+        case 'per_unit': extLow = Math.round(extra.lowPerUnit * quantity); extHigh = Math.round(extra.highPerUnit * quantity); break;
+        case 'percentage': extLow = Math.round(runningLow * (extra.lowPercent / 100)); extHigh = Math.round(runningHigh * (extra.highPercent / 100)); break;
+      }
+      runningLow += extLow; runningHigh += extHigh;
+      breakdown.push({ label: extra.breakdownLabel, low: extLow, high: extHigh, prefix: extra.type === 'percentage' ? '+' : '' });
+    });
+  }
+
+  // 6. Minimum & rounding
+  runningLow = Math.max(runningLow, p.minimumPrice || 0);
+  runningHigh = Math.max(runningHigh, p.minimumPrice || 0);
+  if (p.roundTo && p.roundTo > 0) {
+    runningLow = Math.round(runningLow / p.roundTo) * p.roundTo;
+    runningHigh = Math.round(runningHigh / p.roundTo) * p.roundTo;
+  }
+
+  return { low: runningLow, high: runningHigh, breakdown };
+}
+
+function findOption(stepId, value) {
+  const step = C.steps.find(s => s.id === stepId);
+  return step && step.input.options ? step.input.options.find(o => o.value === value) : null;
+}
+
+function getSliderUnit(sliderId) {
+  for (const step of C.steps) {
+    if (step.input.type === 'slider_group') {
+      const s = step.input.sliders.find(sl => sl.id === sliderId);
+      if (s) return s.unit || '';
+    }
+  }
+  return '';
+}
+
+function updateEstimate() {
+  const est = calculateEstimate();
+  const rangeEl = document.getElementById('estRange');
+  const noteEl = document.getElementById('estNote');
+  const breakdownEl = document.getElementById('estBreakdown');
+  const estIdx = C.steps.length;
+  const previewEl = document.getElementById(`section-${estIdx}-preview`);
+  if (!rangeEl) return;
+  if (!est) {
+    rangeEl.textContent = 'â€”';
+    noteEl.textContent = 'Complete the sections above to see your estimate';
+    breakdownEl.innerHTML = '';
+    if (previewEl) previewEl.textContent = C.estimate.preview;
+    return;
+  }
+  const rangeText = `$${est.low.toLocaleString()} â€“ $${est.high.toLocaleString()}`;
+  rangeEl.textContent = rangeText;
+  noteEl.textContent = C.estimate.note;
+  if (C.pricing.showBreakdown && est.breakdown) {
+    breakdownEl.innerHTML = est.breakdown.map(b => `<div class="breakdown-row"><span class="br-label">${b.label}</span><span class="br-value">${b.prefix || ''}$${b.low.toLocaleString()} â€“ $${b.high.toLocaleString()}</span></div>`).join('');
+  }
+  if (previewEl) previewEl.innerHTML = `<span class="selected">âœ“ ${rangeText}</span>`;
+}
+
+function updateQuoteSummary() {
+  const el = document.getElementById('quoteSummary');
+  if (!el) return;
+  let lines = [];
+  C.steps.forEach(step => {
+    if (step.input.type === 'select' && state.answers[step.id]) {
+      const opt = findOption(step.id, state.answers[step.id]);
+      lines.push(`${opt ? opt.icon : 'â€¢'} ${step.title}: <strong>${opt ? opt.label : state.answers[step.id]}</strong>`);
+    }
+    if (step.input.type === 'slider_group') {
+      const vals = step.input.sliders.map(s => state.sliders[s.id] ? state.sliders[s.id].label : '').filter(Boolean);
+      if (vals.length) lines.push(`ðŸ“ ${step.title}: <strong>${vals.join(' Ã— ')}</strong>`);
+    }
+    if (step.input.type === 'toggle_group') {
+      const active = step.input.toggles.filter(t => state.toggles[t.id]);
+      if (active.length) lines.push(`âž• Extras: ${active.map(t => t.icon + ' ' + t.label).join(', ')}`);
+    }
+  });
+  const est = calculateEstimate();
+  if (est) lines.push(`ðŸ’° Estimate: <strong>$${est.low.toLocaleString()} â€“ $${est.high.toLocaleString()}</strong>`);
+  el.innerHTML = lines.length ? lines.join('<br>') : 'Select your options above first';
+}
+
+function checkWarnings() {
+  const answers = state.answers;
+  C.steps.forEach((step, i) => {
+    if (!step.warnings) return;
+    step.warnings.forEach(w => {
+      const el = document.getElementById(`section-${i}-warning-${w.condition.replace(/[^a-z0-9]/gi,'')}`);
+      if (!el) return;
+      try { el.style.display = eval(w.condition) ? 'block' : 'none'; } catch(e) { el.style.display = 'none'; }
+    });
+  });
+}
+
+function updateProgress() {
+  const total = C.steps.length + (C.estimate ? 1 : 0) + (C.leadCapture && C.leadCapture.enabled ? 1 : 0);
+  const completed = state.completedSections.size;
+  const fillEl = document.getElementById('progressFill');
+  const textEl = document.getElementById('progressText');
+  if (fillEl) fillEl.style.width = (completed / total) * 100 + '%';
+  if (textEl) textEl.textContent = `${completed} of ${total}`;
+}
+
+async function submitLead() {
+  const lc = C.leadCapture;
+  const formData = {};
+  let missing = false;
+  lc.fields.forEach(f => {
+    const el = document.getElementById(`form-${f.id}`);
+    formData[f.id] = el ? el.value.trim() : '';
+    if (f.required && !formData[f.id]) missing = true;
+  });
+  if (missing) { alert('Just need the required fields filled in ðŸ‘'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Sending...'; btn.disabled = true;
+
+  let selections = '';
+  C.steps.forEach(step => {
+    if (step.input.type === 'select' && state.answers[step.id]) {
+      const opt = findOption(step.id, state.answers[step.id]);
+      selections += `${step.title}: ${opt ? opt.label : state.answers[step.id]}\n`;
+    }
+    if (step.input.type === 'slider_group') {
+      selections += step.input.sliders.map(s => `${s.label}: ${state.sliders[s.id] ? state.sliders[s.id].label : ''}`).join(', ') + '\n';
+    }
+    if (step.input.type === 'toggle_group') {
+      const active = step.input.toggles.filter(t => state.toggles[t.id]).map(t => t.label);
+      if (active.length) selections += `Extras: ${active.join(', ')}\n`;
+    }
+  });
+
+  const est = calculateEstimate();
+  const estText = est ? `$${est.low.toLocaleString()} â€“ $${est.high.toLocaleString()}` : 'Not calculated';
+
+  try {
+    if (lc.delivery.method === 'web3forms') {
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: lc.delivery.web3formsKey,
+          subject: lc.delivery.emailSubject.replace('{business.name}', C.business.name),
+          from_name: `${C.business.name} Quote Widget`,
+          to: lc.delivery.notifyEmail,
+          message: `NEW QUOTE ENQUIRY\n==================\n${Object.entries(formData).map(([k,v]) => `${k}: ${v}`).join('\n')}\n\nSELECTIONS\n==================\n${selections}\nESTIMATE SHOWN: ${estText}`.trim(),
+          ...formData, estimate_range: estText, selections_summary: selections,
+        }),
+      });
+    }
+  } catch (err) { console.error(err); }
+
+  document.getElementById('leadFormContainer').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'block';
+  const idx = C.steps.length + (C.estimate ? 1 : 0);
+  const sid = `section-${idx}`;
+  document.getElementById(sid).classList.add('completed');
+  state.completedSections.add(sid);
+  document.getElementById(sid + '-preview').innerHTML = '<span class="selected">âœ“ Sent!</span>';
+  updateProgress();
+}
+
+function getPreview(step) {
+  if (step.input.type === 'select' && state.answers[step.id]) {
+    const opt = step.input.options.find(o => o.value === state.answers[step.id]);
+    return `<span class="selected">âœ“ ${opt ? opt.label : state.answers[step.id]}</span>`;
+  }
+  return step.preview;
+}
+
+init();
+</script>
+</body>
+</html>
