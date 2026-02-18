@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Config Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-main: #0c1117;
+  --bg-card: #151c25;
+  --bg-hover: #1a2332;
+  --bg-dark: #0a0e14;
+  --border: #222d3a;
+  --brand: #f59e0b;
+  --brand2: #d97706;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --text: #e8ecf1;
+  --muted: #8896a7;
+  --dim: #5a6a7d;
+  --font: 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 14px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--bg-main); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+.builder { max-width: 700px; margin: 0 auto; padding: 20px 16px 60px; }
+
+/* Header */
+.builder-header { text-align: center; padding: 30px 0 25px; }
+.builder-header h1 { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, var(--brand), #fbbf24); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.builder-header p { color: var(--muted); font-size: 0.95rem; margin-top: 6px; }
+
+/* Sections */
+.section { background: var(--bg-card); border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--border); overflow: hidden; }
+.section.open { border-color: rgba(245, 158, 11, 0.3); }
+.section-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 16px; cursor: pointer; transition: background 0.2s; }
+.section-head:hover { background: var(--bg-hover); }
+.section-title { display: flex; align-items: center; gap: 12px; }
+.section-num { width: 34px; height: 34px; background: linear-gradient(135deg, var(--brand), var(--brand2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: #000; flex-shrink: 0; }
+.section-name { font-size: 1rem; font-weight: 600; }
+.section-sub { font-size: 0.8rem; color: var(--dim); margin-top: 2px; }
+.section-arrow { color: var(--muted); font-size: 1.2rem; transition: transform 0.3s; }
+.section.open .section-arrow { transform: rotate(180deg); }
+.section-body { display: none; padding: 0 16px 18px; border-top: 1px solid var(--border); }
+.section.open .section-body { display: block; }
+
+/* Form elements */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.field input, .field textarea, .field select {
+  width: 100%; padding: 12px 14px; background: var(--bg-dark); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text); font-family: var(--font); font-size: 0.9rem; outline: none; transition: border 0.2s;
+}
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--brand); }
+.field textarea { min-height: 80px; resize: vertical; }
+.field select { cursor: pointer; }
+.field input[type="color"] { padding: 4px; height: 44px; cursor: pointer; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.field .hint { font-size: 0.75rem; color: var(--dim); margin-top: 4px; }
+
+/* Buttons */
+.btn { padding: 12px 20px; border-radius: 10px; border: none; font-family: var(--font); font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: linear-gradient(135deg, var(--brand), var(--brand2)); color: #000; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
+.btn-secondary { background: var(--bg-hover); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--brand); }
+.btn-danger { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+.btn-danger:hover { background: rgba(239,68,68,0.2); }
+.btn-sm { padding: 8px 14px; font-size: 0.8rem; }
+.btn-full { width: 100%; }
+.btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+/* Step Cards */
+.step-card { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.step-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.step-card-title { font-weight: 700; font-size: 0.95rem; }
+.step-card-type { font-size: 0.75rem; color: var(--brand); font-family: var(--mono); }
+
+/* Option rows inside step cards */
+.option-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; padding: 10px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); }
+.option-row input { flex: 1; padding: 8px 10px; font-size: 0.82rem; }
+.option-row .opt-icon { width: 50px; text-align: center; }
+.option-row .opt-value { width: 100px; }
+.option-row .opt-price { width: 100px; }
+
+/* Slider config rows */
+.slider-row { padding: 12px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; }
+
+/* Toggle config rows */
+.toggle-row-config { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; padding: 10px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); }
+.toggle-row-config input { flex: 1; padding: 8px 10px; font-size: 0.82rem; }
+
+/* Extras (pricing) */
+.extra-row { padding: 12px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border); margin-bottom: 8px; }
+
+/* JSON Preview */
+.json-preview { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 16px; max-height: 400px; overflow: auto; }
+.json-preview pre { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); white-space: pre-wrap; word-break: break-all; }
+
+/* Export bar */
+.export-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-dark); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; gap: 10px; justify-content: center; z-index: 100; }
+
+/* Delete icon */
+.del-btn { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.1rem; padding: 4px 8px; opacity: 0.6; }
+.del-btn:hover { opacity: 1; }
+
+/* Move buttons */
+.move-btn { background: none; border: none; color: var(--dim); cursor: pointer; font-size: 1rem; padding: 2px 6px; }
+.move-btn:hover { color: var(--brand); }
+
+/* Notification */
+.toast { position: fixed; top: 20px; right: 20px; background: var(--green); color: #000; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; z-index: 200; display: none; }
+.toast.show { display: block; animation: fadeInUp 0.3s ease; }
+
+/* AI Section */
+.ai-bar { background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(245,158,11,0.1)); border: 1px solid rgba(59,130,246,0.3); border-radius: var(--radius); padding: 20px 16px; margin-bottom: 20px; }
+.ai-bar h3 { font-size: 1rem; font-weight: 700; margin-bottom: 12px; }
+.ai-bar h3 span { background: linear-gradient(135deg, var(--blue), var(--brand)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.ai-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.ai-row input { flex: 1; }
+.ai-row .btn { flex-shrink: 0; }
+.ai-key-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.ai-key-row input { flex: 1; font-size: 0.82rem; }
+.ai-key-row .key-status { font-size: 0.75rem; white-space: nowrap; }
+.ai-key-row .key-status.saved { color: var(--green); }
+.ai-key-row .key-status.missing { color: var(--dim); }
+.ai-log { background: var(--bg-dark); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-top: 12px; max-height: 200px; overflow-y: auto; display: none; }
+.ai-log p { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; font-family: var(--mono); }
+.ai-log p.ai-ok { color: var(--green); }
+.ai-log p.ai-err { color: var(--red); }
+.ai-log p.ai-info { color: var(--blue); }
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="builder" id="builder">
+  <div class="builder-header">
+    <h1>⚙️ iTabs Config Builder</h1>
+    <p>Build a WIDGET_CONFIG visually. Export a working HTML file.</p>
+  </div>
+
+  <!-- AI ASSIST -->
+  <div class="ai-bar" id="ai-bar">
+    <h3>🤖 <span>AI Assist — Paste a URL, let Gemini build it</span></h3>
+    <div class="ai-key-row">
+      <input id="gemini-key" type="password" placeholder="Gemini API key (free from ai.google.dev)" style="font-size:0.82rem">
+      <button class="btn btn-secondary btn-sm" onclick="saveGeminiKey()">Save Key</button>
+      <span class="key-status missing" id="key-status">No key</span>
+    </div>
+    <div class="ai-row">
+      <input id="ai-url" placeholder="Paste a tradie website URL..." style="font-size:0.9rem">
+      <button class="btn btn-primary btn-sm" id="ai-go-btn" onclick="aiAnalyzeURL()">🔍 Analyze</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="aiSuggestSteps()">💡 Suggest Steps for Trade</button>
+      <button class="btn btn-secondary btn-sm" onclick="aiGenerateTips()">📝 Generate Tips</button>
+    </div>
+    <div class="ai-log" id="ai-log"></div>
+  </div>
+
+  <!-- SECTION 1: Business -->
+  <div class="section open" id="sec-business">
+    <div class="section-head" onclick="toggleSec('business')">
+      <div class="section-title">
+        <span class="section-num">1</span>
+        <div><div class="section-name">Business Info</div><div class="section-sub">Name, phone, location</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field"><label>Business Name *</label><input id="biz-name" placeholder="e.g. Perth Fencing Pros"></div>
+      <div class="field-row">
+        <div class="field"><label>Phone</label><input id="biz-phone" placeholder="e.g. 0412 345 678"></div>
+        <div class="field"><label>Location</label><input id="biz-location" placeholder="e.g. Perth, WA" value="Perth, WA"></div>
+      </div>
+      <div class="field"><label>Website URL</label><input id="biz-website" placeholder="e.g. https://perthfencing.com.au"></div>
+      <div class="field"><label>Tagline</label><input id="biz-tagline" placeholder="e.g. Colorbond, Timber & Aluminium Fencing"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Branding -->
+  <div class="section" id="sec-branding">
+    <div class="section-head" onclick="toggleSec('branding')">
+      <div class="section-title">
+        <span class="section-num">2</span>
+        <div><div class="section-name">Branding</div><div class="section-sub">Colours & theme</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field"><label>Primary Colour</label><input type="color" id="brand-primary" value="#f59e0b"></div>
+        <div class="field"><label>Secondary Colour</label><input type="color" id="brand-secondary" value="#d97706"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Background</label><input type="color" id="brand-bg" value="#0c1117"></div>
+        <div class="field"><label>Card Background</label><input type="color" id="brand-card" value="#151c25"></div>
+      </div>
+      <div class="field"><label>Border Radius</label><input id="brand-radius" value="14px" placeholder="e.g. 14px"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Header -->
+  <div class="section" id="sec-header">
+    <div class="section-head" onclick="toggleSec('header')">
+      <div class="section-title">
+        <span class="section-num">3</span>
+        <div><div class="section-name">Header</div><div class="section-sub">Icon, headline, subtitle</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field"><label>Icon (emoji)</label><input id="hdr-icon" placeholder="e.g. 🏗️" value="🏗️"></div>
+        <div class="field"><label>Badge</label><input id="hdr-badge" placeholder="e.g. 📍 Prices for Perth, WA — 2025"></div>
+      </div>
+      <div class="field"><label>Headline *</label><input id="hdr-headline" placeholder="e.g. How much is my fence?"></div>
+      <div class="field"><label>Subtitle</label><input id="hdr-subtitle" placeholder="e.g. Tap through to get a ballpark price. Takes about 60 seconds."></div>
+      <div class="field"><label>Disclaimer</label><input id="hdr-disclaimer" value="Estimates are approximate. Final pricing confirmed after site inspection."></div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Steps -->
+  <div class="section" id="sec-steps">
+    <div class="section-head" onclick="toggleSec('steps')">
+      <div class="section-title">
+        <span class="section-num">4</span>
+        <div><div class="section-name">Steps</div><div class="section-sub" id="steps-count">0 steps</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div id="steps-container"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" onclick="addStep('select')">+ Select Step</button>
+        <button class="btn btn-secondary btn-sm" onclick="addStep('slider_group')">+ Slider Step</button>
+        <button class="btn btn-secondary btn-sm" onclick="addStep('toggle_group')">+ Toggle Step</button>
+        <button class="btn btn-secondary btn-sm" onclick="addStep('multi_select')">+ Multi-Select</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: Estimate -->
+  <div class="section" id="sec-estimate">
+    <div class="section-head" onclick="toggleSec('estimate')">
+      <div class="section-title">
+        <span class="section-num">5</span>
+        <div><div class="section-name">Estimate Display</div><div class="section-sub">Title & note for the price section</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field"><label>Section Title</label><input id="est-title" value="Your Estimate" placeholder="e.g. Your Estimate"></div>
+      <div class="field"><label>Preview Text</label><input id="est-preview" value="Complete above to see price" placeholder="e.g. Complete above to see price"></div>
+      <div class="field"><label>Note (below price)</label><input id="est-note" value="Based on typical Perth pricing — your actual quote may differ." placeholder="Note shown below the estimate"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: Pricing Logic -->
+  <div class="section" id="sec-pricing">
+    <div class="section-head" onclick="toggleSec('pricing')">
+      <div class="section-title">
+        <span class="section-num">6</span>
+        <div><div class="section-name">Pricing Logic</div><div class="section-sub">Base prices, multipliers, extras</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field-row">
+        <div class="field"><label>Unit</label><input id="price-unit" placeholder="e.g. metre" value="metre"></div>
+        <div class="field"><label>Unit Label</label><input id="price-unit-label" placeholder="e.g. per metre" value="per metre"></div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Base Price Step</label>
+          <select id="price-base-step"><option value="">— Select a step —</option></select>
+          <div class="hint">Which step determines the base price?</div>
+        </div>
+        <div class="field">
+          <label>Quantity Source</label>
+          <select id="price-qty-source"><option value="">— Select a slider —</option></select>
+          <div class="hint">Which slider provides the quantity?</div>
+        </div>
+      </div>
+
+      <div class="field"><label>Base Prices</label><div class="hint" style="margin-bottom:8px">Set low/high price for each option in the base price step. These auto-populate when you select a base price step above.</div></div>
+      <div id="base-prices-container"></div>
+
+      <div class="field-row" style="margin-top:16px">
+        <div class="field"><label>Minimum Price ($)</label><input type="number" id="price-min" value="500" placeholder="e.g. 500"></div>
+        <div class="field"><label>Round To ($)</label><input type="number" id="price-round" value="0" placeholder="e.g. 50"></div>
+      </div>
+      <div class="field">
+        <label><input type="checkbox" id="price-breakdown" checked style="width:auto;margin-right:8px"> Show itemised breakdown</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: Lead Capture -->
+  <div class="section" id="sec-lead">
+    <div class="section-head" onclick="toggleSec('lead')">
+      <div class="section-title">
+        <span class="section-num">7</span>
+        <div><div class="section-name">Lead Capture</div><div class="section-sub">Form fields & delivery</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="field"><label>Section Title</label><input id="lead-title" value="Get your actual quote"></div>
+      <div class="field"><label>Preview</label><input id="lead-preview" value="Free, no obligation"></div>
+      <div class="field"><label>Heading</label><input id="lead-heading" value="We've got your specs."></div>
+      <div class="field"><label>Subheading</label><input id="lead-subheading" value="Drop your details and we'll get back to you with an exact price — usually within 24 hours."></div>
+      <div class="field"><label>Submit Button Text</label><input id="lead-submit" value="📩 Send My Quote Request"></div>
+      <div class="field"><label>Success Message</label><input id="lead-success" value="Quote request sent!"></div>
+      <div class="field"><label>Success Subtext</label><input id="lead-success-sub" value="We'll be in touch within 24 hours with a proper price based on your specs."></div>
+      <hr style="border-color:var(--border);margin:16px 0">
+      <div class="field"><label>Web3Forms Key</label><input id="lead-w3f-key" placeholder="Get free key at web3forms.com"><div class="hint">Leave blank to skip email delivery</div></div>
+      <div class="field"><label>Notify Email</label><input id="lead-notify" placeholder="e.g. you@email.com"></div>
+      <div class="field"><label>Email Subject</label><input id="lead-subject" placeholder="e.g. New Fence Enquiry"></div>
+    </div>
+  </div>
+
+  <!-- SECTION 8: Export -->
+  <div class="section" id="sec-export">
+    <div class="section-head" onclick="toggleSec('export')">
+      <div class="section-title">
+        <span class="section-num">8</span>
+        <div><div class="section-name">Export</div><div class="section-sub">Preview config & download</div></div>
+      </div>
+      <span class="section-arrow">▾</span>
+    </div>
+    <div class="section-body">
+      <button class="btn btn-secondary btn-full" onclick="previewConfig()">👁 Preview Config JSON</button>
+      <div class="json-preview" id="json-preview" style="display:none"><pre id="json-output"></pre></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-primary" onclick="exportJSON()">📋 Copy Config JSON</button>
+        <button class="btn btn-primary" onclick="exportHTML()">📦 Download Full HTML</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm" onclick="saveToLocal()">💾 Save Draft</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadFromLocal()">📂 Load Draft</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Clear All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// iTabs Config Builder — State & Logic
+// ═══════════════════════════════════════════════════
+
+let steps = [];
+let stepCounter = 0;
+
+// ── SECTION TOGGLE ────────────────────────────────
+function toggleSec(name) {
+  const sec = document.getElementById('sec-' + name);
+  sec.classList.toggle('open');
+}
+
+// ── TOAST ─────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── STEPS MANAGEMENT ──────────────────────────────
+function addStep(type) {
+  stepCounter++;
+  const step = {
+    _uid: stepCounter,
+    id: type === 'select' ? 'step_' + stepCounter : (type === 'slider_group' ? 'size' : (type === 'toggle_group' ? 'extras' : 'multi_' + stepCounter)),
+    title: type === 'select' ? 'Choose an option' : (type === 'slider_group' ? 'Set measurements' : (type === 'toggle_group' ? 'Any extras?' : 'Select all that apply')),
+    preview: 'Tap to choose',
+    type: type,
+    options: type === 'select' || type === 'multi_select' ? [{ value: 'option_1', label: 'Option 1', icon: '📦', description: '', priceHint: '' }] : [],
+    sliders: type === 'slider_group' ? [{ id: 'length_m', label: 'Length', min: 5, max: 100, default: 20, step: 1, unit: 'm', markers: [] }] : [],
+    toggles: type === 'toggle_group' ? [{ id: 'extra_1', label: 'Extra option', icon: '➕', costHint: '+$100–$200' }] : [],
+    autoAdvance: type === 'select',
+    optional: type === 'multi_select' || type === 'toggle_group',
+    columns: 1,
+  };
+  steps.push(step);
+  renderSteps();
+  updatePricingDropdowns();
+}
+
+function removeStep(uid) {
+  steps = steps.filter(s => s._uid !== uid);
+  renderSteps();
+  updatePricingDropdowns();
+}
+
+function moveStep(uid, dir) {
+  const idx = steps.findIndex(s => s._uid === uid);
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= steps.length) return;
+  [steps[idx], steps[newIdx]] = [steps[newIdx], steps[idx]];
+  renderSteps();
+}
+
+function renderSteps() {
+  const container = document.getElementById('steps-container');
+  document.getElementById('steps-count').textContent = steps.length + ' step' + (steps.length !== 1 ? 's' : '');
+
+  container.innerHTML = steps.map((step, idx) => {
+    let bodyHtml = '';
+
+    // Common fields
+    bodyHtml += `
+      <div class="field-row" style="margin-bottom:12px">
+        <div class="field"><label>Step ID</label><input value="${esc(step.id)}" onchange="steps[${idx}].id=this.value;updatePricingDropdowns()" placeholder="e.g. fence_type"></div>
+        <div class="field"><label>Title</label><input value="${esc(step.title)}" onchange="steps[${idx}].title=this.value" placeholder="e.g. What type of fence?"></div>
+      </div>
+      <div class="field-row" style="margin-bottom:12px">
+        <div class="field"><label>Preview Text</label><input value="${esc(step.preview)}" onchange="steps[${idx}].preview=this.value"></div>
+        <div class="field"><label>Columns</label>
+          <select onchange="steps[${idx}].columns=parseInt(this.value)">
+            <option value="1" ${step.columns===1?'selected':''}>1 column</option>
+            <option value="2" ${step.columns===2?'selected':''}>2 columns</option>
+            <option value="3" ${step.columns===3?'selected':''}>3 columns</option>
+          </select>
+        </div>
+      </div>`;
+
+    // Type-specific content
+    if (step.type === 'select' || step.type === 'multi_select') {
+      bodyHtml += `<label style="font-size:0.85rem;font-weight:600;color:var(--muted);margin-bottom:8px;display:block">Options</label>`;
+      step.options.forEach((opt, oi) => {
+        bodyHtml += `
+          <div class="option-row">
+            <input class="opt-icon" value="${esc(opt.icon)}" onchange="steps[${idx}].options[${oi}].icon=this.value" placeholder="🔨" style="width:50px;text-align:center">
+            <input value="${esc(opt.value)}" onchange="steps[${idx}].options[${oi}].value=this.value" placeholder="value_id" style="width:100px">
+            <input value="${esc(opt.label)}" onchange="steps[${idx}].options[${oi}].label=this.value" placeholder="Display label" style="flex:1">
+            <input value="${esc(opt.priceHint)}" onchange="steps[${idx}].options[${oi}].priceHint=this.value" placeholder="$X/m" style="width:90px">
+            <button class="del-btn" onclick="steps[${idx}].options.splice(${oi},1);renderSteps()">✕</button>
+          </div>`;
+      });
+      bodyHtml += `<button class="btn btn-secondary btn-sm" style="margin-top:4px" onclick="steps[${idx}].options.push({value:'opt_'+(steps[${idx}].options.length+1),label:'New option',icon:'📦',description:'',priceHint:''});renderSteps()">+ Add Option</button>`;
+
+      // Description editing (expandable)
+      bodyHtml += `<details style="margin-top:12px"><summary style="color:var(--muted);font-size:0.8rem;cursor:pointer">Edit descriptions & tags</summary><div style="margin-top:8px">`;
+      step.options.forEach((opt, oi) => {
+        bodyHtml += `
+          <div style="margin-bottom:8px;padding:8px;background:var(--bg-card);border-radius:8px;border:1px solid var(--border)">
+            <div style="font-weight:600;font-size:0.82rem;margin-bottom:4px">${esc(opt.icon)} ${esc(opt.label)}</div>
+            <input value="${esc(opt.description||'')}" onchange="steps[${idx}].options[${oi}].description=this.value" placeholder="Description text" style="width:100%;padding:8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.82rem;margin-bottom:4px">
+          </div>`;
+      });
+      bodyHtml += `</div></details>`;
+    }
+
+    if (step.type === 'slider_group') {
+      bodyHtml += `<label style="font-size:0.85rem;font-weight:600;color:var(--muted);margin-bottom:8px;display:block">Sliders</label>`;
+      step.sliders.forEach((sl, si) => {
+        bodyHtml += `
+          <div class="slider-row">
+            <div class="field-row" style="margin-bottom:8px">
+              <div class="field"><label>Slider ID</label><input value="${esc(sl.id)}" onchange="steps[${idx}].sliders[${si}].id=this.value;updatePricingDropdowns()"></div>
+              <div class="field"><label>Label</label><input value="${esc(sl.label)}" onchange="steps[${idx}].sliders[${si}].label=this.value"></div>
+            </div>
+            <div class="field-row-3" style="margin-bottom:8px">
+              <div class="field"><label>Min</label><input type="number" value="${sl.min}" onchange="steps[${idx}].sliders[${si}].min=parseFloat(this.value)"></div>
+              <div class="field"><label>Max</label><input type="number" value="${sl.max}" onchange="steps[${idx}].sliders[${si}].max=parseFloat(this.value)"></div>
+              <div class="field"><label>Default</label><input type="number" value="${sl.default}" onchange="steps[${idx}].sliders[${si}].default=parseFloat(this.value)"></div>
+            </div>
+            <div class="field-row-3">
+              <div class="field"><label>Step</label><input type="number" value="${sl.step}" onchange="steps[${idx}].sliders[${si}].step=parseFloat(this.value)"></div>
+              <div class="field"><label>Unit</label><input value="${esc(sl.unit)}" onchange="steps[${idx}].sliders[${si}].unit=this.value" placeholder="e.g. m"></div>
+              <div class="field"><label>Markers</label><input value="${(sl.markers||[]).join(',')}" onchange="steps[${idx}].sliders[${si}].markers=this.value?this.value.split(','):[]" placeholder="5m,50m,100m"></div>
+            </div>
+            <div style="text-align:right;margin-top:4px"><button class="del-btn" onclick="steps[${idx}].sliders.splice(${si},1);renderSteps()">✕ Remove slider</button></div>
+          </div>`;
+      });
+      bodyHtml += `<button class="btn btn-secondary btn-sm" style="margin-top:4px" onclick="steps[${idx}].sliders.push({id:'slider_'+(steps[${idx}].sliders.length+1),label:'New slider',min:0,max:100,default:50,step:1,unit:'',markers:[]});renderSteps()">+ Add Slider</button>`;
+    }
+
+    if (step.type === 'toggle_group') {
+      bodyHtml += `<label style="font-size:0.85rem;font-weight:600;color:var(--muted);margin-bottom:8px;display:block">Toggles</label>`;
+      step.toggles.forEach((tg, ti) => {
+        bodyHtml += `
+          <div class="toggle-row-config">
+            <input value="${esc(tg.icon)}" onchange="steps[${idx}].toggles[${ti}].icon=this.value" placeholder="➕" style="width:50px;text-align:center">
+            <input value="${esc(tg.id)}" onchange="steps[${idx}].toggles[${ti}].id=this.value" placeholder="toggle_id" style="width:100px">
+            <input value="${esc(tg.label)}" onchange="steps[${idx}].toggles[${ti}].label=this.value" placeholder="Label" style="flex:1">
+            <input value="${esc(tg.costHint)}" onchange="steps[${idx}].toggles[${ti}].costHint=this.value" placeholder="+$X" style="width:100px">
+            <button class="del-btn" onclick="steps[${idx}].toggles.splice(${ti},1);renderSteps()">✕</button>
+          </div>`;
+      });
+      bodyHtml += `<button class="btn btn-secondary btn-sm" style="margin-top:4px" onclick="steps[${idx}].toggles.push({id:'toggle_'+(steps[${idx}].toggles.length+1),label:'New toggle',icon:'➕',costHint:'+$0'});renderSteps()">+ Add Toggle</button>`;
+    }
+
+    return `
+      <div class="step-card" id="step-${step._uid}">
+        <div class="step-card-head">
+          <div>
+            <span class="step-card-title">Step ${idx + 1}: ${esc(step.title)}</span>
+            <span class="step-card-type">${step.type}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <button class="move-btn" onclick="moveStep(${step._uid},-1)" title="Move up">▲</button>
+            <button class="move-btn" onclick="moveStep(${step._uid},1)" title="Move down">▼</button>
+            <button class="del-btn" onclick="removeStep(${step._uid})" title="Delete step">✕</button>
+          </div>
+        </div>
+        ${bodyHtml}
+      </div>`;
+  }).join('');
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str).replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ── PRICING DROPDOWNS ─────────────────────────────
+function updatePricingDropdowns() {
+  // Base price step dropdown
+  const baseSel = document.getElementById('price-base-step');
+  const curBase = baseSel.value;
+  baseSel.innerHTML = '<option value="">— Select a step —</option>';
+  steps.filter(s => s.type === 'select').forEach(s => {
+    baseSel.innerHTML += `<option value="${s.id}" ${s.id===curBase?'selected':''}>${s.title} (${s.id})</option>`;
+  });
+
+  // Quantity source dropdown (sliders)
+  const qtySel = document.getElementById('price-qty-source');
+  const curQty = qtySel.value;
+  qtySel.innerHTML = '<option value="">— No quantity —</option>';
+  steps.filter(s => s.type === 'slider_group').forEach(s => {
+    s.sliders.forEach(sl => {
+      qtySel.innerHTML += `<option value="${sl.id}" ${sl.id===curQty?'selected':''}>${sl.label} (${sl.id})</option>`;
+    });
+  });
+
+  updateBasePrices();
+}
+
+function updateBasePrices() {
+  const baseStepId = document.getElementById('price-base-step').value;
+  const container = document.getElementById('base-prices-container');
+  if (!baseStepId) { container.innerHTML = '<div style="color:var(--dim);font-size:0.82rem">Select a base price step first</div>'; return; }
+
+  const step = steps.find(s => s.id === baseStepId);
+  if (!step || !step.options) { container.innerHTML = ''; return; }
+
+  // Preserve existing values
+  const existing = {};
+  container.querySelectorAll('[data-bp-value]').forEach(el => {
+    const val = el.dataset.bpValue;
+    const low = el.querySelector('.bp-low');
+    const high = el.querySelector('.bp-high');
+    if (low && high) existing[val] = { low: low.value, high: high.value };
+  });
+
+  container.innerHTML = step.options.map(opt => {
+    const prev = existing[opt.value] || { low: '', high: '' };
+    return `
+      <div class="option-row" data-bp-value="${opt.value}">
+        <span style="width:120px;font-size:0.85rem;font-weight:600">${esc(opt.icon)} ${esc(opt.label)}</span>
+        <span style="color:var(--dim);font-size:0.8rem;width:30px">Low</span>
+        <input class="bp-low" type="number" value="${prev.low}" placeholder="0" style="width:80px">
+        <span style="color:var(--dim);font-size:0.8rem;width:35px">High</span>
+        <input class="bp-high" type="number" value="${prev.high}" placeholder="0" style="width:80px">
+      </div>`;
+  }).join('');
+}
+
+// Listen for base step change
+document.getElementById('price-base-step').addEventListener('change', updateBasePrices);
+
+// ── BUILD CONFIG ──────────────────────────────────
+function buildConfig() {
+  const primary = document.getElementById('brand-primary').value;
+  const secondary = document.getElementById('brand-secondary').value;
+  const bgColor = document.getElementById('brand-bg').value;
+  const cardBg = document.getElementById('brand-card').value;
+
+  // Build steps array
+  const configSteps = steps.map(step => {
+    const s = {
+      id: step.id,
+      title: step.title,
+      preview: step.preview,
+      input: { type: step.type },
+      hints: [],
+    };
+
+    if (step.type === 'select' || step.type === 'multi_select') {
+      s.input.columns = step.columns || 1;
+      if (step.type === 'select') s.input.autoAdvance = step.autoAdvance !== false;
+      if (step.type === 'multi_select') s.input.optional = step.optional !== false;
+      s.input.options = step.options.map(opt => {
+        const o = { value: opt.value, label: opt.label, icon: opt.icon || '📦' };
+        if (opt.description) o.description = opt.description;
+        if (opt.priceHint) o.priceHint = opt.priceHint;
+        return o;
+      });
+    }
+
+    if (step.type === 'slider_group') {
+      s.input.sliders = step.sliders.map(sl => {
+        const slider = {
+          id: sl.id, label: sl.label,
+          min: sl.min, max: sl.max, default: sl.default, step: sl.step,
+        };
+        if (sl.unit) slider.unit = sl.unit;
+        if (sl.markers && sl.markers.length) slider.markers = sl.markers;
+        return slider;
+      });
+    }
+
+    if (step.type === 'toggle_group') {
+      s.input.toggles = step.toggles.map(tg => ({
+        id: tg.id, label: tg.label, icon: tg.icon || '➕', costHint: tg.costHint || '',
+      }));
+    }
+
+    // Add AI-generated tips to first step if available
+    if (window._aiTips && window._aiTips.length > 0 && idx === 0) {
+      s.hints = [{
+        tabLabel: 'Tips',
+        type: 'tips',
+        tips: window._aiTips.map(t => ({ icon: t.icon || '💡', title: t.title, text: t.text })),
+      }];
+    }
+
+    return s;
+  });
+
+  // Build base prices
+  const basePrices = {};
+  document.querySelectorAll('[data-bp-value]').forEach(el => {
+    const val = el.dataset.bpValue;
+    const low = parseFloat(el.querySelector('.bp-low').value) || 0;
+    const high = parseFloat(el.querySelector('.bp-high').value) || 0;
+    basePrices[val] = { low, high };
+  });
+
+  // Build pricing extras from toggle steps
+  const extras = [];
+  steps.filter(s => s.type === 'toggle_group').forEach(step => {
+    step.toggles.forEach(tg => {
+      extras.push({
+        id: tg.id,
+        type: 'fixed',
+        low: 0, high: 0,
+        breakdownLabel: tg.label,
+      });
+    });
+  });
+
+  const config = {
+    business: {
+      name: document.getElementById('biz-name').value || 'My Business',
+      tagline: document.getElementById('biz-tagline').value || '',
+      phone: document.getElementById('biz-phone').value || '',
+      email: '',
+      logo: '',
+      website: document.getElementById('biz-website').value || '',
+      location: document.getElementById('biz-location').value || 'Perth, WA',
+      socials: { facebook: '', instagram: '', google: '' },
+    },
+    branding: {
+      mode: 'dark',
+      primaryColor: primary,
+      secondaryColor: secondary,
+      backgroundColor: bgColor,
+      cardBackground: cardBg,
+      hoverBackground: lighten(cardBg, 10),
+      darkBackground: darken(bgColor, 5),
+      borderColor: lighten(bgColor, 15),
+      textColor: '#e8ecf1',
+      mutedText: '#8896a7',
+      dimText: '#5a6a7d',
+      successColor: '#22c55e',
+      errorColor: '#ef4444',
+      infoColor: '#3b82f6',
+      fontFamily: "'Plus Jakarta Sans', sans-serif",
+      monoFont: "'JetBrains Mono', monospace",
+      borderRadius: document.getElementById('brand-radius').value || '14px',
+      googleFontsUrl: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap",
+    },
+    header: {
+      icon: document.getElementById('hdr-icon').value || '🏗️',
+      headline: document.getElementById('hdr-headline').value || 'Get a Quote',
+      subtitle: document.getElementById('hdr-subtitle').value || '',
+      badge: document.getElementById('hdr-badge').value || '',
+      disclaimer: document.getElementById('hdr-disclaimer').value || '',
+    },
+    steps: configSteps,
+    estimate: {
+      title: document.getElementById('est-title').value || 'Your Estimate',
+      preview: document.getElementById('est-preview').value || 'Complete above to see price',
+      note: document.getElementById('est-note').value || '',
+    },
+    pricing: {
+      unit: document.getElementById('price-unit').value || 'unit',
+      unitLabel: document.getElementById('price-unit-label').value || 'per unit',
+      basePriceStep: document.getElementById('price-base-step').value || '',
+      basePrices: basePrices,
+      quantitySource: document.getElementById('price-qty-source').value || '',
+      multipliers: [],
+      extras: extras,
+      showBreakdown: document.getElementById('price-breakdown').checked,
+      roundTo: parseInt(document.getElementById('price-round').value) || 0,
+      minimumPrice: parseInt(document.getElementById('price-min').value) || 0,
+    },
+    leadCapture: {
+      enabled: true,
+      title: document.getElementById('lead-title').value || 'Get your quote',
+      preview: document.getElementById('lead-preview').value || 'Free, no obligation',
+      heading: document.getElementById('lead-heading').value || '',
+      subheading: document.getElementById('lead-subheading').value || '',
+      showSummary: true,
+      fields: [
+        { id: 'name', label: 'Your name', type: 'text', placeholder: 'e.g. Dave', required: true },
+        { id: 'contact', label: 'Phone or email', type: 'text', placeholder: 'e.g. 0412 345 678', required: true },
+        { id: 'suburb', label: 'Suburb', type: 'text', placeholder: 'e.g. Joondalup', required: false },
+        { id: 'notes', label: 'Anything else?', type: 'textarea', placeholder: '', required: false },
+      ],
+      submitText: document.getElementById('lead-submit').value || '📩 Send Quote',
+      submitNote: 'No spam. Just your quote.',
+      successMessage: document.getElementById('lead-success').value || 'Sent!',
+      successSubtext: document.getElementById('lead-success-sub').value || '',
+      delivery: {
+        method: 'web3forms',
+        web3formsKey: document.getElementById('lead-w3f-key').value || '',
+        notifyEmail: document.getElementById('lead-notify').value || '',
+        emailSubject: document.getElementById('lead-subject').value || 'New Quote Enquiry',
+      },
+    },
+    socialProof: { enabled: false, rating: 4.9, reviewCount: 0, badges: [] },
+    footer: { showPoweredBy: true, poweredByUrl: 'https://itabs.ai' },
+  };
+
+  return config;
+}
+
+// ── COLOUR HELPERS ────────────────────────────────
+function lighten(hex, amt) {
+  let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.min(255, r + amt); g = Math.min(255, g + amt); b = Math.min(255, b + amt);
+  return '#' + [r,g,b].map(c => c.toString(16).padStart(2,'0')).join('');
+}
+function darken(hex, amt) { return lighten(hex, -amt); }
+
+// ── EXPORT FUNCTIONS ──────────────────────────────
+function previewConfig() {
+  const config = buildConfig();
+  const pre = document.getElementById('json-preview');
+  document.getElementById('json-output').textContent = 'const WIDGET_CONFIG = ' + JSON.stringify(config, null, 2) + ';';
+  pre.style.display = pre.style.display === 'none' ? 'block' : 'none';
+}
+
+function exportJSON() {
+  const config = buildConfig();
+  const text = 'const WIDGET_CONFIG = ' + JSON.stringify(config, null, 2) + ';';
+  navigator.clipboard.writeText(text).then(() => toast('✅ Config copied to clipboard!'));
+}
+
+function exportHTML() {
+  const config = buildConfig();
+  const configStr = JSON.stringify(config, null, 2);
+
+  // Fetch the engine template
+  const html = buildFullHTML(configStr);
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const filename = (config.business.name || 'itabs-widget').toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.html';
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✅ Downloaded ' + filename);
+}
+
+function buildFullHTML(configJSON) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Estimator</title>
+<script>
+const WIDGET_CONFIG = ${configJSON};
+<\/script>
+<script src="https://boilermaker-innovator.github.io/itabs-quotes/engine.js"><\/script>
+<link rel="stylesheet" href="https://boilermaker-innovator.github.io/itabs-quotes/engine.css">
+</head>
+<body>
+<div id="app" class="container"></div>
+</body>
+</html>`;
+}
+
+// ── SAVE / LOAD ───────────────────────────────────
+function saveToLocal() {
+  const data = {
+    steps: steps,
+    stepCounter: stepCounter,
+    fields: {},
+    aiTips: window._aiTips || [],
+    aiServices: window._aiServices || [],
+  };
+  // Save all input values
+  document.querySelectorAll('#builder input, #builder select, #builder textarea').forEach(el => {
+    if (el.id && el.id !== 'gemini-key') data.fields[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  localStorage.setItem('itabs-builder-draft', JSON.stringify(data));
+  toast('💾 Draft saved!');
+}
+
+function loadFromLocal() {
+  const raw = localStorage.getItem('itabs-builder-draft');
+  if (!raw) { toast('No saved draft found'); return; }
+  const data = JSON.parse(raw);
+  steps = data.steps || [];
+  stepCounter = data.stepCounter || 0;
+  renderSteps();
+  updatePricingDropdowns();
+  // Restore field values
+  Object.entries(data.fields || {}).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = val;
+    else el.value = val;
+  });
+  // Re-trigger base prices
+  updateBasePrices();
+  // Restore AI data
+  if (data.aiTips) window._aiTips = data.aiTips;
+  if (data.aiServices) window._aiServices = data.aiServices;
+  toast('📂 Draft loaded!');
+}
+
+function clearAll() {
+  if (!confirm('Clear everything and start fresh?')) return;
+  steps = [];
+  stepCounter = 0;
+  renderSteps();
+  updatePricingDropdowns();
+  document.querySelectorAll('#builder input, #builder textarea').forEach(el => {
+    if (el.type === 'checkbox') el.checked = true;
+    else if (el.type === 'color') {} // leave colours
+    else el.value = '';
+  });
+  toast('🗑 Cleared!');
+}
+
+// ── GEMINI AI ─────────────────────────────────────
+const GEMINI_MODEL = 'gemini-2.0-flash';
+
+function getGeminiKey() {
+  return localStorage.getItem('itabs-gemini-key') || '';
+}
+
+function saveGeminiKey() {
+  const key = document.getElementById('gemini-key').value.trim();
+  if (!key) { toast('Enter a key first'); return; }
+  localStorage.setItem('itabs-gemini-key', key);
+  document.getElementById('gemini-key').value = key;
+  updateKeyStatus();
+  toast('🔑 Gemini key saved!');
+}
+
+function updateKeyStatus() {
+  const key = getGeminiKey();
+  const el = document.getElementById('key-status');
+  if (key) {
+    el.textContent = '✓ Key saved';
+    el.className = 'key-status saved';
+    document.getElementById('gemini-key').value = key;
+  } else {
+    el.textContent = 'No key';
+    el.className = 'key-status missing';
+  }
+}
+
+function aiLog(msg, type) {
+  const log = document.getElementById('ai-log');
+  log.style.display = 'block';
+  const p = document.createElement('p');
+  p.className = type ? 'ai-' + type : '';
+  p.innerHTML = msg;
+  log.appendChild(p);
+  log.scrollTop = log.scrollHeight;
+}
+
+function aiLogClear() {
+  const log = document.getElementById('ai-log');
+  log.innerHTML = '';
+  log.style.display = 'none';
+}
+
+async function callGemini(prompt, useSearch) {
+  const key = getGeminiKey();
+  if (!key) { toast('Add your Gemini API key first'); return null; }
+
+  const body = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens: 4096,
+    }
+  };
+
+  // Add Google Search grounding for URL analysis
+  if (useSearch) {
+    body.tools = [{ google_search: {} }];
+  }
+
+  try {
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${key}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+    );
+
+    if (!resp.ok) {
+      const err = await resp.json();
+      aiLog('API Error: ' + (err.error?.message || resp.status), 'err');
+      return null;
+    }
+
+    const data = await resp.json();
+    const text = data.candidates?.[0]?.content?.parts
+      ?.filter(p => p.text)
+      ?.map(p => p.text)
+      ?.join('\n') || '';
+    return text;
+  } catch (e) {
+    aiLog('Network error: ' + e.message, 'err');
+    return null;
+  }
+}
+
+function extractJSON(text) {
+  // Try to find JSON block in response
+  const jsonMatch = text.match(/```json\s*([\s\S]*?)```/) || text.match(/```\s*([\s\S]*?)```/);
+  if (jsonMatch) {
+    try { return JSON.parse(jsonMatch[1].trim()); } catch(e) {}
+  }
+  // Try parsing the whole thing
+  try { return JSON.parse(text.trim()); } catch(e) {}
+  // Try finding { ... } block
+  const braceMatch = text.match(/\{[\s\S]*\}/);
+  if (braceMatch) {
+    try { return JSON.parse(braceMatch[0]); } catch(e) {}
+  }
+  return null;
+}
+
+async function aiAnalyzeURL() {
+  const url = document.getElementById('ai-url').value.trim();
+  if (!url) { toast('Paste a URL first'); return; }
+
+  aiLogClear();
+  const btn = document.getElementById('ai-go-btn');
+  btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+  btn.disabled = true;
+
+  aiLog('🔍 Searching for: ' + url, 'info');
+
+  const prompt = `You are helping build an interactive quote estimator widget for an Australian trades business.
+
+I'm going to give you a website URL. Use Google Search to find information about this business. Then extract the following and return it as JSON:
+
+URL: ${url}
+
+Return this exact JSON structure (fill in what you can find, leave empty string for unknowns):
+{
+  "business": {
+    "name": "",
+    "phone": "",
+    "location": "",
+    "website": "${url}",
+    "tagline": "",
+    "trade": ""
+  },
+  "branding": {
+    "primaryColor": "",
+    "secondaryColor": ""
+  },
+  "services": [
+    { "value": "service_id", "label": "Service Name", "icon": "emoji", "description": "brief description", "priceHint": "$X–$Y per unit if known" }
+  ],
+  "suggestedSteps": [
+    {
+      "id": "step_id",
+      "title": "Question for the customer?",
+      "type": "select",
+      "options": [
+        { "value": "opt_id", "label": "Option Name", "icon": "emoji", "description": "", "priceHint": "" }
+      ]
+    }
+  ],
+  "tips": [
+    { "icon": "emoji", "title": "Tip title", "text": "Helpful tip text relevant to this trade in their area" }
+  ]
+}
+
+IMPORTANT:
+- "trade" should be a single word like "fencing", "concreting", "painting", "patios", "landscaping", "electrical", "plumbing" etc
+- For suggestedSteps, think about what a customer needs to decide when getting a quote for this trade. Include 4-6 steps.
+- For tips, include local Australian knowledge, regulations, money-saving advice. Include 3-5 tips.
+- For branding colours, try to identify the dominant brand colour from the website.
+- For services, list the main services this business offers.
+- Return ONLY the JSON, no other text.`;
+
+  const result = await callGemini(prompt, true);
+  btn.innerHTML = '🔍 Analyze';
+  btn.disabled = false;
+
+  if (!result) {
+    aiLog('❌ No response from Gemini', 'err');
+    return;
+  }
+
+  aiLog('📄 Got response, parsing...', 'info');
+
+  const data = extractJSON(result);
+  if (!data) {
+    aiLog('❌ Could not parse JSON from response', 'err');
+    aiLog('Raw response: ' + result.substring(0, 500), 'info');
+    return;
+  }
+
+  aiLog('✅ Business: ' + (data.business?.name || 'unknown'), 'ok');
+  aiLog('✅ Trade: ' + (data.business?.trade || 'unknown'), 'ok');
+  aiLog('✅ Services found: ' + (data.services?.length || 0), 'ok');
+  aiLog('✅ Steps suggested: ' + (data.suggestedSteps?.length || 0), 'ok');
+  aiLog('✅ Tips generated: ' + (data.tips?.length || 0), 'ok');
+
+  // Auto-fill the form
+  applyAIData(data);
+
+  aiLog('🎉 Form pre-filled! Review and edit above.', 'ok');
+  toast('✅ AI analysis complete — check the form!');
+}
+
+function applyAIData(data) {
+  // Business info
+  if (data.business) {
+    if (data.business.name) document.getElementById('biz-name').value = data.business.name;
+    if (data.business.phone) document.getElementById('biz-phone').value = data.business.phone;
+    if (data.business.location) document.getElementById('biz-location').value = data.business.location;
+    if (data.business.website) document.getElementById('biz-website').value = data.business.website;
+    if (data.business.tagline) document.getElementById('biz-tagline').value = data.business.tagline;
+  }
+
+  // Branding
+  if (data.branding) {
+    if (data.branding.primaryColor && data.branding.primaryColor.startsWith('#')) {
+      document.getElementById('brand-primary').value = data.branding.primaryColor;
+    }
+    if (data.branding.secondaryColor && data.branding.secondaryColor.startsWith('#')) {
+      document.getElementById('brand-secondary').value = data.branding.secondaryColor;
+    }
+  }
+
+  // Header
+  if (data.business?.trade) {
+    const trade = data.business.trade;
+    document.getElementById('hdr-headline').value = `How much is my ${trade}?`;
+    document.getElementById('hdr-subtitle').value = `Tap through to get a ballpark price for your ${trade} project. Takes about 60 seconds.`;
+    document.getElementById('hdr-badge').value = `📍 Prices based on ${data.business.location || 'Perth, WA'} — 2025`;
+    document.getElementById('lead-subject').value = `New ${trade.charAt(0).toUpperCase() + trade.slice(1)} Enquiry`;
+  }
+
+  // Steps from suggested
+  if (data.suggestedSteps && data.suggestedSteps.length > 0) {
+    steps = [];
+    stepCounter = 0;
+
+    data.suggestedSteps.forEach(ss => {
+      stepCounter++;
+      const step = {
+        _uid: stepCounter,
+        id: ss.id || 'step_' + stepCounter,
+        title: ss.title || 'Choose an option',
+        preview: 'Tap to choose',
+        type: ss.type || 'select',
+        options: (ss.options || []).map(opt => ({
+          value: opt.value || opt.label?.toLowerCase().replace(/[^a-z0-9]+/g, '_') || 'opt',
+          label: opt.label || 'Option',
+          icon: opt.icon || '📦',
+          description: opt.description || '',
+          priceHint: opt.priceHint || '',
+        })),
+        sliders: ss.sliders || [],
+        toggles: ss.toggles || [],
+        autoAdvance: ss.type === 'select',
+        optional: ss.type === 'multi_select' || ss.type === 'toggle_group',
+        columns: ss.columns || 1,
+      };
+
+      // If no options but it's a select, add placeholders
+      if ((step.type === 'select' || step.type === 'multi_select') && step.options.length === 0) {
+        step.options = [{ value: 'option_1', label: 'Option 1', icon: '📦', description: '', priceHint: '' }];
+      }
+
+      // If slider type but no sliders defined, add default
+      if (step.type === 'slider_group' && step.sliders.length === 0) {
+        step.sliders = [{ id: 'length', label: 'Length', min: 1, max: 100, default: 20, step: 1, unit: 'm', markers: [] }];
+      }
+
+      // If toggle type but no toggles defined, add default
+      if (step.type === 'toggle_group' && step.toggles.length === 0) {
+        step.toggles = [{ id: 'extra_1', label: 'Extra option', icon: '➕', costHint: '+$100–$200' }];
+      }
+
+      steps.push(step);
+    });
+
+    renderSteps();
+    updatePricingDropdowns();
+  }
+
+  // Store tips for later use (saved in a global)
+  if (data.tips && data.tips.length > 0) {
+    window._aiTips = data.tips;
+    aiLog('💡 ' + data.tips.length + ' tips stored — will be included in export', 'ok');
+  }
+
+  // Store services for reference
+  if (data.services && data.services.length > 0) {
+    window._aiServices = data.services;
+  }
+
+  // Open the business section to show results
+  document.getElementById('sec-business').classList.add('open');
+  document.getElementById('sec-steps').classList.add('open');
+}
+
+async function aiSuggestSteps() {
+  const trade = document.getElementById('biz-tagline').value || document.getElementById('biz-name').value || '';
+  const location = document.getElementById('biz-location').value || 'Perth, WA';
+
+  if (!trade) { toast('Fill in the business name or tagline first so AI knows the trade'); return; }
+
+  aiLogClear();
+  aiLog('💡 Generating steps for: ' + trade, 'info');
+
+  const prompt = `You are helping build an interactive quote estimator widget for an Australian trades business.
+
+Business: ${document.getElementById('biz-name').value || 'Unknown'}
+Trade/Services: ${trade}
+Location: ${location}
+
+Generate 4-6 steps that walk a customer through getting a quote for this trade. Think about what decisions the customer needs to make and what the tradie needs to know.
+
+Return as JSON array:
+[
+  {
+    "id": "step_id_snake_case",
+    "title": "Question for customer?",
+    "type": "select",
+    "options": [
+      { "value": "opt_id", "label": "Display Name", "icon": "emoji", "description": "Brief helpful description", "priceHint": "$X–$Y/unit if known" }
+    ]
+  }
+]
+
+Include these step types where appropriate:
+- "select" for choosing one option (most common)
+- "slider_group" with sliders: [{ "id": "...", "label": "...", "min": X, "max": Y, "default": Z, "step": 1, "unit": "m" }] for measurements
+- "toggle_group" with toggles: [{ "id": "...", "label": "...", "icon": "emoji", "costHint": "+$X–$Y" }] for optional extras
+- "multi_select" for choosing multiple options
+
+Always include a measurement step (slider) and an extras step (toggles) where relevant.
+Return ONLY the JSON array, no other text.`;
+
+  const result = await callGemini(prompt, false);
+  if (!result) return;
+
+  const stepsData = extractJSON(result);
+  if (!stepsData || !Array.isArray(stepsData)) {
+    aiLog('❌ Could not parse steps', 'err');
+    return;
+  }
+
+  // Apply as suggested steps
+  applyAIData({ suggestedSteps: stepsData });
+  aiLog('✅ ' + stepsData.length + ' steps generated!', 'ok');
+  toast('✅ Steps generated — review in Section 4');
+}
+
+async function aiGenerateTips() {
+  const trade = document.getElementById('biz-tagline').value || document.getElementById('biz-name').value || '';
+  const location = document.getElementById('biz-location').value || 'Perth, WA';
+
+  if (!trade) { toast('Fill in business details first'); return; }
+
+  aiLogClear();
+  aiLog('📝 Generating tips for: ' + trade + ' in ' + location, 'info');
+
+  const prompt = `You are helping build an interactive quote estimator widget for an Australian trades business.
+
+Business: ${document.getElementById('biz-name').value || 'Unknown'}
+Trade/Services: ${trade}
+Location: ${location}
+
+Generate 5-8 helpful tips that would educate a customer getting a quote for this trade in this area. Include:
+- Local knowledge specific to ${location} (climate, soil, regulations)
+- Money-saving tips
+- Common mistakes to avoid
+- Relevant Australian regulations or standards
+- What to look for in a good tradie
+
+Return as JSON array:
+[
+  { "icon": "emoji", "title": "Short tip title", "text": "Detailed helpful tip text. Write like a knowledgeable friend, not a brochure." }
+]
+
+Return ONLY the JSON array, no other text.`;
+
+  const result = await callGemini(prompt, false);
+  if (!result) return;
+
+  const tips = extractJSON(result);
+  if (!tips || !Array.isArray(tips)) {
+    aiLog('❌ Could not parse tips', 'err');
+    return;
+  }
+
+  window._aiTips = tips;
+  aiLog('✅ ' + tips.length + ' tips generated and stored!', 'ok');
+  tips.forEach(t => aiLog(t.icon + ' ' + t.title, 'ok'));
+  toast('✅ ' + tips.length + ' tips generated — will be included in export');
+}
+
+// ── INIT ──────────────────────────────────────────
+renderSteps();
+updateKeyStatus();
+
+// Auto-load draft if exists
+if (localStorage.getItem('itabs-builder-draft')) {
+  loadFromLocal();
+}
+</script>
+</body>
+</html>
