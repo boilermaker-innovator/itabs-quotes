@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painting Quote Estimator — Perth, WA | iTabs</title>
+<style>
+:root {
+  --itabs-primary: #3B82F6;
+  --itabs-secondary: #FFFFFF;
+  --itabs-accent: #3B82F6;
+  --itabs-bg: #0c1117;
+  --itabs-card: #151c25;
+  --itabs-card-hover: #1a2332;
+  --itabs-border: #222d3a;
+  --itabs-text: #e8ecf1;
+  --itabs-text-muted: #8896a7;
+  --itabs-text-dim: #5a6a7d;
+  --itabs-success: #22c55e;
+  --itabs-error: #ef4444;
+  --itabs-radius: 12px;
+  --itabs-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #080b10; min-height: 100vh; display: flex;
+  justify-content: center; padding: 12px; font-family: var(--itabs-font);
+}
+.itabs-widget {
+  font-family: var(--itabs-font); color: var(--itabs-text); background: var(--itabs-bg);
+  max-width: 540px; width: 100%; margin: 0 auto; padding: 16px;
+  box-sizing: border-box; line-height: 1.5; -webkit-font-smoothing: antialiased;
+}
+.itabs-widget *, .itabs-widget *::before, .itabs-widget *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.itabs-header { text-align: center; padding: 20px 0 16px; }
+.itabs-header h1 { font-size: 1.4rem; font-weight: 700; color: var(--itabs-text); margin-bottom: 6px; }
+.itabs-header p { font-size: 0.9rem; color: var(--itabs-text-muted); }
+.itabs-business-name {
+  font-size: 0.8rem; color: var(--itabs-primary); font-weight: 600;
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.itabs-progress { display: flex; align-items: center; gap: 8px; padding: 12px 0 20px; }
+.itabs-progress-bar { flex: 1; height: 6px; background: var(--itabs-border); border-radius: 3px; overflow: hidden; }
+.itabs-progress-fill { height: 100%; background: var(--itabs-primary); border-radius: 3px; transition: width 0.4s ease; }
+.itabs-progress-text { font-size: 0.75rem; color: var(--itabs-text-dim); white-space: nowrap; font-weight: 600; }
+.itabs-running-total {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--itabs-card); border: 1px solid var(--itabs-border);
+  border-radius: var(--itabs-radius); padding: 10px 16px; margin-bottom: 16px; font-size: 0.85rem;
+}
+.itabs-running-total-label { color: var(--itabs-text-muted); }
+.itabs-running-total-amount { font-size: 1.1rem; font-weight: 700; color: var(--itabs-primary); }
+.itabs-step { animation: itabs-fadeIn 0.3s ease; }
+@keyframes itabs-fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.itabs-step-title { font-size: 1.15rem; font-weight: 700; color: var(--itabs-text); margin-bottom: 8px; }
+.itabs-step-help {
+  font-size: 0.85rem; color: var(--itabs-text-muted); margin-bottom: 16px;
+  padding: 10px 14px; background: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid var(--itabs-primary);
+  border-radius: 0 var(--itabs-radius) var(--itabs-radius) 0; line-height: 1.6;
+}
+.itabs-step-required { color: var(--itabs-error); font-size: 0.75rem; margin-left: 4px; }
+.itabs-options { display: flex; flex-direction: column; gap: 10px; }
+.itabs-option-card {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+  background: var(--itabs-card); border: 2px solid var(--itabs-border);
+  border-radius: var(--itabs-radius); cursor: pointer; transition: all 0.2s ease;
+  user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.itabs-option-card:hover { background: var(--itabs-card-hover); border-color: var(--itabs-text-dim); }
+.itabs-option-card.selected { border-color: var(--itabs-primary); background: rgba(59, 130, 246, 0.06); }
+.itabs-option-indicator {
+  width: 22px; height: 22px; min-width: 22px; border-radius: 50%;
+  border: 2px solid var(--itabs-text-dim); display: flex; align-items: center;
+  justify-content: center; transition: all 0.2s ease;
+}
+.itabs-option-card.selected .itabs-option-indicator { border-color: var(--itabs-primary); background: var(--itabs-primary); }
+.itabs-option-indicator::after {
+  content: ''; width: 8px; height: 8px; border-radius: 50%;
+  background: transparent; transition: background 0.2s ease;
+}
+.itabs-option-card.selected .itabs-option-indicator::after { background: var(--itabs-bg); }
+.itabs-option-card[data-multi] .itabs-option-indicator { border-radius: 4px; }
+.itabs-option-card[data-multi].selected .itabs-option-indicator::after {
+  width: 10px; height: 6px; border-radius: 0; background: transparent;
+  border-bottom: 2.5px solid var(--itabs-bg); border-left: 2.5px solid var(--itabs-bg);
+  transform: rotate(-45deg); margin-top: -2px;
+}
+.itabs-option-content { flex: 1; }
+.itabs-option-label { font-size: 0.95rem; font-weight: 600; color: var(--itabs-text); }
+.itabs-option-desc { font-size: 0.8rem; color: var(--itabs-text-muted); margin-top: 2px; }
+.itabs-option-price { font-size: 0.85rem; font-weight: 600; color: var(--itabs-primary); white-space: nowrap; }
+.itabs-number-input { display: flex; align-items: center; gap: 12px; justify-content: center; padding: 16px 0; }
+.itabs-number-btn {
+  width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--itabs-border);
+  background: var(--itabs-card); color: var(--itabs-text); font-size: 1.4rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;
+}
+.itabs-number-btn:hover { border-color: var(--itabs-primary); background: var(--itabs-card-hover); }
+.itabs-number-btn:active { transform: scale(0.95); }
+.itabs-number-value input {
+  background: transparent; border: none; color: var(--itabs-text);
+  font-size: 2rem; font-weight: 700; text-align: center; width: 100px;
+  outline: none; font-family: inherit;
+}
+.itabs-number-unit { font-size: 0.85rem; color: var(--itabs-text-muted); text-align: center; margin-top: 4px; }
+.itabs-range-wrap { padding: 16px 0; }
+.itabs-range-display { text-align: center; font-size: 1.6rem; font-weight: 700; color: var(--itabs-text); margin-bottom: 16px; }
+.itabs-range-display .unit { font-size: 0.9rem; color: var(--itabs-text-muted); font-weight: 500; }
+.itabs-range-input {
+  width: 100%; height: 6px; -webkit-appearance: none; appearance: none;
+  background: var(--itabs-border); border-radius: 3px; outline: none;
+}
+.itabs-range-input::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--itabs-primary); cursor: pointer; border: 3px solid var(--itabs-bg);
+  box-shadow: 0 0 0 2px var(--itabs-primary);
+}
+.itabs-range-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--itabs-text-dim); margin-top: 8px; }
+.itabs-textarea {
+  width: 100%; min-height: 100px; padding: 14px; background: var(--itabs-card);
+  border: 2px solid var(--itabs-border); border-radius: var(--itabs-radius);
+  color: var(--itabs-text); font-size: 0.9rem; font-family: inherit;
+  line-height: 1.5; resize: vertical; outline: none; transition: border-color 0.2s ease;
+}
+.itabs-textarea::placeholder { color: var(--itabs-text-dim); }
+.itabs-textarea:focus { border-color: var(--itabs-primary); }
+.itabs-contact-form { display: flex; flex-direction: column; gap: 12px; }
+.itabs-form-field { display: flex; flex-direction: column; gap: 4px; }
+.itabs-form-label { font-size: 0.85rem; font-weight: 600; color: var(--itabs-text-muted); }
+.itabs-form-label .required { color: var(--itabs-error); }
+.itabs-form-input {
+  width: 100%; padding: 12px 14px; background: var(--itabs-card);
+  border: 2px solid var(--itabs-border); border-radius: var(--itabs-radius);
+  color: var(--itabs-text); font-size: 0.95rem; font-family: inherit;
+  outline: none; transition: border-color 0.2s ease;
+}
+.itabs-form-input::placeholder { color: var(--itabs-text-dim); }
+.itabs-form-input:focus { border-color: var(--itabs-primary); }
+.itabs-form-input.error { border-color: var(--itabs-error); }
+.itabs-form-error { font-size: 0.75rem; color: var(--itabs-error); min-height: 0; }
+.itabs-nav { display: flex; gap: 10px; margin-top: 24px; }
+.itabs-btn {
+  flex: 1; padding: 14px 20px; border: none; border-radius: var(--itabs-radius);
+  font-size: 0.95rem; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: all 0.2s ease; -webkit-tap-highlight-color: transparent;
+}
+.itabs-btn:active { transform: scale(0.98); }
+.itabs-btn-back {
+  background: var(--itabs-card); color: var(--itabs-text-muted);
+  border: 2px solid var(--itabs-border); flex: 0 0 auto; padding: 14px 24px;
+}
+.itabs-btn-back:hover { background: var(--itabs-card-hover); color: var(--itabs-text); }
+.itabs-btn-next { background: var(--itabs-primary); color: #FFFFFF; }
+.itabs-btn-next:hover { filter: brightness(1.1); }
+.itabs-btn-next:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+.itabs-btn-skip {
+  background: transparent; color: var(--itabs-text-dim); font-size: 0.85rem;
+  text-align: center; padding: 10px; cursor: pointer; border: none; font-family: inherit;
+}
+.itabs-btn-skip:hover { color: var(--itabs-text-muted); }
+.itabs-summary { animation: itabs-fadeIn 0.3s ease; }
+.itabs-summary-title { font-size: 1.2rem; font-weight: 700; color: var(--itabs-text); margin-bottom: 4px; }
+.itabs-summary-desc { font-size: 0.85rem; color: var(--itabs-text-muted); margin-bottom: 20px; }
+.itabs-summary-section {
+  background: var(--itabs-card); border: 1px solid var(--itabs-border);
+  border-radius: var(--itabs-radius); padding: 16px; margin-bottom: 12px;
+}
+.itabs-summary-section-title {
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--itabs-text-dim); margin-bottom: 12px;
+}
+.itabs-summary-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.itabs-summary-row:last-child { border-bottom: none; }
+.itabs-summary-row-label { font-size: 0.85rem; color: var(--itabs-text-muted); flex: 1; }
+.itabs-summary-row-value { font-size: 0.9rem; font-weight: 600; color: var(--itabs-text); text-align: right; max-width: 60%; }
+.itabs-summary-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px; background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--itabs-radius); margin-bottom: 12px;
+}
+.itabs-summary-total-label { font-size: 0.9rem; font-weight: 600; color: var(--itabs-text); }
+.itabs-summary-total-amount { font-size: 1.5rem; font-weight: 700; color: var(--itabs-primary); }
+.itabs-summary-disclaimer { font-size: 0.75rem; color: var(--itabs-text-dim); text-align: center; font-style: italic; margin-bottom: 16px; }
+.itabs-summary-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.itabs-btn-copy {
+  padding: 14px 20px; background: var(--itabs-primary); color: #FFFFFF;
+  border: none; border-radius: var(--itabs-radius); font-size: 0.95rem;
+  font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.2s ease; text-align: center;
+}
+.itabs-btn-copy:hover { filter: brightness(1.1); }
+.itabs-btn-copy.copied { background: var(--itabs-success); }
+.itabs-btn-restart {
+  padding: 10px 20px; background: transparent; color: var(--itabs-text-dim);
+  border: none; font-size: 0.85rem; font-family: inherit; cursor: pointer; text-align: center;
+}
+.itabs-btn-restart:hover { color: var(--itabs-text-muted); }
+.itabs-summary-edit { font-size: 0.75rem; color: var(--itabs-primary); cursor: pointer; margin-left: 8px; opacity: 0.7; }
+.itabs-summary-edit:hover { opacity: 1; }
+.itabs-loading { display: flex; align-items: center; justify-content: center; padding: 60px 20px; color: var(--itabs-text-muted); font-size: 0.9rem; }
+.itabs-error { padding: 20px; text-align: center; color: var(--itabs-error); font-size: 0.9rem; }
+@media (min-width: 480px) {
+  .itabs-widget { padding: 24px; }
+  .itabs-header h1 { font-size: 1.6rem; }
+  .itabs-option-card { padding: 16px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div id="itabs-widget"></div>
+
+<script>
+var ITABS_CONFIG = {
+  trade: { id: "painting", name: "Painting", region: "Perth, WA" },
+  business: {
+    name: "Perth Painting Pros",
+    logo: "", phone: "",
+    colors: { primary: "#3B82F6", secondary: "#FFFFFF", accent: "#3B82F6" }
+  },
+  settings: {
+    showPricing: true,
+    pricingDisclaimer: "Estimates are approximate. Final price depends on wall condition, furniture moving, and paint brand. A site visit or video call is usually needed for an accurate quote.",
+    currency: "AUD", currencySymbol: "$",
+    summaryTitle: "How much to paint my home?"
+  },
+  steps: [
+    {
+      id: "job_type", title: "What needs painting?", type: "single_select", required: true,
+      helpText: "Interior and exterior are usually quoted separately because they need different paint types and prep work. Most Perth painters specialise in one or the other.",
+      options: [
+        { id: "interior", label: "Interior \u2014 walls & ceilings", description: "Inside the house. Walls, ceilings, doors, trims.", pricing: { type: "fixed", amount: 0 } },
+        { id: "exterior", label: "Exterior \u2014 outside walls & trim", description: "Weatherboards, render, fascias, gutters, eaves.", pricing: { type: "fixed", amount: 500 } },
+        { id: "both", label: "Both interior & exterior", description: "Full repaint inside and out. Often a better deal.", pricing: { type: "fixed", amount: 800 } }
+      ]
+    },
+    {
+      id: "rooms", title: "How many rooms?", type: "number_input", required: true,
+      helpText: "Count each bedroom, living area, kitchen, bathroom, and hallway as one room. Open-plan living/kitchen/dining usually counts as 2 rooms for painting purposes. A standard 3-bed Perth home is about 8\u201310 rooms total.",
+      min: 1, max: 25, step: 1, unit: "rooms", default: 4,
+      pricing: { type: "multiplier" }
+    },
+    {
+      id: "room_size", title: "What size are most rooms?", type: "single_select", required: true,
+      helpText: "Think about your average room. Older Perth homes (pre-2000) tend to have smaller rooms. Newer builds often have larger open-plan areas. Pick the size that best matches most of your rooms.",
+      options: [
+        { id: "small", label: "Small \u2014 under 12m\u00B2", description: "Bathrooms, laundry, small study.", pricing: { type: "per_unit", amount: 350, unit: "room" } },
+        { id: "medium", label: "Medium \u2014 12\u201320m\u00B2", description: "Standard bedrooms, kitchen.", pricing: { type: "per_unit", amount: 500, unit: "room" } },
+        { id: "large", label: "Large \u2014 20\u201335m\u00B2", description: "Master bedroom, living room.", pricing: { type: "per_unit", amount: 700, unit: "room" } },
+        { id: "xlarge", label: "Extra large \u2014 35m\u00B2+", description: "Open-plan living, double garage.", pricing: { type: "per_unit", amount: 950, unit: "room" } }
+      ]
+    },
+    {
+      id: "ceilings", title: "Do the ceilings need painting?", type: "single_select", required: true,
+      helpText: "Ceilings are often forgotten but can make a huge difference. If they haven\u2019t been painted in 5+ years, they\u2019re probably yellowed or patchy. Ceiling work adds cost because of the overhead position and extra drop sheets.",
+      options: [
+        { id: "no", label: "No \u2014 walls only", pricing: { type: "fixed", amount: 0 } },
+        { id: "yes", label: "Yes \u2014 ceilings too", description: "Adds roughly $150\u2013250 per room.", pricing: { type: "per_unit", amount: 200, unit: "room" } }
+      ]
+    },
+    {
+      id: "wall_condition", title: "What condition are the walls in?", type: "single_select", required: true,
+      helpText: "Wall condition affects how much prep work the painter needs to do before they can start. Cracks, holes, flaking paint, and water damage all need to be fixed first. More prep = more time = higher cost. Perth\u2019s sandy soil can cause settlement cracks in older homes.",
+      options: [
+        { id: "good", label: "Good \u2014 just needs a fresh coat", description: "No cracks, holes, or peeling. Straight to painting.", pricing: { type: "fixed", amount: 0 } },
+        { id: "fair", label: "Fair \u2014 minor cracks and nail holes", description: "Some patching and sanding needed. Pretty normal.", pricing: { type: "fixed", amount: 300 } },
+        { id: "poor", label: "Poor \u2014 significant prep needed", description: "Large cracks, peeling paint, water stains, texture repair.", pricing: { type: "fixed", amount: 800 } }
+      ]
+    },
+    {
+      id: "paint_quality", title: "What quality paint?", type: "single_select", required: true,
+      helpText: "Better paint costs more per litre but covers better, lasts longer, and is easier to clean. Most painters in Perth recommend Dulux or Taubmans. Premium paints like Dulux Wash & Wear are worth it for high-traffic areas like hallways and kids\u2019 rooms.",
+      options: [
+        { id: "standard", label: "Standard", description: "Good quality ceiling and wall paint. Gets the job done.", pricing: { type: "fixed", amount: 0 } },
+        { id: "premium", label: "Premium", description: "Dulux Wash & Wear or similar. More durable, easier to clean.", pricing: { type: "fixed", amount: 400 } },
+        { id: "specialty", label: "Specialty", description: "Low VOC, anti-mould, or specific finishes (e.g. limewash).", pricing: { type: "fixed", amount: 700 } }
+      ]
+    },
+    {
+      id: "notes", title: "Anything else the painter should know?", type: "text_input", required: false,
+      helpText: "Mention things like high ceilings (above 2.7m), feature walls, dark-to-light colour changes (needs extra coats), wallpaper removal, or if you need help choosing colours.",
+      placeholder: "e.g. Two rooms have 3m high ceilings, want a dark feature wall in the master bedroom, there's wallpaper in the hallway that needs removing"
+    }
+  ],
+  contact: {
+    title: "Your Details",
+    fields: [
+      { id: "name", label: "Name", type: "text", required: true },
+      { id: "phone", label: "Phone", type: "tel", required: true },
+      { id: "email", label: "Email", type: "email", required: false },
+      { id: "suburb", label: "Suburb", type: "text", required: true, placeholder: "e.g. Joondalup, Fremantle, Armadale" }
+    ]
+  },
+  summary: {
+    title: "Your Painting Quote Request",
+    description: "Here\u2019s a summary of what you need. Copy this and send it to any painting company for a quick quote.",
+    includeEstimate: true,
+    ctaText: "\uD83D\uDCCB Copy Quote Summary"
+  },
+  delivery: { method: "display" }
+};
+
+// ═══════════════════════════════════════════════════════════
+// iTabs Widget Engine v2.0 (identical engine, different config)
+// ═══════════════════════════════════════════════════════════
+(function (CONFIG) {
+  var container = document.getElementById('itabs-widget');
+  if (!container) return;
+  var C = CONFIG;
+  var totalSteps = C.steps.length + 1;
+  var currentStep = 0;
+  var answers = {};
+  var contactData = {};
+  render();
+
+  function render() {
+    var html = '<div class="itabs-widget">';
+    html += renderHeader();
+    if (currentStep < C.steps.length) {
+      html += renderProgress();
+      if (C.settings.showPricing) html += renderRunningTotal();
+      html += renderStep(C.steps[currentStep]);
+      html += renderNav(C.steps[currentStep]);
+    } else if (currentStep === C.steps.length) {
+      html += renderProgress();
+      if (C.settings.showPricing) html += renderRunningTotal();
+      html += renderContact();
+    } else {
+      html += renderSummary();
+    }
+    html += '</div>';
+    container.innerHTML = html;
+    bindEvents();
+  }
+
+  function renderHeader() {
+    var h = '<div class="itabs-header">';
+    if (C.business && C.business.name) h += '<div class="itabs-business-name">' + esc(C.business.name) + '</div>';
+    if (C.settings && C.settings.summaryTitle) h += '<h1>' + esc(C.settings.summaryTitle) + '</h1>';
+    h += '</div>';
+    return h;
+  }
+
+  function renderProgress() {
+    var pct = (currentStep / totalSteps) * 100;
+    return '<div class="itabs-progress">' +
+      '<div class="itabs-progress-bar"><div class="itabs-progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<span class="itabs-progress-text">Step ' + (currentStep + 1) + ' of ' + totalSteps + '</span></div>';
+  }
+
+  function renderRunningTotal() {
+    var total = calculateTotal();
+    var sym = C.settings.currencySymbol || '$';
+    return '<div class="itabs-running-total">' +
+      '<span class="itabs-running-total-label">Estimated total</span>' +
+      '<span class="itabs-running-total-amount">' + sym + formatNum(total) + '</span></div>';
+  }
+
+  function renderStep(step) {
+    var h = '<div class="itabs-step">';
+    h += '<div class="itabs-step-title">' + esc(step.title);
+    if (step.required) h += '<span class="itabs-step-required">*</span>';
+    h += '</div>';
+    if (step.helpText) h += '<div class="itabs-step-help">' + esc(step.helpText) + '</div>';
+    switch (step.type) {
+      case 'single_select': h += renderSingleSelect(step); break;
+      case 'multi_select':  h += renderMultiSelect(step); break;
+      case 'number_input':  h += renderNumberInput(step); break;
+      case 'range_slider':  h += renderRangeSlider(step); break;
+      case 'text_input':    h += renderTextInput(step); break;
+    }
+    h += '</div>';
+    return h;
+  }
+
+  function renderSingleSelect(step) {
+    var cur = answers[step.id];
+    var h = '<div class="itabs-options">';
+    step.options.forEach(function (opt) {
+      var sel = cur && cur.optionId === opt.id;
+      h += '<div class="itabs-option-card' + (sel ? ' selected' : '') + '" data-step="' + step.id + '" data-option="' + opt.id + '">';
+      h += '<div class="itabs-option-indicator"></div><div class="itabs-option-content">';
+      h += '<div class="itabs-option-label">' + esc(opt.label) + '</div>';
+      if (opt.description) h += '<div class="itabs-option-desc">' + esc(opt.description) + '</div>';
+      h += '</div>';
+      if (C.settings.showPricing && opt.pricing) h += '<div class="itabs-option-price">' + formatPricingLabel(opt.pricing) + '</div>';
+      h += '</div>';
+    });
+    return h + '</div>';
+  }
+
+  function renderMultiSelect(step) {
+    var cur = answers[step.id];
+    var selected = (cur && cur.selectedIds) || [];
+    var h = '<div class="itabs-options">';
+    step.options.forEach(function (opt) {
+      var sel = selected.indexOf(opt.id) >= 0;
+      h += '<div class="itabs-option-card' + (sel ? ' selected' : '') + '" data-multi data-step="' + step.id + '" data-option="' + opt.id + '">';
+      h += '<div class="itabs-option-indicator"></div><div class="itabs-option-content">';
+      h += '<div class="itabs-option-label">' + esc(opt.label) + '</div>';
+      if (opt.description) h += '<div class="itabs-option-desc">' + esc(opt.description) + '</div>';
+      h += '</div>';
+      if (C.settings.showPricing && opt.pricing) h += '<div class="itabs-option-price">' + formatPricingLabel(opt.pricing) + '</div>';
+      h += '</div>';
+    });
+    return h + '</div>';
+  }
+
+  function renderNumberInput(step) {
+    var val = (answers[step.id] && answers[step.id].value) || step.default || step.min || 1;
+    if (!answers[step.id]) answers[step.id] = { value: val, label: val + (step.unit ? ' ' + step.unit : '') };
+    var h = '<div class="itabs-number-input">';
+    h += '<button class="itabs-number-btn" data-action="decrement" data-step="' + step.id + '">\u2212</button>';
+    h += '<div class="itabs-number-value"><input type="number" id="num-' + step.id + '" value="' + val + '" min="' + (step.min||0) + '" max="' + (step.max||9999) + '" data-step="' + step.id + '"></div>';
+    h += '<button class="itabs-number-btn" data-action="increment" data-step="' + step.id + '">+</button>';
+    h += '</div>';
+    if (step.unit) h += '<div class="itabs-number-unit">' + esc(step.unit) + '</div>';
+    return h;
+  }
+
+  function renderRangeSlider(step) {
+    var val = (answers[step.id] && answers[step.id].value) || step.default || step.min || 0;
+    if (!answers[step.id]) answers[step.id] = { value: val, label: val + (step.unit ? ' ' + step.unit : '') };
+    var h = '<div class="itabs-range-wrap">';
+    h += '<div class="itabs-range-display"><span id="range-val-' + step.id + '">' + val + '</span>';
+    if (step.unit) h += ' <span class="unit">' + esc(step.unit) + '</span>';
+    h += '</div>';
+    h += '<input type="range" class="itabs-range-input" id="range-' + step.id + '" min="' + (step.min||0) + '" max="' + (step.max||100) + '" step="' + (step.step||1) + '" value="' + val + '" data-step="' + step.id + '">';
+    h += '<div class="itabs-range-labels"><span>' + (step.min||0) + '</span><span>' + (step.max||100) + '</span></div></div>';
+    return h;
+  }
+
+  function renderTextInput(step) {
+    var val = (answers[step.id] && answers[step.id].value) || '';
+    return '<textarea class="itabs-textarea" id="text-' + step.id + '" data-step="' + step.id + '" placeholder="' + esc(step.placeholder||'') + '">' + esc(val) + '</textarea>';
+  }
+
+  function renderContact() {
+    var h = '<div class="itabs-step"><div class="itabs-step-title">' + esc(C.contact.title || 'Your Details') + '</div>';
+    h += '<div class="itabs-step-help">We just need a few details so the painter can get back to you with an accurate quote.</div>';
+    h += '<div class="itabs-contact-form">';
+    C.contact.fields.forEach(function (f) {
+      var val = contactData[f.id] || '';
+      h += '<div class="itabs-form-field"><label class="itabs-form-label" for="contact-' + f.id + '">' + esc(f.label);
+      if (f.required) h += ' <span class="required">*</span>';
+      h += '</label><input class="itabs-form-input" type="' + (f.type||'text') + '" id="contact-' + f.id + '" data-field="' + f.id + '" value="' + esc(val) + '" placeholder="' + esc(f.placeholder||'') + '">';
+      h += '<div class="itabs-form-error" id="error-' + f.id + '"></div></div>';
+    });
+    h += '</div></div>';
+    h += '<div class="itabs-nav"><button class="itabs-btn itabs-btn-back" data-action="back">\u2190 Back</button>';
+    h += '<button class="itabs-btn itabs-btn-next" data-action="submit-contact">See Your Estimate</button></div>';
+    return h;
+  }
+
+  function renderNav(step) {
+    var h = '<div class="itabs-nav">';
+    if (currentStep > 0) h += '<button class="itabs-btn itabs-btn-back" data-action="back">\u2190 Back</button>';
+    var nextLabel = (currentStep === C.steps.length - 1) ? 'Your Details \u2192' : 'Next \u2192';
+    var disabled = step.required && !isStepAnswered(step) ? ' disabled' : '';
+    h += '<button class="itabs-btn itabs-btn-next" data-action="next"' + disabled + '>' + nextLabel + '</button></div>';
+    if (!step.required && !isStepAnswered(step)) {
+      h += '<div style="text-align:center"><button class="itabs-btn-skip" data-action="skip">Skip this step</button></div>';
+    }
+    return h;
+  }
+
+  function renderSummary() {
+    var sym = C.settings.currencySymbol || '$';
+    var h = '<div class="itabs-summary">';
+    h += '<div class="itabs-summary-title">' + esc(C.summary.title || 'Your Quote Summary') + '</div>';
+    if (C.summary.description) {
+      var desc = C.summary.description.replace('{{business.name}}', C.business ? C.business.name : 'the tradie');
+      h += '<div class="itabs-summary-desc">' + esc(desc) + '</div>';
+    }
+    h += '<div class="itabs-summary-section"><div class="itabs-summary-section-title">Your Selections</div>';
+    C.steps.forEach(function (step, i) {
+      var a = answers[step.id]; if (!a) return;
+      var label = getAnswerDisplay(step, a); if (!label) return;
+      h += '<div class="itabs-summary-row"><span class="itabs-summary-row-label">' + esc(step.title) + ' <span class="itabs-summary-edit" data-goto="' + i + '">edit</span></span>';
+      h += '<span class="itabs-summary-row-value">' + esc(label) + '</span></div>';
+    });
+    h += '</div>';
+    if (C.settings.showPricing && C.summary.includeEstimate) {
+      var total = calculateTotal();
+      var breakdown = getBreakdown();
+      if (breakdown.length > 0) {
+        h += '<div class="itabs-summary-section"><div class="itabs-summary-section-title">Price Breakdown</div>';
+        breakdown.forEach(function (item) {
+          h += '<div class="itabs-summary-row"><span class="itabs-summary-row-label">' + esc(item.label) + '</span>';
+          h += '<span class="itabs-summary-row-value">' + sym + formatNum(item.amount) + '</span></div>';
+        });
+        h += '</div>';
+      }
+      h += '<div class="itabs-summary-total"><span class="itabs-summary-total-label">Estimated Total</span>';
+      h += '<span class="itabs-summary-total-amount">' + sym + formatNum(total) + '</span></div>';
+      if (C.settings.pricingDisclaimer) h += '<div class="itabs-summary-disclaimer">' + esc(C.settings.pricingDisclaimer) + '</div>';
+    }
+    h += '<div class="itabs-summary-section"><div class="itabs-summary-section-title">Your Details</div>';
+    C.contact.fields.forEach(function (f) {
+      if (!contactData[f.id]) return;
+      h += '<div class="itabs-summary-row"><span class="itabs-summary-row-label">' + esc(f.label) + '</span>';
+      h += '<span class="itabs-summary-row-value">' + esc(contactData[f.id]) + '</span></div>';
+    });
+    h += '</div>';
+    h += '<div class="itabs-summary-actions"><button class="itabs-btn-copy" data-action="copy">' + esc(C.summary.ctaText || 'Copy Quote Summary') + '</button>';
+    h += '<button class="itabs-btn-restart" data-action="restart">Start Over</button></div></div>';
+    return h;
+  }
+
+  function bindEvents() {
+    container.querySelectorAll('.itabs-option-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        handleOptionClick(this.getAttribute('data-step'), this.getAttribute('data-option'), this.hasAttribute('data-multi'));
+      });
+    });
+    container.querySelectorAll('.itabs-number-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () { handleNumberBtn(this.getAttribute('data-step'), this.getAttribute('data-action')); });
+    });
+    container.querySelectorAll('.itabs-number-value input').forEach(function (inp) {
+      inp.addEventListener('change', function () { handleNumberChange(this.getAttribute('data-step'), this.value); });
+    });
+    container.querySelectorAll('.itabs-range-input').forEach(function (slider) {
+      slider.addEventListener('input', function () { handleRangeChange(this.getAttribute('data-step'), this.value); });
+    });
+    container.querySelectorAll('.itabs-textarea').forEach(function (ta) {
+      ta.addEventListener('input', function () { handleTextChange(this.getAttribute('data-step'), this.value); });
+    });
+    container.querySelectorAll('.itabs-form-input').forEach(function (inp) {
+      inp.addEventListener('input', function () { contactData[this.getAttribute('data-field')] = this.value; });
+    });
+    container.querySelectorAll('[data-action="next"]').forEach(function (b) { b.addEventListener('click', function () { goNext(); }); });
+    container.querySelectorAll('[data-action="back"]').forEach(function (b) { b.addEventListener('click', function () { goBack(); }); });
+    container.querySelectorAll('[data-action="skip"]').forEach(function (b) { b.addEventListener('click', function () { goNext(true); }); });
+    container.querySelectorAll('[data-action="submit-contact"]').forEach(function (b) { b.addEventListener('click', function () { submitContact(); }); });
+    container.querySelectorAll('[data-action="copy"]').forEach(function (b) { b.addEventListener('click', function () { copySummary(this); }); });
+    container.querySelectorAll('[data-action="restart"]').forEach(function (b) { b.addEventListener('click', function () { restart(); }); });
+    container.querySelectorAll('[data-goto]').forEach(function (l) {
+      l.addEventListener('click', function () { currentStep = parseInt(this.getAttribute('data-goto')); render(); });
+    });
+  }
+
+  function handleOptionClick(stepId, optId, isMulti) {
+    var step = C.steps.find(function (s) { return s.id === stepId; });
+    var opt = step.options.find(function (o) { return o.id === optId; });
+    if (isMulti) {
+      if (!answers[stepId]) answers[stepId] = { selectedIds: [], labels: [], options: [] };
+      var idx = answers[stepId].selectedIds.indexOf(optId);
+      if (idx >= 0) { answers[stepId].selectedIds.splice(idx, 1); answers[stepId].labels.splice(idx, 1); answers[stepId].options.splice(idx, 1); }
+      else { answers[stepId].selectedIds.push(optId); answers[stepId].labels.push(opt.label); answers[stepId].options.push(opt); }
+    } else {
+      answers[stepId] = { optionId: optId, label: opt.label, option: opt };
+    }
+    render();
+  }
+
+  function handleNumberBtn(stepId, action) {
+    var step = C.steps.find(function (s) { return s.id === stepId; });
+    var cur = (answers[stepId] && answers[stepId].value) || step.default || step.min || 1;
+    var sz = step.step || 1;
+    var nv = action === 'increment' ? cur + sz : cur - sz;
+    nv = Math.max(step.min||0, Math.min(step.max||9999, nv));
+    answers[stepId] = { value: nv, label: nv + (step.unit ? ' ' + step.unit : '') };
+    render();
+  }
+
+  function handleNumberChange(stepId, val) {
+    var step = C.steps.find(function (s) { return s.id === stepId; });
+    var num = parseFloat(val) || step.min || 1;
+    num = Math.max(step.min||0, Math.min(step.max||9999, num));
+    answers[stepId] = { value: num, label: num + (step.unit ? ' ' + step.unit : '') };
+    render();
+  }
+
+  function handleRangeChange(stepId, val) {
+    var num = parseFloat(val);
+    answers[stepId] = { value: num, label: num + ((C.steps.find(function(s){return s.id===stepId}).unit) ? ' ' + C.steps.find(function(s){return s.id===stepId}).unit : '') };
+    var d = container.querySelector('#range-val-' + stepId);
+    if (d) d.textContent = num;
+  }
+
+  function handleTextChange(stepId, val) { answers[stepId] = { value: val, label: val }; }
+
+  function goNext(skip) {
+    if (!skip && currentStep < C.steps.length) {
+      var step = C.steps[currentStep];
+      if (step.required && !isStepAnswered(step)) return;
+    }
+    currentStep++;
+    render();
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function goBack() {
+    if (currentStep > 0) { currentStep--; render(); container.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }
+
+  function submitContact() {
+    var valid = true;
+    C.contact.fields.forEach(function (f) {
+      var errEl = container.querySelector('#error-' + f.id);
+      var inputEl = container.querySelector('#contact-' + f.id);
+      contactData[f.id] = inputEl ? inputEl.value.trim() : '';
+      if (f.required && !contactData[f.id]) {
+        valid = false;
+        if (errEl) errEl.textContent = f.label + ' is required';
+        if (inputEl) inputEl.classList.add('error');
+      } else { if (errEl) errEl.textContent = ''; if (inputEl) inputEl.classList.remove('error'); }
+    });
+    if (!valid) return;
+    currentStep = C.steps.length + 1;
+    render();
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function restart() { currentStep = 0; answers = {}; contactData = {}; render(); container.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+  function isStepAnswered(step) {
+    var a = answers[step.id]; if (!a) return false;
+    switch (step.type) {
+      case 'single_select': return !!a.optionId;
+      case 'multi_select':  return a.selectedIds && a.selectedIds.length > 0;
+      case 'number_input':  return a.value !== undefined;
+      case 'range_slider':  return a.value !== undefined;
+      case 'text_input':    return a.value && a.value.trim().length > 0;
+      default: return false;
+    }
+  }
+
+  function calculateTotal() {
+    var total = 0; var mult = getMultiplierValue();
+    C.steps.forEach(function (step) {
+      var a = answers[step.id]; if (!a) return;
+      if (step.type === 'single_select' && a.option && a.option.pricing) total += resolvePricing(a.option.pricing, mult);
+      if (step.type === 'multi_select' && a.options) a.options.forEach(function (o) { if (o.pricing) total += resolvePricing(o.pricing, mult); });
+      if ((step.type === 'number_input' || step.type === 'range_slider') && step.pricing && step.pricing.type === 'fixed') total += step.pricing.amount || 0;
+    });
+    return Math.round(total);
+  }
+
+  function getMultiplierValue() {
+    var val = 1;
+    C.steps.forEach(function (step) {
+      if (step.pricing && step.pricing.type === 'multiplier') { var a = answers[step.id]; if (a && a.value !== undefined) val = a.value; }
+    });
+    return val;
+  }
+
+  function resolvePricing(p, mult) {
+    if (!p) return 0;
+    if (p.type === 'fixed') return p.amount || 0;
+    if (p.type === 'per_unit') return (p.amount || 0) * mult;
+    return 0;
+  }
+
+  function getBreakdown() {
+    var items = []; var mult = getMultiplierValue();
+    C.steps.forEach(function (step) {
+      var a = answers[step.id]; if (!a) return;
+      if (step.type === 'single_select' && a.option && a.option.pricing) {
+        var amt = resolvePricing(a.option.pricing, mult);
+        if (amt > 0) {
+          var lbl = a.label;
+          if (a.option.pricing.type === 'per_unit') lbl += ' (' + formatNum(a.option.pricing.amount) + '/' + (a.option.pricing.unit||'unit') + ' \u00d7 ' + mult + ')';
+          items.push({ label: lbl, amount: amt });
+        }
+      }
+      if (step.type === 'multi_select' && a.options) a.options.forEach(function (o) {
+        if (o.pricing) { var amt = resolvePricing(o.pricing, mult); if (amt > 0) items.push({ label: o.label, amount: amt }); }
+      });
+    });
+    return items;
+  }
+
+  function getAnswerDisplay(step, a) {
+    switch (step.type) {
+      case 'single_select': return a.label;
+      case 'multi_select':  return a.labels ? a.labels.join(', ') : '';
+      case 'number_input': case 'range_slider': return a.label;
+      case 'text_input':    return a.value;
+      default: return '';
+    }
+  }
+
+  function formatPricingLabel(p) {
+    var sym = C.settings.currencySymbol || '$';
+    if (p.type === 'fixed') return p.amount === 0 ? '' : '+' + sym + formatNum(p.amount);
+    if (p.type === 'per_unit') return sym + formatNum(p.amount) + '/' + (p.unit||'unit');
+    return '';
+  }
+
+  function copySummary(btn) {
+    var sym = C.settings.currencySymbol || '$';
+    var text = (C.summary.title || 'Quote Request Summary') + '\n' + '\u2501'.repeat(40) + '\n\n';
+    C.steps.forEach(function (step) {
+      var a = answers[step.id]; if (!a) return;
+      var d = getAnswerDisplay(step, a); if (!d) return;
+      text += step.title + ': ' + d + '\n';
+    });
+    if (C.settings.showPricing) {
+      text += '\n' + '\u2501'.repeat(40) + '\n';
+      text += 'Estimated Total: ' + sym + formatNum(calculateTotal()) + '\n';
+      if (C.settings.pricingDisclaimer) text += C.settings.pricingDisclaimer + '\n';
+    }
+    text += '\n' + '\u2501'.repeat(40) + '\nCustomer Details\n';
+    C.contact.fields.forEach(function (f) { if (contactData[f.id]) text += f.label + ': ' + contactData[f.id] + '\n'; });
+    navigator.clipboard.writeText(text).then(function () {
+      btn.textContent = '\u2713 Copied!'; btn.classList.add('copied');
+      setTimeout(function () { btn.textContent = C.summary.ctaText || 'Copy Quote Summary'; btn.classList.remove('copied'); }, 2000);
+    }).catch(function () {
+      var ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      btn.textContent = '\u2713 Copied!'; btn.classList.add('copied');
+    });
+  }
+
+  function esc(str) { if (!str) return ''; var d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+  function formatNum(n) { return n.toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+})(ITABS_CONFIG);
+</script>
+</body>
+</html>
