@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How Much Does Colorbond Fencing Cost? | Allwest Fencing</title>
+  <meta name="description" content="Free instant price guide for Colorbond fencing in Perth. Pick your style, height, and length — get a ballpark in 60 seconds. By Allwest Fencing.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How Much Does Colorbond Fencing Cost in Perth?">
+  <meta property="og:description" content="Free instant price guide — pick your style, height, length and get a ballpark in 60 seconds. By Allwest Fencing.">
+  <meta property="og:image" content="https://boilermaker-innovator.github.io/og-images/fencing-estimator.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How Much Does Colorbond Fencing Cost in Perth?">
+  <meta name="twitter:description" content="Free instant price guide in 60 seconds. By Allwest Fencing.">
+  <meta name="twitter:image" content="https://boilermaker-innovator.github.io/og-images/fencing-estimator.jpg">
+  <meta name="theme-color" content="#D4A843">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      /* SWAP: brand colours */
+      --primary:#D4A843;
+      --primary-light:rgba(212,168,67,0.1);
+      --primary-border:rgba(212,168,67,0.15);
+      --dark:#2B2B2B;
+      --sand:#F5F0EB;
+      --white:#FEFCF8;
+      --slate:#666;
+      --warn-bg:#FEF5E7;--warn-border:#D4A843;--warn-text:#7D6608;
+      --info-bg:#EBF5FB;--info-border:#5B9BD5;--info-text:#1A5276;
+      --danger-bg:#FDEDEC;--danger-border:#C0392B;--danger-text:#7B241C;
+      --radius:12px;
+      --shadow:0 2px 12px rgba(0,0,0,0.07);
+    }
+    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--sand);color:#333;line-height:1.6}
+    .site-header{background:var(--dark);color:var(--white);padding:20px 16px;text-align:center}
+    .site-header h1{font-family:'Instrument Serif',serif;font-size:1.5rem;font-weight:400;margin-bottom:4px;color:var(--primary)}
+    .site-header .usp{font-size:0.85rem;opacity:0.8}
+    .container{max-width:520px;margin:0 auto;padding:16px}
+    .hero-title{font-family:'Instrument Serif',serif;font-size:1.3rem;text-align:center;margin:16px 0 4px;color:var(--dark)}
+    .hero-sub{text-align:center;font-size:0.85rem;color:var(--slate);margin-bottom:20px}
+    .progress-bar{display:flex;gap:6px;margin-bottom:20px}
+    .step-dot{flex:1;height:4px;border-radius:2px;background:#ddd;transition:background 0.3s}
+    .step-dot.active{background:var(--primary)}
+    .step-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;border:1px solid #e8e4dd}
+    .step-header{display:flex;align-items:center;padding:16px;cursor:pointer;gap:12px}
+    .step-number{width:32px;height:32px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;transition:all 0.3s}
+    .step-card.active .step-number,.step-card.completed .step-number{background:var(--primary);color:white}
+    .step-title{font-weight:600;font-size:0.95rem}
+    .step-summary{margin-left:auto;font-size:0.8rem;color:var(--slate);white-space:nowrap}
+    .step-body{display:none;padding:0 16px 16px}
+    .step-card.active .step-body{display:block}
+    .sub-option{display:flex;align-items:center;padding:12px;border:2px solid #e8e4dd;border-radius:10px;margin-bottom:8px;cursor:pointer;gap:10px;transition:all 0.2s}
+    .sub-option:hover{border-color:var(--primary)}
+    .sub-option.selected{border-color:var(--primary);background:var(--primary-light)}
+    .sub-option .radio{width:20px;height:20px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+    .sub-option.selected .radio{border-color:var(--primary)}
+    .sub-option.selected .radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--primary)}
+    .sub-name{font-weight:600;font-size:0.9rem}
+    .sub-desc{font-size:0.78rem;color:var(--slate);margin-top:2px}
+    .sub-price{font-size:0.75rem;color:var(--primary);font-weight:600;white-space:nowrap;margin-left:auto}
+    .toggle-option{display:flex;align-items:center;padding:12px;border:2px solid #e8e4dd;border-radius:10px;margin-bottom:8px;cursor:pointer;gap:10px;transition:all 0.2s}
+    .toggle-option:hover{border-color:var(--primary)}
+    .toggle-option.selected{border-color:var(--primary);background:var(--primary-light)}
+    .toggle-check{width:22px;height:22px;border-radius:4px;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s;font-size:0.7rem;font-weight:700;color:#fff}
+    .toggle-option.selected .toggle-check{background:var(--primary);border-color:var(--primary)}
+    .toggle-icon{font-size:1.1rem;flex-shrink:0}
+    .info-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--primary-border);color:#B8860B;font-size:0.7rem;font-weight:700;border:none;cursor:pointer;vertical-align:middle;margin-left:4px}
+    .field-group{margin-bottom:14px}
+    .field-label{font-weight:600;font-size:0.85rem;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+    select,input[type="number"],input[type="text"],input[type="email"],input[type="tel"]{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.9rem;background:white;box-sizing:border-box}
+    .slider-row{display:flex;align-items:center;gap:12px}
+    .slider-row input[type="range"]{flex:1;accent-color:var(--primary)}
+    .slider-value{font-weight:700;font-size:1rem;min-width:50px;text-align:right}
+    .btn-next{width:100%;padding:14px;border:none;border-radius:8px;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:0.95rem;cursor:pointer;margin-top:8px}
+    .btn-next:hover{opacity:0.9}
+    .alert{padding:10px 12px;border-radius:8px;font-size:0.82rem;margin-bottom:8px;line-height:1.5}
+    .alert-warn{background:var(--warn-bg);border-left:3px solid var(--warn-border);color:var(--warn-text)}
+    .alert-info{background:var(--info-bg);border-left:3px solid var(--info-border);color:var(--info-text)}
+    .alert-danger{background:var(--danger-bg);border-left:3px solid var(--danger-border);color:var(--danger-text)}
+    .comparison-chart{margin-bottom:20px}
+    .comparison-chart h3{font-size:0.9rem;margin-bottom:10px;font-weight:600}
+    .bar-row{display:flex;align-items:center;margin-bottom:8px;gap:8px}
+    .bar-label{width:100px;font-size:0.78rem;font-weight:500;text-align:right;flex-shrink:0}
+    .bar-track{flex:1;height:28px;background:#eee;border-radius:6px;position:relative;overflow:hidden}
+    .bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding-left:8px;font-size:0.72rem;font-weight:700;color:white;transition:width 0.5s ease;white-space:nowrap}
+    .bar-row.highlight .bar-label{font-weight:700}
+    .bar-row.highlight .bar-fill{box-shadow:0 0 0 2px var(--primary),0 0 0 4px rgba(0,0,0,0.1)}
+    .lead-gate{background:var(--white);border:2px dashed var(--primary);border-radius:var(--radius);padding:20px 16px;text-align:center;margin:16px 0}
+    .lead-gate h3{font-family:'Instrument Serif',serif;font-size:1.1rem;margin-bottom:4px}
+    .lead-gate p{font-size:0.82rem;color:var(--slate);margin-bottom:14px}
+    .lead-form{text-align:left}
+    .lead-form input,.lead-form select{margin-bottom:8px}
+    .contact-toggle,.timeline-toggle{display:flex;gap:8px;margin-bottom:8px}
+    .toggle-btn{flex:1;padding:8px 12px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-weight:400;font-size:0.85rem;cursor:pointer;text-align:center;color:#333}
+    .toggle-btn.active{border-color:var(--primary);background:var(--primary-light);font-weight:600}
+    .timeline-btn{flex:1;padding:8px 6px;border:2px solid #ddd;border-radius:8px;background:#fff;font-family:inherit;font-weight:400;font-size:0.78rem;cursor:pointer;text-align:center;color:#333}
+    .timeline-btn.active{border-color:var(--primary);background:var(--primary-light);font-weight:600}
+    .toggle-label{font-size:0.8rem;color:var(--slate);margin-bottom:4px}
+    .btn-submit{width:100%;padding:14px;border:none;border-radius:8px;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:0.95rem;cursor:pointer}
+    .breakdown{display:none}
+    .breakdown.visible{display:block}
+    .breakdown-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px}
+    .breakdown-table th{text-align:left;padding:8px;border-bottom:2px solid var(--dark);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+    .breakdown-table td{padding:8px;border-bottom:1px solid #eee}
+    .breakdown-table tr.total td{font-weight:700;border-top:2px solid var(--dark);border-bottom:none;font-size:0.95rem}
+    .cta-section{background:var(--dark);border-radius:var(--radius);padding:20px 16px;text-align:center;margin-top:16px}
+    .cta-section h3{font-family:'Instrument Serif',serif;color:var(--primary);font-size:1.1rem;margin-bottom:4px}
+    .cta-section p{color:rgba(255,255,255,0.7);font-size:0.82rem;margin-bottom:14px}
+    .cta-buttons{display:flex;gap:8px}
+    .btn-call{flex:1;padding:14px;border:none;border-radius:8px;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:0.95rem;cursor:pointer;text-decoration:none;text-align:center;display:block}
+    .btn-quote{flex:1;padding:14px;border:2px solid rgba(255,255,255,0.3);border-radius:8px;background:transparent;color:white;font-family:inherit;font-weight:700;font-size:0.95rem;cursor:pointer;text-decoration:none;text-align:center;display:block}
+    .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:flex-end;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-sheet{background:white;width:100%;max-width:520px;max-height:70vh;border-radius:16px 16px 0 0;overflow-y:auto;padding:8px 20px 30px}
+    .modal-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:8px auto 16px}
+    .modal-sheet h3{font-family:'Instrument Serif',serif;font-size:1.1rem;margin-bottom:10px}
+    .modal-sheet p{font-size:0.85rem;line-height:1.7;color:#444;margin-bottom:8px}
+    .modal-sheet strong{color:var(--dark)}
+    .site-footer{text-align:center;padding:16px;font-size:0.72rem;color:#999;margin-top:20px}
+    .site-footer a{color:#999}
+    .disclaimer{font-size:0.72rem;color:#999;text-align:center;margin-top:12px;line-height:1.5}
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <!-- SWAP: business name and USP -->
+    <h1>Allwest Fencing</h1>
+    <div class="usp">Perth's Colorbond Fencing &amp; Gate Specialists &middot; Family Owned</div>
+  </header>
+
+  <div class="container">
+    <h2 class="hero-title">How Much Will My Colorbond Fence Cost?</h2>
+    <p class="hero-sub">Free price guide in 60 seconds &middot; Perth metro &middot; 7 days a week</p>
+
+    <div class="progress-bar" id="progress">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <!-- STEP 1: Fence Style -->
+    <div class="step-card active" id="step1">
+      <div class="step-header" id="header1">
+        <div class="step-number"><span>1</span></div>
+        <div class="step-title">Fence Style</div>
+        <div class="step-summary" id="summary1"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">Choose your Colorbond style <button class="info-btn" data-tip="style">i</button></div>
+        <div class="sub-options">
+          <div class="sub-option selected" data-style="standard">
+            <div class="radio"></div>
+            <div><div class="sub-name">Standard Colorbond</div><div class="sub-desc">Most popular &middot; Full privacy &middot; 22+ colours</div></div>
+            <div class="sub-price">From $85/m</div>
+          </div>
+          <div class="sub-option" data-style="lattice">
+            <div class="radio"></div>
+            <div><div class="sub-name">Colorbond + Lattice</div><div class="sub-desc">Decorative top &middot; Light &amp; airflow &middot; Privacy</div></div>
+            <div class="sub-price">From $110/m</div>
+          </div>
+          <div class="sub-option" data-style="miniOrb">
+            <div class="radio"></div>
+            <div><div class="sub-name">Mini Orb / Feature</div><div class="sub-desc">Textured panels &middot; Street appeal &middot; Modern</div></div>
+            <div class="sub-price">From $100/m</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Height -->
+    <div class="step-card" id="step2">
+      <div class="step-header" id="header2">
+        <div class="step-number"><span>2</span></div>
+        <div class="step-title">Height</div>
+        <div class="step-summary" id="summary2"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">Fence height <button class="info-btn" data-tip="height">i</button></div>
+        <div class="sub-options">
+          <div class="sub-option" data-height="1200"><div class="radio"></div><div class="sub-name">1.2m (low boundary)</div></div>
+          <div class="sub-option" data-height="1500"><div class="radio"></div><div class="sub-name">1.5m (mid-height)</div></div>
+          <div class="sub-option selected" data-height="1800"><div class="radio"></div><div class="sub-name">1.8m (standard — most common)</div></div>
+          <div class="sub-option" data-height="2100"><div class="radio"></div><div class="sub-name">2.1m (extra privacy)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Length -->
+    <div class="step-card" id="step3">
+      <div class="step-header" id="header3">
+        <div class="step-number"><span>3</span></div>
+        <div class="step-title">Length</div>
+        <div class="step-summary" id="summary3"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-group">
+          <div class="field-label">Total fence length <button class="info-btn" data-tip="length">i</button></div>
+          <div class="slider-row">
+            <input type="range" id="wallLength" min="3" max="80" value="20">
+            <div class="slider-value"><span id="lengthDisplay">20</span>m</div>
+          </div>
+        </div>
+        <button class="btn-next" id="btnNext3">Next →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Extras -->
+    <div class="step-card" id="step4">
+      <div class="step-header" id="header4">
+        <div class="step-number"><span>4</span></div>
+        <div class="step-title">Extras</div>
+        <div class="step-summary" id="summary4"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">Any extras? <button class="info-btn" data-tip="extras">i</button></div>
+        <div class="toggle-option" data-extra="pedGate">
+          <div class="toggle-check"></div>
+          <div class="toggle-icon">🚪</div>
+          <div><div class="sub-name">Pedestrian gate</div><div class="sub-desc">Custom single gate to match</div></div>
+        </div>
+        <div class="toggle-option" data-extra="driveGateSwing">
+          <div class="toggle-check"></div>
+          <div class="toggle-icon">🚗</div>
+          <div><div class="sub-name">Driveway gate (swing)</div><div class="sub-desc">Double swing gates</div></div>
+        </div>
+        <div class="toggle-option" data-extra="driveGateSlide">
+          <div class="toggle-check"></div>
+          <div class="toggle-icon">🏠</div>
+          <div><div class="sub-name">Driveway gate (sliding)</div><div class="sub-desc">Automatic or manual sliding</div></div>
+        </div>
+        <div class="toggle-option" data-extra="removal">
+          <div class="toggle-check"></div>
+          <div class="toggle-icon">🗑️</div>
+          <div><div class="sub-name">Old fence removal</div><div class="sub-desc">Remove &amp; dispose existing fence</div></div>
+        </div>
+        <div class="toggle-option" data-extra="slope">
+          <div class="toggle-check"></div>
+          <div class="toggle-icon">⛰️</div>
+          <div><div class="sub-name">Sloping block</div><div class="sub-desc">Stepped or raked panels</div></div>
+        </div>
+        <button class="btn-next" id="btnEstimate">Get My Price Guide →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Results -->
+    <div class="step-card" id="step5">
+      <div class="step-header" id="header5">
+        <div class="step-number"><span>5</span></div>
+        <div class="step-title">Your Price Guide</div>
+        <div class="step-summary" id="summary5"></div>
+      </div>
+      <div class="step-body">
+        <div class="alerts-container" id="alerts"></div>
+        <div class="comparison-chart">
+          <h3>How Colorbond compares <button class="info-btn" data-tip="comparison">i</button></h3>
+          <div id="chartBars"></div>
+        </div>
+        <div class="lead-gate" id="leadGate">
+          <h3>See Your Full Breakdown</h3>
+          <p>Get detailed line items and send your specs to Allwest Fencing for an accurate quote.</p>
+          <div class="lead-form">
+            <input type="text" id="leadName" placeholder="Your name *">
+            <input type="email" id="leadEmail" placeholder="Email address *">
+            <input type="tel" id="leadPhone" placeholder="Phone (optional)">
+            <div class="toggle-label">Preferred contact method</div>
+            <div class="contact-toggle">
+              <button class="toggle-btn active" data-contact="Email">Email</button>
+              <button class="toggle-btn" data-contact="Phone">Phone</button>
+            </div>
+            <select id="leadSuburb">
+              <option value="">Suburb (optional)</option>
+              <option>Atwell</option><option>Cockburn</option><option>Fremantle</option><option>Rockingham</option><option>Mandurah</option><option>Armadale</option><option>Canning</option><option>Melville</option><option>South Perth</option><option>Joondalup</option><option>Wanneroo</option><option>Stirling</option><option>Midland</option><option>Baldivis</option><option>Ellenbrook</option><option>Other</option>
+            </select>
+            <div class="toggle-label">When do you need this done? *</div>
+            <div class="timeline-toggle">
+              <button class="timeline-btn" data-timeline="ASAP">ASAP</button>
+              <button class="timeline-btn" data-timeline="1-3 months">1–3 months</button>
+              <button class="timeline-btn" data-timeline="Just planning">Just planning</button>
+            </div>
+            <button class="btn-submit" id="btnSubmit">Show My Breakdown</button>
+          </div>
+        </div>
+        <div class="breakdown" id="breakdown">
+          <h3 style="font-family:'Instrument Serif',serif;margin-bottom:12px;">Detailed Price Guide</h3>
+          <table class="breakdown-table"><thead><tr><th>Item</th><th style="text-align:right">Guide Price</th></tr></thead><tbody id="breakdownBody"></tbody></table>
+          <div class="cta-section">
+            <!-- SWAP: business name, phone, quote URL -->
+            <h3>Ready for Your Free Quote?</h3>
+            <p>This is a guide only. Craig and the Allwest team will measure your site and provide an exact price — free, no obligation.</p>
+            <div class="cta-buttons">
+              <a href="tel:0412060440" class="btn-call">📞 Call Craig</a>
+              <a href="https://allwestfencing.com.au/request-a-quote/" class="btn-quote">Request a Quote</a>
+            </div>
+          </div>
+        </div>
+        <p class="disclaimer">Prices are a guide only based on 2026 Perth averages incl. GST. Your actual quote is confirmed after a site visit.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">Powered by <a href="https://itabs.ai">iTabs</a></footer>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 id="modalTitle"></h3>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    /* SWAP: business config */
+    var CONFIG = {
+      businessName: 'Allwest Fencing',
+      phone: '0412060440',
+      quoteUrl: 'https://allwestfencing.com.au/request-a-quote/',
+      base: { standard:{low:85,high:120}, lattice:{low:110,high:150}, miniOrb:{low:100,high:140} },
+      heightMult: {1200:0.75, 1500:0.85, 1800:1.0, 2100:1.15},
+      extras: {
+        pedGate:{low:350,high:600,label:'Pedestrian gate'},
+        driveGateSwing:{low:800,high:1500,label:'Driveway gate (swing)'},
+        driveGateSlide:{low:1500,high:3500,label:'Driveway gate (sliding)'},
+        removal:{lowPer:15,highPer:30,label:'Old fence removal'},
+        slope:{lowPct:10,highPct:20,label:'Sloping block adjustment'}
+      },
+      minimum: 500
+    };
+
+    var state = {style:'standard', height:1800, length:20, extras:[]};
+    var lastResult = null;
+    var leadContact = 'Email';
+    var leadTimeline = '';
+
+    var tips = {
+      style:{title:'Colorbond Fence Styles',content:'<p><strong>Standard</strong> — Flat steel panels in posts. Perth\'s most popular choice. Clean look, full privacy, low maintenance. Comes in 22+ colours from BlueScope.</p><p><strong>Lattice Top</strong> — Standard Colorbond with a decorative lattice panel along the top. Lets in light and airflow while keeping privacy. Great for garden boundaries.</p><p><strong>Mini Orb / Feature</strong> — Corrugated or ribbed infill panels instead of flat. Adds texture and a feature look. Popular for front fences and street-facing boundaries.</p>'},
+      height:{title:'Fence Height Guide',content:'<p><strong>1.2m</strong> — Low boundary or front fence. Open feel.</p><p><strong>1.5m</strong> — Mid-height. Good for front yards and side boundaries.</p><p><strong>1.8m</strong> — Standard Perth dividing fence height. Full privacy. Most common choice.</p><p><strong>2.1m</strong> — Extra height for added privacy or security. May need council approval in some areas.</p><p><strong>Tip:</strong> Under the WA Dividing Fences Act, neighbours typically split the cost of a standard 1.8m Colorbond dividing fence.</p>'},
+      length:{title:'Measuring Your Fence',content:'<p>Walk along your fence line and count your steps — each adult step is roughly 0.75m. So 30 steps ≈ 22 metres.</p><p>Or use Google Maps: right-click your property and use \'Measure distance\' to trace the fence line.</p><p><strong>Average Perth block:</strong></p><p>Side fence (one side): 25–35m<br>Back fence: 15–20m<br>Full perimeter: 70–90m</p>'},
+      extras:{title:'Common Extras',content:'<p><strong>Pedestrian gate</strong> — Standard single gate for side access. Custom-built to match your fence colour and height.</p><p><strong>Driveway gate</strong> — Swing (double) or sliding. Sliding gates need a clear run beside the opening. Allwest specialises in custom-built gates.</p><p><strong>Old fence removal</strong> — Includes pulling out old posts, panels, and disposal. Cost depends on material.</p><p><strong>Sloping block</strong> — Panels are either stepped (gaps at bottom on slopes) or raked (angled to follow the ground). Raking costs more but looks cleaner.</p>'},
+      comparison:{title:'Why Colorbond?',content:'<p><strong>vs Timber</strong> — Colorbond won\'t rot, warp, or attract termites. No staining needed. 20–30 year lifespan vs 15–20 for timber.</p><p><strong>vs Aluminium Slat</strong> — Colorbond is more affordable and provides full privacy. Aluminium slats look modern but cost 2–3x more.</p><p><strong>vs Hardifence</strong> — Colorbond is lighter, faster to install, and more wind-resistant.</p><p>Colorbond is made by BlueScope Steel — Australian made, tested for Australian conditions.</p>'}
+    };
+
+    function $(id){return document.getElementById(id)}
+    function fmt(n){return n.toLocaleString()}
+
+    function goToStep(n){
+      for(var i=1;i<=5;i++) $('step'+i).classList.remove('active');
+      $('step'+n).classList.add('active');
+    }
+
+    function completeStep(from,to){
+      $('step'+from).classList.remove('active');
+      $('step'+from).classList.add('completed');
+      updateSummary(from);
+      $('step'+to).classList.add('active');
+      var dots=document.querySelectorAll('.step-dot');
+      for(var i=0;i<to;i++) dots[i].classList.add('active');
+      $('step'+to).scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function updateSummary(step){
+      if(step===1) $('summary1').textContent={standard:'Standard',lattice:'Lattice Top',miniOrb:'Mini Orb'}[state.style];
+      if(step===2) $('summary2').textContent=(state.height/1000)+'m high';
+      if(step===3) $('summary3').textContent=state.length+'m';
+      if(step===4){
+        var n=state.extras.length;
+        $('summary4').textContent=n?n+' extra'+(n>1?'s':''):'None';
+      }
+    }
+
+    function calculate(){
+      var b=CONFIG.base[state.style];
+      var hm=CONFIG.heightMult[state.height]||1.0;
+      var baseLow=b.low*hm*state.length;
+      var baseHigh=b.high*hm*state.length;
+      var lineItems=[{name:'Colorbond fencing ('+(state.style==='standard'?'standard':state.style==='lattice'?'lattice top':'mini orb')+')',low:Math.round(baseLow),high:Math.round(baseHigh)}];
+      var tLow=baseLow,tHigh=baseHigh;
+      var ex=CONFIG.extras;
+
+      if(state.extras.indexOf('pedGate')>-1){lineItems.push({name:ex.pedGate.label,low:ex.pedGate.low,high:ex.pedGate.high});tLow+=ex.pedGate.low;tHigh+=ex.pedGate.high;}
+      if(state.extras.indexOf('driveGateSwing')>-1){lineItems.push({name:ex.driveGateSwing.label,low:ex.driveGateSwing.low,high:ex.driveGateSwing.high});tLow+=ex.driveGateSwing.low;tHigh+=ex.driveGateSwing.high;}
+      if(state.extras.indexOf('driveGateSlide')>-1){lineItems.push({name:ex.driveGateSlide.label,low:ex.driveGateSlide.low,high:ex.driveGateSlide.high});tLow+=ex.driveGateSlide.low;tHigh+=ex.driveGateSlide.high;}
+      if(state.extras.indexOf('removal')>-1){var rL=ex.removal.lowPer*state.length;var rH=ex.removal.highPer*state.length;lineItems.push({name:ex.removal.label,low:Math.round(rL),high:Math.round(rH)});tLow+=rL;tHigh+=rH;}
+      if(state.extras.indexOf('slope')>-1){var sL=baseLow*(ex.slope.lowPct/100);var sH=baseHigh*(ex.slope.highPct/100);lineItems.push({name:ex.slope.label,low:Math.round(sL),high:Math.round(sH)});tLow+=sL;tHigh+=sH;}
+
+      tLow=Math.max(Math.round(tLow),CONFIG.minimum);
+      tHigh=Math.max(Math.round(tHigh),tLow);
+
+      var comparisons=[
+        {label:'Colorbond',colour:'#D4A843',low:Math.round(baseLow),high:Math.round(baseHigh),hl:true},
+        {label:'Timber',colour:'#8B6914',low:Math.round(120*hm*state.length),high:Math.round(200*hm*state.length),hl:false},
+        {label:'Aluminium Slat',colour:'#555',low:Math.round(180*hm*state.length),high:Math.round(300*hm*state.length),hl:false}
+      ];
+      comparisons.sort(function(a,b){return(a.low+a.high)/2-(b.low+b.high)/2});
+
+      return{lineItems:lineItems,totalLow:tLow,totalHigh:tHigh,comparisons:comparisons,range:'$'+fmt(tLow)+' – $'+fmt(tHigh)};
+    }
+
+    function renderAlerts(){
+      var html='';
+      if(state.height>=2100) html+='<div class="alert alert-warn">Fences over 2.1m may require council approval in some Perth local government areas. Check with your council before committing.</div>';
+      if(state.extras.indexOf('slope')>-1) html+='<div class="alert alert-info">Sloping blocks need either stepped or raked panels. Allwest will assess the best approach on site.</div>';
+      if(state.extras.indexOf('driveGateSlide')>-1) html+='<div class="alert alert-info">Sliding gates need a clear run beside the opening equal to the gate width. Allwest will check your site access.</div>';
+      if(state.length>40) html+='<div class="alert alert-info">For larger jobs, Allwest may offer better rates. Mention the total length when you call.</div>';
+      $('alerts').innerHTML=html;
+    }
+
+    function renderChart(result){
+      var maxC=0;
+      result.comparisons.forEach(function(c){if(c.high>maxC)maxC=c.high});
+      var html='';
+      result.comparisons.forEach(function(c){
+        var pct=Math.max(Math.round(((c.low+c.high)/2/maxC)*100),25);
+        html+='<div class="bar-row'+(c.hl?' highlight':'')+'">';
+        html+='<div class="bar-label">'+c.label+'</div>';
+        html+='<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+c.colour+'">$'+fmt(c.low)+'–$'+fmt(c.high)+'</div></div></div>';
+      });
+      $('chartBars').innerHTML=html;
+    }
+
+    function renderBreakdown(result){
+      var html='',tMin=0,tMax=0;
+      result.lineItems.forEach(function(item){
+        tMin+=item.low;tMax+=item.high;
+        html+='<tr><td>'+item.name+'</td><td style="text-align:right">$'+fmt(item.low)+' – $'+fmt(item.high)+'</td></tr>';
+      });
+      html+='<tr class="total"><td>Price Guide Total</td><td style="text-align:right">$'+fmt(result.totalLow)+' – $'+fmt(result.totalHigh)+'</td></tr>';
+      $('breakdownBody').innerHTML=html;
+    }
+
+    function openModal(key){
+      var t=tips[key];if(!t)return;
+      $('modalTitle').textContent=t.title;
+      $('modalContent').innerHTML=t.content;
+      $('modalOverlay').classList.add('open');
+    }
+
+    function sendLeadEmail(formData){
+      var message=[
+        '--- CUSTOMER DETAILS ---',
+        'Name: '+formData.name,
+        'Email: '+formData.email,
+        'Phone: '+(formData.phone||'Not provided'),
+        'Preferred contact: '+formData.contactPreference,
+        'Suburb: '+(formData.suburb||'Not provided'),
+        'Timeline: '+formData.timeline,
+        '',
+        '--- FENCE SPECIFICATIONS ---',
+        'Style: '+({standard:'Standard Colorbond',lattice:'Colorbond + Lattice',miniOrb:'Mini Orb / Feature'}[state.style]),
+        'Height: '+(state.height/1000)+'m',
+        'Length: '+state.length+'m',
+        'Extras: '+(state.extras.length?state.extras.map(function(e){return CONFIG.extras[e]?CONFIG.extras[e].label:e}).join(', '):'None'),
+        '',
+        'Source: '+(new URLSearchParams(window.location.search).get('src')||'direct')
+      ].join('\n');
+
+      fetch('https://api.web3forms.com/submit',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          access_key:'99a11c15-5c61-4765-99c5-673adec64b16',
+          subject:'New Fence Enquiry – '+formData.name+' ('+(formData.suburb||'Perth')+')',
+          from_name:formData.name,
+          replyto:formData.email,
+          to:'jgwynne7@gmail.com',
+          message:message
+        })
+      })
+      .then(function(r){return r.json()})
+      .then(function(data){console.log('Lead sent:',data)})
+      .catch(function(err){console.error('Lead send failed:',err)});
+    }
+
+    // Wire up style selection (auto-advance)
+    document.querySelectorAll('[data-style]').forEach(function(el){
+      el.addEventListener('click',function(){
+        state.style=this.dataset.style;
+        document.querySelectorAll('[data-style]').forEach(function(e){e.classList.remove('selected')});
+        this.classList.add('selected');
+        setTimeout(function(){completeStep(1,2)},350);
+      });
+    });
+
+    // Wire up height selection (auto-advance)
+    document.querySelectorAll('[data-height]').forEach(function(el){
+      el.addEventListener('click',function(){
+        state.height=parseInt(this.dataset.height);
+        document.querySelectorAll('[data-height]').forEach(function(e){e.classList.remove('selected')});
+        this.classList.add('selected');
+        setTimeout(function(){completeStep(2,3)},350);
+      });
+    });
+
+    // Length slider
+    $('wallLength').addEventListener('input',function(){
+      state.length=parseInt(this.value);
+      $('lengthDisplay').textContent=this.value;
+    });
+
+    $('btnNext3').addEventListener('click',function(){completeStep(3,4)});
+
+    // Toggle extras
+    document.querySelectorAll('[data-extra]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var id=this.dataset.extra;
+        var idx=state.extras.indexOf(id);
+        if(idx>-1){state.extras.splice(idx,1);this.classList.remove('selected');this.querySelector('.toggle-check').textContent='';}
+        else{state.extras.push(id);this.classList.add('selected');this.querySelector('.toggle-check').textContent='✓';}
+      });
+    });
+
+    // Get estimate
+    $('btnEstimate').addEventListener('click',function(){
+      updateSummary(4);
+      $('step4').classList.remove('active');
+      $('step4').classList.add('completed');
+      lastResult=calculate();
+      $('summary5').textContent=lastResult.range;
+      $('step5').classList.add('active');
+      var dots=document.querySelectorAll('.step-dot');
+      for(var i=0;i<5;i++) dots[i].classList.add('active');
+      renderAlerts();
+      renderChart(lastResult);
+      $('step5').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+
+    // Contact toggle
+    document.querySelectorAll('[data-contact]').forEach(function(el){
+      el.addEventListener('click',function(){
+        leadContact=this.dataset.contact;
+        document.querySelectorAll('[data-contact]').forEach(function(e){e.classList.remove('active')});
+        this.classList.add('active');
+      });
+    });
+
+    // Timeline toggle
+    document.querySelectorAll('[data-timeline]').forEach(function(el){
+      el.addEventListener('click',function(){
+        leadTimeline=this.dataset.timeline;
+        document.querySelectorAll('[data-timeline]').forEach(function(e){e.classList.remove('active')});
+        this.classList.add('active');
+      });
+    });
+
+    // Submit lead
+    $('btnSubmit').addEventListener('click',function(){
+      var name=$('leadName').value.trim();
+      var email=$('leadEmail').value.trim();
+      var phone=$('leadPhone').value.trim();
+      if(!name||!email){alert('Please fill in your name and email.');return;}
+      if(!leadTimeline){alert('Please select a timeline.');return;}
+
+      sendLeadEmail({
+        name:name,
+        email:email,
+        phone:phone,
+        contactPreference:leadContact,
+        suburb:$('leadSuburb').value,
+        timeline:leadTimeline
+      });
+
+      $('leadGate').style.display='none';
+      renderBreakdown(lastResult);
+      $('breakdown').classList.add('visible');
+    });
+
+    // Step header clicks
+    for(var i=1;i<=5;i++){
+      (function(n){
+        $('header'+n).addEventListener('click',function(){
+          if($('step'+n).classList.contains('completed')||$('step'+n).classList.contains('active')) goToStep(n);
+        });
+      })(i);
+    }
+
+    // Info buttons
+    document.querySelectorAll('.info-btn').forEach(function(el){
+      el.addEventListener('click',function(e){
+        e.stopPropagation();
+        openModal(this.dataset.tip);
+      });
+    });
+
+    // Modal close
+    $('modalOverlay').addEventListener('click',function(e){
+      if(e.target===this)this.classList.remove('open');
+    });
+  })();
+  </script>
+</body>
+</html>
