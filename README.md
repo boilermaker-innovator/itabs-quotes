@@ -6,11 +6,10 @@ Config-driven interactive quote estimator widgets for trades businesses.
 
 ## How It Works
 
-```
 configs/fencing.js  ──┐
                       ├──▶  engine.js + engine.css  ──▶  Interactive widget
 configs/gateworld.js ─┘
-```
+
 
 The engine reads a `WIDGET_CONFIG` object and renders everything: accordion sections, input controls, tabbed hints, live pricing with breakdown, and a lead capture form.
 
