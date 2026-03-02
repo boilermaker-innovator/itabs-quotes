@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How Much Does a New Fence Cost? | Perth Picket Fencing</title>
+  <meta name="description" content="Free instant price guide for fencing in Perth. Pick your fence type, height, length and get a ballpark in 60 seconds. By Perth Picket Fencing.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How Much Does a New Fence Cost in Perth?">
+  <meta property="og:description" content="Free price guide in 60 seconds — pick your fence type, height, length and extras. By Perth Picket Fencing.">
+  <meta property="og:image" content="https://boilermaker-innovator.github.io/og-images/fencing-estimator.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="How Much Does a New Fence Cost in Perth?">
+  <meta name="twitter:description" content="Free price guide in 60 seconds. By Perth Picket Fencing.">
+  <meta name="twitter:image" content="https://boilermaker-innovator.github.io/og-images/fencing-estimator.jpg">
+  <meta name="theme-color" content="#2D5A3D">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      /* SWAP: brand colours */
+      --primary:#2D5A3D;
+      --primary-light:rgba(45,90,61,0.08);
+      --secondary:#C8A96E;
+      --dark:#1E2A24;
+      --sand:#F5F1EB;
+      --white:#FEFCF8;
+      --slate:#555;
+      --danger:#C0392B;
+      --warn:#D4840A;
+      --info:#2C7A7B;
+      --radius:12px;
+      --shadow:0 2px 12px rgba(0,0,0,0.07);
+    }
+    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--sand);color:#333;line-height:1.6}
+    .site-header{background:var(--dark);color:var(--white);padding:20px 16px;text-align:center}
+    .site-header h1{font-family:'Instrument Serif',serif;font-size:1.5rem;font-weight:400;margin-bottom:4px}
+    .site-header .usp{font-size:0.82rem;opacity:0.75}
+    .container{max-width:520px;margin:0 auto;padding:16px}
+    .hero-title{font-family:'Instrument Serif',serif;font-size:1.3rem;text-align:center;margin:16px 0 4px;color:var(--dark)}
+    .hero-sub{text-align:center;font-size:0.82rem;color:var(--slate);margin-bottom:20px}
+    .progress-bar{display:flex;gap:5px;margin-bottom:20px}
+    .step-dot{flex:1;height:4px;border-radius:2px;background:#ddd;transition:background 0.3s}
+    .step-dot.active{background:var(--primary)}
+    .step-card{background:var(--white);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden;border:1px solid #e8e4dd}
+    .step-header{display:flex;align-items:center;padding:14px 16px;cursor:pointer;gap:10px}
+    .step-number{width:30px;height:30px;border-radius:50%;background:#eee;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0;transition:all 0.3s}
+    .step-card.active .step-number,.step-card.completed .step-number{background:var(--primary);color:white}
+    .step-title{font-weight:600;font-size:0.92rem}
+    .step-summary{margin-left:auto;font-size:0.78rem;color:var(--slate);white-space:nowrap}
+    .step-body{display:none;padding:0 16px 16px}
+    .step-card.active .step-body{display:block}
+    .field-label{font-weight:600;font-size:0.82rem;margin-bottom:8px;display:flex;align-items:center;gap:4px}
+    .info-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:rgba(44,122,123,0.12);color:var(--info);font-size:0.7rem;font-weight:700;border:none;cursor:pointer}
+    .option-card{display:flex;align-items:center;padding:12px;border:2px solid #e8e4dd;border-radius:10px;margin-bottom:8px;cursor:pointer;gap:10px;transition:all 0.2s}
+    .option-card:hover{border-color:var(--secondary)}
+    .option-card.selected{border-color:var(--primary);background:var(--primary-light)}
+    .option-radio{width:20px;height:20px;border-radius:50%;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+    .option-card.selected .option-radio{border-color:var(--primary)}
+    .option-card.selected .option-radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--primary)}
+    .option-icon{font-size:1.1rem;flex-shrink:0}
+    .option-name{font-weight:600;font-size:0.88rem}
+    .option-desc{font-size:0.75rem;color:var(--slate);margin-top:2px}
+    .option-price{font-size:0.72rem;color:var(--primary);font-weight:600;white-space:nowrap;margin-left:auto}
+    .tag{font-size:0.65rem;background:var(--secondary);color:var(--dark);border-radius:4px;padding:1px 6px;font-weight:600;margin-left:4px}
+    .toggle-card{display:flex;align-items:center;padding:12px;border:2px solid #e8e4dd;border-radius:10px;margin-bottom:8px;cursor:pointer;gap:10px;transition:all 0.2s}
+    .toggle-card.selected{border-color:var(--primary);background:var(--primary-light)}
+    .toggle-check{width:22px;height:22px;border-radius:6px;border:2px solid #ccc;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:white;transition:all 0.2s}
+    .toggle-card.selected .toggle-check{background:var(--primary);border-color:var(--primary)}
+    select,input[type="number"],input[type="text"],input[type="email"],input[type="tel"]{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;font-size:0.88rem;background:white;box-sizing:border-box}
+    .slider-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .slider-row input[type="range"]{flex:1;accent-color:var(--primary)}
+    .slider-value{font-weight:700;font-size:1rem;min-width:50px;text-align:right}
+    .btn{width:100%;padding:14px;border:none;border-radius:8px;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:0.95rem;cursor:pointer;margin-top:4px}
+    .btn:hover{opacity:0.9}
+    .alert{padding:10px 12px;border-radius:8px;font-size:0.8rem;margin-bottom:8px;line-height:1.5}
+    .alert-danger{background:#FDEDEC;border-left:3px solid var(--danger);color:#7B241C}
+    .alert-warn{background:#FEF5E7;border-left:3px solid var(--warn);color:#7D6608}
+    .alert-info{background:#E8F8F5;border-left:3px solid var(--info);color:#1A5276}
+    .price-hero{background:linear-gradient(135deg,var(--dark),var(--primary));border-radius:12px;padding:20px 16px;text-align:center;margin-bottom:16px}
+    .price-hero .label{font-size:0.75rem;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+    .price-hero .amount{font-family:'Instrument Serif',serif;font-size:1.6rem;color:white;font-weight:400}
+    .price-hero .note{font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:4px}
+    .lead-gate{border:2px dashed var(--secondary);border-radius:var(--radius);padding:20px 16px;text-align:center;margin-bottom:16px}
+    .lead-gate h3{font-family:'Instrument Serif',serif;font-size:1.05rem;margin-bottom:4px;color:var(--dark)}
+    .lead-gate p{font-size:0.8rem;color:var(--slate);margin-bottom:14px}
+    .lead-form{text-align:left}
+    .lead-form input,.lead-form select{margin-bottom:8px}
+    .contact-toggle{display:flex;gap:6px;margin-bottom:8px}
+    .contact-toggle button{flex:1;padding:8px 0;border-radius:8px;border:2px solid #ddd;background:white;color:var(--slate);font-weight:600;font-size:0.82rem;cursor:pointer;font-family:inherit}
+    .contact-toggle button.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+    .timeline-label{font-size:0.8rem;font-weight:600;margin-bottom:6px;color:var(--dark)}
+    .timeline-row{display:flex;gap:6px;margin-bottom:12px}
+    .timeline-row button{flex:1;padding:8px 4px;border-radius:8px;border:2px solid #ddd;background:white;color:var(--slate);font-weight:600;font-size:0.72rem;cursor:pointer;font-family:inherit}
+    .timeline-row button.active{border-color:var(--primary);background:var(--primary-light);color:var(--primary)}
+    .breakdown{display:none}
+    .breakdown.visible{display:block}
+    .breakdown-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-bottom:16px}
+    .breakdown-table th{text-align:left;padding:8px;border-bottom:2px solid var(--dark);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.5px}
+    .breakdown-table td{padding:8px;border-bottom:1px solid #eee}
+    .breakdown-table tr.total td{font-weight:700;border-top:2px solid var(--dark);border-bottom:none;font-size:0.95rem}
+    .cta-section{background:var(--dark);border-radius:var(--radius);padding:20px 16px;text-align:center;margin-top:16px}
+    .cta-section h3{font-family:'Instrument Serif',serif;color:var(--white);font-size:1.05rem;margin-bottom:4px}
+    .cta-section p{color:rgba(255,255,255,0.65);font-size:0.8rem;margin-bottom:14px}
+    .cta-buttons{display:flex;gap:8px}
+    .btn-call{flex:1;padding:14px;border:none;border-radius:8px;background:var(--primary);color:white;font-family:inherit;font-weight:700;font-size:0.92rem;cursor:pointer;text-decoration:none;text-align:center;display:block}
+    .btn-quote{flex:1;padding:14px;border:2px solid rgba(255,255,255,0.3);border-radius:8px;background:transparent;color:white;font-family:inherit;font-weight:700;font-size:0.92rem;cursor:pointer;text-decoration:none;text-align:center;display:block}
+    .modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:flex-end;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-sheet{background:white;width:100%;max-width:520px;max-height:70vh;border-radius:16px 16px 0 0;overflow-y:auto;padding:8px 20px 30px}
+    .modal-handle{width:40px;height:4px;background:#ddd;border-radius:2px;margin:8px auto 16px}
+    .modal-sheet h3{font-family:'Instrument Serif',serif;font-size:1.1rem;margin-bottom:12px;color:var(--dark)}
+    .modal-sheet p{font-size:0.84rem;line-height:1.7;color:#444;margin-bottom:10px}
+    .modal-sheet strong{color:var(--dark)}
+    .site-footer{text-align:center;padding:16px;font-size:0.72rem;color:#999;margin-top:20px}
+    .site-footer a{color:#999}
+    .disclaimer{font-size:0.7rem;color:#999;text-align:center;margin-top:12px;line-height:1.5}
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <!-- SWAP: businessName -->
+    <h1>Perth Picket Fencing</h1>
+    <!-- SWAP: usp -->
+    <div class="usp">Perth's Trusted Experts in Timber &amp; Picket Fencing</div>
+  </header>
+
+  <div class="container">
+    <h2 class="hero-title">How Much Will Your New Fence Cost?</h2>
+    <!-- SWAP: serviceArea -->
+    <p class="hero-sub">Free price guide in 60 seconds &middot; Perth Metro Area</p>
+
+    <div class="progress-bar" id="progress">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <!-- STEP 1: Fence Type -->
+    <div class="step-card active" id="step1">
+      <div class="step-header" id="header1">
+        <div class="step-number">1</div>
+        <div class="step-title">Fence Type</div>
+        <div class="step-summary" id="summary1"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">What type of fence? <button class="info-btn" id="info-fence_type">i</button></div>
+        <div id="fenceOptions">
+          <div class="option-card selected" data-type="picket">
+            <div class="option-radio"></div>
+            <div class="option-icon">🏡</div>
+            <div style="flex:1"><div class="option-name">Picket Fence <span class="tag">Our Specialty</span></div><div class="option-desc">Classic timber picket · Custom designs · Stainless steel screws</div></div>
+            <div class="option-price">From $150/m</div>
+          </div>
+          <div class="option-card" data-type="colorbond">
+            <div class="option-radio"></div>
+            <div class="option-icon">🛡️</div>
+            <div style="flex:1"><div class="option-name">Colorbond <span class="tag">Most Popular</span></div><div class="option-desc">Steel panels · Low maintenance · Wide colour range</div></div>
+            <div class="option-price">From $90/m</div>
+          </div>
+          <div class="option-card" data-type="jarrah">
+            <div class="option-radio"></div>
+            <div class="option-icon">🪵</div>
+            <div style="flex:1"><div class="option-name">Jarrah Paling</div><div class="option-desc">Classic hardwood · Natural look · Long lasting</div></div>
+            <div class="option-price">From $140/m</div>
+          </div>
+          <div class="option-card" data-type="pinelap">
+            <div class="option-radio"></div>
+            <div class="option-icon">🪓</div>
+            <div style="flex:1"><div class="option-name">Pinelap</div><div class="option-desc">Solid privacy · Durable · Cost-effective</div></div>
+            <div class="option-price">From $100/m</div>
+          </div>
+          <div class="option-card" data-type="slat">
+            <div class="option-radio"></div>
+            <div class="option-icon">✨</div>
+            <div style="flex:1"><div class="option-name">Slat Fence</div><div class="option-desc">Contemporary horizontal · Sleek modern look</div></div>
+            <div class="option-price">From $180/m</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Height -->
+    <div class="step-card" id="step2">
+      <div class="step-header" id="header2">
+        <div class="step-number">2</div>
+        <div class="step-title">Height</div>
+        <div class="step-summary" id="summary2"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">How high? <button class="info-btn" id="info-height">i</button></div>
+        <select id="heightSelect">
+          <option value="0.9">0.9m (low boundary)</option>
+          <option value="1.2">1.2m (standard front)</option>
+          <option value="1.5">1.5m (semi-privacy)</option>
+          <option value="1.8" selected>1.8m (full privacy)</option>
+          <option value="2.1">2.1m (extra tall)</option>
+        </select>
+        <button class="btn" id="btnNext2">Next →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Length -->
+    <div class="step-card" id="step3">
+      <div class="step-header" id="header3">
+        <div class="step-number">3</div>
+        <div class="step-title">Length</div>
+        <div class="step-summary" id="summary3"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">How many metres? <button class="info-btn" id="info-length">i</button></div>
+        <div class="slider-row">
+          <input type="range" id="lengthSlider" min="3" max="80" value="20">
+          <div class="slider-value"><span id="lengthDisplay">20</span>m</div>
+        </div>
+        <button class="btn" id="btnNext3">Next →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Extras -->
+    <div class="step-card" id="step4">
+      <div class="step-header" id="header4">
+        <div class="step-number">4</div>
+        <div class="step-title">Extras</div>
+        <div class="step-summary" id="summary4"></div>
+      </div>
+      <div class="step-body">
+        <div class="field-label">Any extras? <button class="info-btn" id="info-extras">i</button></div>
+        <div id="extrasOptions">
+          <div class="toggle-card" data-extra="pedgate">
+            <div class="toggle-check"></div>
+            <div style="font-size:1rem;flex-shrink:0">🚪</div>
+            <div><div class="option-name">Pedestrian gate</div><div class="option-desc">Custom single gate to match fence</div></div>
+          </div>
+          <div class="toggle-card" data-extra="slidegate">
+            <div class="toggle-check"></div>
+            <div style="font-size:1rem;flex-shrink:0">🚗</div>
+            <div><div class="option-name">Sliding gate (automated)</div><div class="option-desc">Motorised sliding gate with remote</div></div>
+          </div>
+          <div class="toggle-card" data-extra="removal">
+            <div class="toggle-check"></div>
+            <div style="font-size:1rem;flex-shrink:0">🗑️</div>
+            <div><div class="option-name">Old fence removal</div><div class="option-desc">Remove and dispose of existing fence</div></div>
+          </div>
+          <div class="toggle-card" data-extra="slope">
+            <div class="toggle-check"></div>
+            <div style="font-size:1rem;flex-shrink:0">⛰️</div>
+            <div><div class="option-name">Sloping block</div><div class="option-desc">Stepped or raked for uneven ground</div></div>
+          </div>
+          <div class="toggle-card" data-extra="painting" id="paintingToggle">
+            <div class="toggle-check"></div>
+            <div style="font-size:1rem;flex-shrink:0">🎨</div>
+            <div><div class="option-name">Painting / oiling</div><div class="option-desc">Professional finish on timber fences</div></div>
+          </div>
+        </div>
+        <button class="btn" id="btnEstimate">Get My Price Guide →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Results -->
+    <div class="step-card" id="step5">
+      <div class="step-header" id="header5">
+        <div class="step-number">5</div>
+        <div class="step-title">Your Price Guide</div>
+        <div class="step-summary" id="summary5"></div>
+      </div>
+      <div class="step-body">
+        <div id="alerts"></div>
+        <div class="price-hero">
+          <div class="label">Price Guide</div>
+          <div class="amount" id="priceRange"></div>
+          <div class="note">Supply &amp; install · incl. GST · Perth Metro Area</div>
+        </div>
+
+        <div class="lead-gate" id="leadGate">
+          <h3>See Your Full Breakdown</h3>
+          <p>Get detailed line items and send your specs to Perth Picket Fencing for a free quote.</p>
+          <div class="lead-form">
+            <input type="text" id="leadName" placeholder="Your name *">
+            <input type="email" id="leadEmail" placeholder="Email address *">
+            <input type="tel" id="leadPhone" placeholder="Phone (optional)">
+            <div class="contact-toggle">
+              <button class="active" data-contact="Email">📧 Email</button>
+              <button data-contact="Phone">📞 Phone</button>
+            </div>
+            <select id="leadSuburb">
+              <option value="">Suburb (optional)</option>
+              <option>Beaconsfield</option><option>Fremantle</option><option>Cottesloe</option>
+              <option>Claremont</option><option>Nedlands</option><option>Subiaco</option>
+              <option>Leederville</option><option>Mt Lawley</option><option>Morley</option>
+              <option>Joondalup</option><option>Wanneroo</option><option>Stirling</option>
+              <option>Scarborough</option><option>Rockingham</option><option>Mandurah</option>
+              <option>Armadale</option><option>Midland</option><option>South Perth</option>
+              <option>Victoria Park</option><option>Como</option><option>Other</option>
+            </select>
+            <div class="timeline-label">When do you need this? *</div>
+            <div class="timeline-row">
+              <button data-tl="ASAP">ASAP</button>
+              <button data-tl="1–3 months">1–3 months</button>
+              <button data-tl="Just planning">Just planning</button>
+            </div>
+            <button class="btn" id="btnSubmit">Show My Breakdown</button>
+          </div>
+        </div>
+
+        <div class="breakdown" id="breakdown">
+          <h3 style="font-family:'Instrument Serif',serif;margin-bottom:12px;color:var(--dark)">Detailed Price Guide</h3>
+          <table class="breakdown-table"><thead><tr><th>Item</th><th style="text-align:right">Guide</th></tr></thead><tbody id="breakdownBody"></tbody></table>
+          <div class="cta-section">
+            <h3>Ready for an Accurate Quote?</h3>
+            <p>This is a guide only. We'll measure your site and provide an exact price — free, no obligation.</p>
+            <div class="cta-buttons">
+              <!-- SWAP: phone -->
+              <a href="tel:+61422021146" class="btn-call">📞 Call James</a>
+              <!-- SWAP: ctaUrl -->
+              <a href="https://perthpicketfencing.com.au/contact-us/" class="btn-quote" target="_blank">Get In Touch</a>
+            </div>
+          </div>
+        </div>
+        <p class="disclaimer">Prices are a guide only based on 2026 Perth averages. Your actual quote is confirmed after a site visit. Always get 2-3 quotes.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">Powered by <a href="https://itabs.ai">iTabs</a></footer>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <h3 id="modalTitle"></h3>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    /* SWAP: business config */
+    var CONFIG = {
+      businessName: 'Perth Picket Fencing',
+      phone: '+61422021146',
+      phoneDisplay: '0422 021 146',
+      ctaUrl: 'https://perthpicketfencing.com.au/contact-us/',
+      ctaLabel: 'Get In Touch',
+      serviceArea: 'Perth Metro Area',
+      web3formsKey: '99a11c15-5c61-4765-99c5-673adec64b16',
+      operatorEmail: 'jgwynne7@gmail.com'
+    };
+
+    var basePrices = {
+      picket: {low:150,high:280},
+      colorbond: {low:90,high:150},
+      jarrah: {low:140,high:220},
+      pinelap: {low:100,high:170},
+      slat: {low:180,high:300}
+    };
+
+    var heightMult = {0.9:0.6, 1.2:0.8, 1.5:0.9, 1.8:1.0, 2.1:1.15};
+
+    var extrasDef = {
+      pedgate: {label:'Pedestrian gate',type:'fixed',low:400,high:800},
+      slidegate: {label:'Sliding gate (automated)',type:'fixed',low:2500,high:5000},
+      removal: {label:'Old fence removal',type:'per_metre',lowPer:15,highPer:30},
+      slope: {label:'Sloping block',type:'percent',lowPct:10,highPct:20},
+      painting: {label:'Painting / oiling',type:'per_metre',lowPer:25,highPer:45}
+    };
+
+    var fenceNames = {picket:'Picket Fence',colorbond:'Colorbond',jarrah:'Jarrah Paling',pinelap:'Pinelap',slat:'Slat Fence'};
+
+    var tips = {
+      fence_type: {title:'Which fence type is right for you?', content:'<p><strong>Picket Fence</strong> — The classic Perth front fence. Timber pickets with treated pine posts (90×90mm) and rails (90×45mm). We use stainless steel screws — no rust stains. Custom designs to match your home\'s character.</p><p><strong>Colorbond</strong> — Perth\'s most popular dividing fence. Steel panels, virtually no maintenance, 20-30 year lifespan. Wide colour range. We use 40kg concrete per post for stability.</p><p><strong>Jarrah Paling</strong> — Traditional hardwood paling fence. Beautiful natural grain, very strong. Needs oiling every 2-3 years but ages beautifully.</p><p><strong>Pinelap</strong> — Solid overlapping pine palings for full privacy. Budget-friendly, durable when treated. Good for rear and side boundaries.</p><p><strong>Slat Fence</strong> — Horizontal timber or composite slats for a modern, contemporary look. Popular in new builds and renovations.</p>'},
+      height: {title:'Fence height guide', content:'<p><strong>0.9m</strong> — Decorative boundary. Common for front picket fences.</p><p><strong>1.2m</strong> — Standard front fence height. Must be minimum 1.2m for pool fencing (AS1926.1).</p><p><strong>1.5m</strong> — Semi-privacy. Good for side boundaries in front setback areas.</p><p><strong>1.8m</strong> — Full privacy. Standard for rear and side dividing fences. Most common height in Perth.</p><p><strong>2.1m</strong> — Extra tall. May require council approval in some Perth councils.</p><p><strong>Dividing Fences Act (WA):</strong> Neighbours typically split the cost of a standard 1.8m dividing fence. If you want something taller or fancier, you pay the difference.</p>'},
+      length: {title:'How to measure your fence', content:'<p>Walk along your fence line and count your steps. Each adult step is roughly 0.75m. So 30 steps ≈ 22 metres.</p><p>Or use Google Maps — right-click your property and use "Measure distance" for a quick estimate.</p><p><strong>Average Perth block:</strong> A standard 450m² lot typically needs 40-50m of boundary fencing. Corner blocks need more.</p><p><strong>Tip:</strong> When you contact us, we\'ll do a free site measure to get exact dimensions.</p>'},
+      extras: {title:'Common extras', content:'<p><strong>Pedestrian gate</strong> — Custom made to match your fence style. Includes hinges, latch, and concrete post footings.</p><p><strong>Sliding gate</strong> — Automated with motor, remote controls, and safety sensors. Great for driveways.</p><p><strong>Old fence removal</strong> — We handle the full removal and disposal, including asbestos coordination through a licensed company if needed.</p><p><strong>Sloping block</strong> — Fences on slopes need stepping or raking, which adds complexity and materials.</p><p><strong>Painting/oiling</strong> — We offer professional painting and oiling services. Recommend re-treating every 2-3 years.</p>'}
+    };
+
+    var state = {fenceType:'picket', height:1.8, length:20, extras:[]};
+    var contactPref = 'Email';
+    var timeline = '';
+    var lastResult = null;
+
+    function $(id){return document.getElementById(id);}
+    function fmt(n){return n.toLocaleString();}
+
+    function goToStep(n){
+      for(var i=1;i<=5;i++){$('step'+i).classList.remove('active');}
+      $('step'+n).classList.add('active');
+    }
+
+    function completeStep(from,to){
+      $('step'+from).classList.remove('active');
+      $('step'+from).classList.add('completed');
+      updateSummary(from);
+      $('step'+to).classList.add('active');
+      var dots=document.querySelectorAll('.step-dot');
+      for(var i=0;i<to;i++) dots[i].classList.add('active');
+      $('step'+to).scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function updateSummary(step){
+      if(step===1) $('summary1').textContent=fenceNames[state.fenceType];
+      if(step===2) $('summary2').textContent=state.height+'m';
+      if(step===3) $('summary3').textContent=state.length+'m';
+      if(step===4){
+        var n=state.extras.length;
+        $('summary4').textContent=n?n+' extra'+(n>1?'s':''):'None';
+      }
+    }
+
+    function calculate(){
+      var base=basePrices[state.fenceType];
+      var hm=heightMult[state.height]||1.0;
+      var len=state.length;
+      var bLow=Math.round(base.low*hm*len);
+      var bHigh=Math.round(base.high*hm*len);
+      var breakdown=[{name:fenceNames[state.fenceType]+' — supply & install',low:bLow,high:bHigh}];
+      var tLow=bLow,tHigh=bHigh;
+
+      state.extras.forEach(function(eid){
+        var ex=extrasDef[eid]; if(!ex) return;
+        var eLow,eHigh;
+        if(ex.type==='fixed'){eLow=ex.low;eHigh=ex.high;}
+        else if(ex.type==='per_metre'){eLow=Math.round(ex.lowPer*len);eHigh=Math.round(ex.highPer*len);}
+        else if(ex.type==='percent'){eLow=Math.round(bLow*ex.lowPct/100);eHigh=Math.round(bHigh*ex.highPct/100);}
+        breakdown.push({name:ex.label,low:eLow,high:eHigh});
+        tLow+=eLow;tHigh+=eHigh;
+      });
+
+      if(tLow<500)tLow=500;
+      if(tHigh<500)tHigh=500;
+
+      return{breakdown:breakdown,totalLow:tLow,totalHigh:tHigh,range:'$'+fmt(tLow)+' – $'+fmt(tHigh)};
+    }
+
+    function renderAlerts(){
+      var html='';
+      if(state.height>=2.1) html+='<div class="alert alert-warn">Fences over 2.1m may require council approval in some Perth councils. Check with your local council before committing.</div>';
+      if(state.fenceType==='picket'&&state.height>1.5) html+='<div class="alert alert-info">Picket fences above 1.5m are uncommon. Consider a paling or slat fence for full-height privacy.</div>';
+      if(state.extras.indexOf('removal')>=0) html+='<div class="alert alert-info">We handle full fence removal including disposal. If asbestos is present, we coordinate safe removal through a licensed company.</div>';
+      if(state.extras.indexOf('slidegate')>=0) html+='<div class="alert alert-info">Automated sliding gates require power access near the gate location. We\'ll check this during the site visit.</div>';
+      if(state.fenceType!=='colorbond') html+='<div class="alert alert-info">Timber fences should be oiled or painted every 2-3 years for best longevity. We offer painting &amp; oiling services.</div>';
+      $('alerts').innerHTML=html;
+    }
+
+    function renderBreakdown(result){
+      var html='',tMin=0,tMax=0;
+      result.breakdown.forEach(function(item){
+        tMin+=item.low;tMax+=item.high;
+        html+='<tr><td>'+item.name+'</td><td style="text-align:right">$'+fmt(item.low)+' – $'+fmt(item.high)+'</td></tr>';
+      });
+      html+='<tr class="total"><td>Price Guide Total</td><td style="text-align:right">'+result.range+'</td></tr>';
+      $('breakdownBody').innerHTML=html;
+    }
+
+    function openModal(key){
+      var t=tips[key]; if(!t) return;
+      $('modalTitle').textContent=t.title;
+      $('modalContent').innerHTML=t.content;
+      $('modalOverlay').classList.add('open');
+    }
+
+    function sendLead(){
+      var name=$('leadName').value.trim();
+      var email=$('leadEmail').value.trim();
+      var phone=$('leadPhone').value.trim();
+      var suburb=$('leadSuburb').value;
+
+      if(!name||!email||!timeline){alert('Please fill in your name, email, and timeline.');return;}
+
+      var extLabels=state.extras.map(function(eid){return extrasDef[eid]?extrasDef[eid].label:'';}).filter(Boolean).join(', ');
+      var message=[
+        '--- CUSTOMER DETAILS ---',
+        'Name: '+name,
+        'Email: '+email,
+        'Phone: '+(phone||'Not provided'),
+        'Preferred contact: '+contactPref,
+        'Suburb: '+(suburb||'Not provided'),
+        'Timeline: '+timeline,
+        '',
+        '--- FENCE SPECIFICATIONS ---',
+        'Fence type: '+fenceNames[state.fenceType],
+        'Height: '+state.height+'m',
+        'Length: '+state.length+'m',
+        'Extras: '+(extLabels||'None'),
+        '',
+        'Source: '+(new URLSearchParams(window.location.search).get('src')||'direct')
+      ].join('\n');
+
+      fetch('https://api.web3forms.com/submit',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          access_key:CONFIG.web3formsKey,
+          subject:'New Fence Enquiry – '+name+' ('+(suburb||'Perth')+')',
+          from_name:name,
+          replyto:email,
+          to:CONFIG.operatorEmail,
+          message:message
+        })
+      }).then(function(r){return r.json();}).then(function(d){console.log('Lead sent:',d);}).catch(function(e){console.error('Lead error:',e);});
+
+      $('leadGate').style.display='none';
+      renderBreakdown(lastResult);
+      $('breakdown').classList.add('visible');
+    }
+
+    // Wire fence type selection
+    var fenceCards=document.querySelectorAll('#fenceOptions .option-card');
+    fenceCards.forEach(function(card){
+      card.addEventListener('click',function(){
+        fenceCards.forEach(function(c){c.classList.remove('selected');});
+        this.classList.add('selected');
+        state.fenceType=this.getAttribute('data-type');
+        // Hide painting toggle for colorbond
+        $('paintingToggle').style.display=state.fenceType==='colorbond'?'none':'flex';
+        // Remove painting from extras if switching to colorbond
+        if(state.fenceType==='colorbond'){
+          state.extras=state.extras.filter(function(e){return e!=='painting';});
+          var pt=$('paintingToggle');
+          if(pt) pt.classList.remove('selected');
+          var ptCheck=pt?pt.querySelector('.toggle-check'):null;
+          if(ptCheck) ptCheck.textContent='';
+        }
+        setTimeout(function(){completeStep(1,2);},350);
+      });
+    });
+
+    // Headers — navigate back
+    $('header1').addEventListener('click',function(){goToStep(1);});
+    $('header2').addEventListener('click',function(){goToStep(2);});
+    $('header3').addEventListener('click',function(){goToStep(3);});
+    $('header4').addEventListener('click',function(){goToStep(4);});
+    $('header5').addEventListener('click',function(){goToStep(5);});
+
+    // Length slider
+    $('lengthSlider').addEventListener('input',function(){
+      state.length=parseInt(this.value);
+      $('lengthDisplay').textContent=this.value;
+    });
+
+    // Next buttons
+    $('btnNext2').addEventListener('click',function(){
+      state.height=parseFloat($('heightSelect').value);
+      completeStep(2,3);
+    });
+
+    $('btnNext3').addEventListener('click',function(){
+      state.length=parseInt($('lengthSlider').value);
+      completeStep(3,4);
+    });
+
+    // Extras toggles
+    var toggleCards=document.querySelectorAll('.toggle-card');
+    toggleCards.forEach(function(card){
+      card.addEventListener('click',function(){
+        var eid=this.getAttribute('data-extra');
+        var idx=state.extras.indexOf(eid);
+        if(idx>=0){
+          state.extras.splice(idx,1);
+          this.classList.remove('selected');
+          this.querySelector('.toggle-check').textContent='';
+        }else{
+          state.extras.push(eid);
+          this.classList.add('selected');
+          this.querySelector('.toggle-check').textContent='✓';
+        }
+      });
+    });
+
+    // Estimate button
+    $('btnEstimate').addEventListener('click',function(){
+      updateSummary(4);
+      $('step4').classList.remove('active');
+      $('step4').classList.add('completed');
+      lastResult=calculate();
+      $('priceRange').textContent=lastResult.range;
+      $('summary5').textContent=lastResult.range;
+      $('step5').classList.add('active');
+      var dots=document.querySelectorAll('.step-dot');
+      for(var i=0;i<5;i++) dots[i].classList.add('active');
+      renderAlerts();
+      $('step5').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+
+    // Contact preference
+    var contactBtns=document.querySelectorAll('.contact-toggle button');
+    contactBtns.forEach(function(btn){
+      btn.addEventListener('click',function(){
+        contactBtns.forEach(function(b){b.classList.remove('active');});
+        this.classList.add('active');
+        contactPref=this.getAttribute('data-contact');
+      });
+    });
+
+    // Timeline
+    var tlBtns=document.querySelectorAll('.timeline-row button');
+    tlBtns.forEach(function(btn){
+      btn.addEventListener('click',function(){
+        tlBtns.forEach(function(b){b.classList.remove('active');});
+        this.classList.add('active');
+        timeline=this.getAttribute('data-tl');
+      });
+    });
+
+    // Submit lead
+    $('btnSubmit').addEventListener('click',sendLead);
+
+    // Info buttons
+    $('info-fence_type').addEventListener('click',function(e){e.stopPropagation();openModal('fence_type');});
+    $('info-height').addEventListener('click',function(e){e.stopPropagation();openModal('height');});
+    $('info-length').addEventListener('click',function(e){e.stopPropagation();openModal('length');});
+    $('info-extras').addEventListener('click',function(e){e.stopPropagation();openModal('extras');});
+
+    // Modal close
+    $('modalOverlay').addEventListener('click',function(e){
+      if(e.target===this) this.classList.remove('open');
+    });
+  })();
+  </script>
+</body>
+</html>
