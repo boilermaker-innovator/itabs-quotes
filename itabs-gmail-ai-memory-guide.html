@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iTabs | Never Lose an AI Session Again</title>
+    <meta property="og:title" content="Never Lose an AI Session Again — Gmail + Claude Workflow">
+    <meta property="og:description" content="Use Gmail as your AI memory. One word saves everything. Free, no apps needed.">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --bg: #0c1117;
+            --bg-card: #151c25;
+            --bg-dark: #0a0e14;
+            --border: #1e2a38;
+            --text: #e8ecf1;
+            --text-dim: #8896a7;
+            --text-muted: #5a6a7d;
+            --brand: #e8a838;
+            --brand-secondary: #d97706;
+            --brand-soft: rgba(232,168,56,0.12);
+            --brand-glow: rgba(232,168,56,0.25);
+            --success: #22c55e;
+            --success-soft: rgba(34,197,94,0.12);
+            --blue: #3b82f6;
+            --blue-soft: rgba(59,130,246,0.12);
+            --red: #ef4444;
+            --radius: 16px;
+        }
+
+        html, body { height: 100%; overflow: hidden; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Progress */
+        .progress-container {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px 8px;
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(12,17,23,0.95) 0%, transparent 100%);
+        }
+
+        .progress-segment {
+            flex: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+        }
+
+        .progress-segment.active, .progress-segment.viewed { background: var(--brand); }
+
+        /* Header */
+        .header {
+            padding: 48px 16px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--brand-soft);
+            border: 1px solid rgba(232,168,56,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--brand);
+            font-style: italic;
+        }
+
+        .header-info { flex: 1; }
+        .header-name { font-size: 14px; font-weight: 700; }
+        .header-title {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Cards */
+        .cards-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            inset: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .card.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .card.prev { transform: translateX(-100%); }
+
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .card-visual {
+            width: 100%;
+            padding: 32px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-visual-icon {
+            font-size: 64px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-visual-bg {
+            position: absolute;
+            inset: 0;
+            opacity: 0.15;
+        }
+
+        .card-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-number {
+            font-size: 11px;
+            color: var(--brand);
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card-headline {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
+
+        .card-summary {
+            font-size: 15px;
+            color: var(--text-dim);
+            line-height: 1.7;
+            flex: 1;
+        }
+
+        .card-summary strong { color: var(--text); font-weight: 600; }
+
+        /* i-Buttons */
+        .i-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .i-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .i-button:hover {
+            background: var(--brand-soft);
+            border-color: rgba(232,168,56,0.2);
+        }
+
+        .i-icon {
+            width: 20px;
+            height: 20px;
+            background: var(--brand);
+            color: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            font-style: italic;
+            flex-shrink: 0;
+        }
+
+        /* Navigation */
+        .nav-left, .nav-right {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 30%;
+            z-index: 50;
+            cursor: pointer;
+        }
+
+        .nav-left { left: 0; }
+        .nav-right { right: 0; }
+
+        /* Footer */
+        .footer {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .share-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--brand);
+            color: #000;
+            padding: 10px 24px;
+            border-radius: 24px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+
+        .share-button:hover { opacity: 0.9; }
+
+        .itabs-link {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .itabs-link span { color: var(--brand); font-weight: 700; font-style: italic; }
+
+        .download-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .download-link:hover {
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+
+        /* Hint */
+        .swipe-hint {
+            position: absolute;
+            bottom: 72px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            animation: fadeHint 3s ease-in-out;
+            pointer-events: none;
+        }
+
+        .swipe-hint.hidden { display: none; }
+
+        @keyframes fadeHint {
+            0%, 100% { opacity: 0; }
+            20%, 80% { opacity: 1; }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            max-width: 430px;
+            width: 100%;
+            max-height: 60vh;
+            border-radius: 16px 16px 0 0;
+            overflow: hidden;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border);
+            border-bottom: none;
+        }
+
+        .modal-overlay.active .modal { transform: translateY(0); }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #modalTerm { font-weight: 700; font-size: 16px; }
+
+        .type-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: var(--brand-soft);
+            color: var(--brand);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(60vh - 60px);
+        }
+
+        .modal-content {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-dim);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-container" id="progress"></div>
+
+        <div class="header">
+            <div class="header-logo">i</div>
+            <div class="header-info">
+                <div class="header-name">iTabs Guide</div>
+                <div class="header-title">Never Lose an AI Session Again</div>
+            </div>
+        </div>
+
+        <div class="cards-wrapper" id="cardsWrapper">
+            <div class="nav-left" id="navLeft"></div>
+            <div class="nav-right" id="navRight"></div>
+        </div>
+
+        <div class="swipe-hint" id="swipeHint">← Swipe or tap edges →</div>
+
+        <div class="footer">
+            <a class="download-link" href="gmail-guide.md" download>📄 Download as Markdown</a>
+            <a class="itabs-link" href="https://itabs.ai" target="_blank">Powered by <span>iTabs</span></a>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span id="modalTerm"></span>
+                    <span class="type-badge" id="modalType"></span>
+                </div>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-content" id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DATA = {
+            cards: [
+                {
+                    icon: "🧠",
+                    bgColor: "#1a1520",
+                    headline: "The Problem: AI Amnesia",
+                    summary: "Every time you start a new Claude chat, it forgets everything from your last one. Your decisions, your progress, what you built — gone. You end up repeating yourself, losing context, and drowning in dozens of scattered chats you can't find anything in.",
+                    iButtons: [
+                        {type: "why-it-matters", content: "This is the #1 complaint from people using AI for projects. You spend 30 minutes getting Claude up to speed on your project before you can do any actual work. Multiply that by every chat session and you're losing hours every week."},
+                        {type: "context", term: "Context window", content: "Claude can only 'see' what's in the current conversation. Once you close a chat or start a new one, that context is gone. It's like having a brilliant colleague who gets amnesia every time they leave the room."}
+                    ]
+                },
+                {
+                    icon: "💡",
+                    bgColor: "#1a1a10",
+                    headline: "The Discovery: Gmail Is Your AI Memory",
+                    summary: "Claude can connect to your Gmail. That means at the end of every session, Claude can <strong>draft an email to yourself</strong> with a complete summary of what happened. Next session, Claude <strong>searches your Gmail</strong> to find where you left off. Your inbox becomes your project memory.",
+                    iButtons: [
+                        {type: "definition", term: "Session log", content: "A structured summary of an AI chat session covering: what was discussed, what was built, what decisions were made, and what to do next. Think of it as meeting minutes between you and the AI."},
+                        {type: "why-it-matters", content: "You already have Gmail on your phone. You already check it every day. No new apps to install, no new habits to learn. Your AI memory just lives where you already are."}
+                    ]
+                },
+                {
+                    icon: "⚡",
+                    bgColor: "#151a10",
+                    headline: "One Word Triggers Everything",
+                    summary: "You set up a trigger word — like <strong>\"summary\"</strong> — and save it to Claude's memory. From that point on, in any chat, just type that word and Claude automatically creates a session log and drafts an email to yourself. One word. That's it.",
+                    iButtons: [
+                        {type: "definition", term: "Claude Memory", content: "Claude has a memory system that persists across conversations. When you save a trigger word, Claude remembers it in every future chat — even new ones. You set it once and it works forever."},
+                        {type: "context", term: "How to set it up", content: "Just tell Claude: 'When I say summary, create a session log and draft an email to myself at [your email] with the subject MYPROJECT-LOG and the date.' Claude saves this to memory and does it automatically from then on."}
+                    ]
+                },
+                {
+                    icon: "📧",
+                    bgColor: "#10151a",
+                    headline: "Branded Emails in Your Inbox",
+                    summary: "The session log emails aren't just plain text — Claude sends them as <strong>styled HTML emails</strong> with colour-coded sections for what was discussed, what was built, decisions made, and next steps. They look professional and are easy to scan on your phone.",
+                    iButtons: [
+                        {type: "context", term: "Codename system", content: "Each project gets a unique codename in the email subject line (like MYPROJECT-LOG). Search Gmail for that codename and every session log for that project appears instantly. Different projects, different codenames, zero confusion."},
+                        {type: "why-it-matters", content: "You can search years of project history in seconds. Try finding anything in 50+ scattered Claude chats — impossible. One Gmail search with your codename pulls up everything, in order, beautifully formatted."}
+                    ]
+                },
+                {
+                    icon: "🔄",
+                    bgColor: "#101a15",
+                    headline: "Next Session: Instant Pickup",
+                    summary: "When you start a new chat, Claude searches your Gmail for your most recent session logs and <strong>picks up exactly where you left off</strong>. No copy-pasting, no reminding it what you're working on. It reads your own emails and already knows.",
+                    iButtons: [
+                        {type: "context", term: "How it works", content: "In your Claude Project Instructions, you tell Claude: 'At the start of each chat, search Gmail for recent emails with my project codename to find the latest session logs.' Claude does this automatically and reminds you where you left off."},
+                        {type: "why-it-matters", content: "This turns Claude from a forgetful assistant into a team member with perfect memory. Every session builds on the last. Your project actually moves forward instead of going in circles."}
+                    ]
+                },
+                {
+                    icon: "📱",
+                    bgColor: "#1a1015",
+                    headline: "Works From Your Phone",
+                    summary: "This entire system runs from your phone. No desktop apps needed, no special software, no developer tools. Just Claude in your browser and Gmail in your pocket. Say \"summary\", tap send on the draft, done.",
+                    iButtons: [
+                        {type: "context", term: "The full workflow", content: "1) Chat with Claude as normal. 2) When you're done, say 'summary'. 3) Claude creates the log and drafts an email. 4) Open Gmail, find the draft, hit send. 5) Next session, Claude reads it back. That's the whole thing."},
+                        {type: "why-it-matters", content: "Most AI productivity systems assume you're at a desk with a laptop. This one works on the bus, on your lunch break, on site — wherever you are. If you can open a browser and Gmail, you can run this system."}
+                    ]
+                },
+                {
+                    icon: "🏗️",
+                    bgColor: "#15101a",
+                    headline: "Level Up: Claude Projects",
+                    summary: "For even more power, create a <strong>Claude Project</strong> — a dedicated workspace with Project Instructions (your AI coach personality) and Project Knowledge (uploaded context files). Every chat inside the project starts with full context automatically.",
+                    iButtons: [
+                        {type: "definition", term: "Project Instructions", content: "A block of text that tells Claude how to behave inside this project. You can set its tone, tell it your bad habits to watch for, define workflows, and give it rules. Every chat in the project inherits these instructions automatically."},
+                        {type: "definition", term: "Project Knowledge", content: "Files you upload into the project that Claude reads at the start of every chat. Could be a project brief, session logs, technical docs — anything. Claude references these without you having to paste anything."},
+                        {type: "context", term: "Combined with Gmail", content: "Projects give you the coach and context. Gmail gives you the session history that grows over time. Together they solve the 'AI amnesia' problem completely — and it all works from your phone."}
+                    ]
+                },
+                {
+                    icon: "🚀",
+                    bgColor: "#1a1510",
+                    headline: "Set It Up in 5 Minutes",
+                    summary: "Here's everything you need to get started right now. No technical skills required. If you can copy-paste and hit send on an email, you can set this up today.",
+                    iButtons: [
+                        {type: "context", term: "Step 1: Connect Gmail", content: "Open Claude (claude.ai). Start a chat and ask Claude to check your Gmail. It'll ask for permission — approve it. This only needs to happen once."},
+                        {type: "context", term: "Step 2: Set trigger word", content: "Tell Claude: 'Please remember this — when I say summary, create a session log covering what we discussed, what was built, decisions made, and what's next. Then draft an email to [your email] with the subject MYPROJECT-LOG and today's date.' Claude saves this to memory."},
+                        {type: "context", term: "Step 3: Test it", content: "Have a quick chat about anything. Then type 'summary'. Claude will create the log and draft the email. Go to Gmail drafts, find it, hit send. Search Gmail for your codename. If it shows up — you're done. The system works."},
+                        {type: "context", term: "Step 4 (optional): Create a Project", content: "Create a Claude Project for your main focus area. Add Project Instructions telling Claude how to behave (coach personality, rules, workflows). Add a CLAUDE.md file with your project context. Now every chat starts smart."}
+                    ]
+                }
+            ]
+        };
+
+        let currentCard = 0;
+        const totalCards = DATA.cards.length;
+
+        const progress = document.getElementById('progress');
+        const cardsWrapper = document.getElementById('cardsWrapper');
+        const navLeft = document.getElementById('navLeft');
+        const navRight = document.getElementById('navRight');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTerm = document.getElementById('modalTerm');
+        const modalType = document.getElementById('modalType');
+        const modalContent = document.getElementById('modalContent');
+        const modalClose = document.getElementById('modalClose');
+        const swipeHint = document.getElementById('swipeHint');
+
+        function init() {
+            for (let i = 0; i < totalCards; i++) {
+                const seg = document.createElement('div');
+                seg.className = 'progress-segment';
+                progress.appendChild(seg);
+            }
+
+            DATA.cards.forEach((card, idx) => {
+                const el = createCard(card, idx);
+                cardsWrapper.insertBefore(el, navLeft);
+            });
+
+            updateCard(0);
+
+            navLeft.addEventListener('click', () => navigate(-1));
+            navRight.addEventListener('click', () => navigate(1));
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') navigate(-1);
+                if (e.key === 'ArrowRight') navigate(1);
+                if (e.key === 'Escape') closeModal();
+            });
+
+            let touchStartX = 0;
+            cardsWrapper.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+            cardsWrapper.addEventListener('touchend', (e) => {
+                const diff = touchStartX - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+            });
+
+            [navLeft, navRight].forEach(el => {
+                el.addEventListener('click', () => { swipeHint.classList.add('hidden'); }, { once: true });
+            });
+        }
+
+        function createCard(card, index) {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.dataset.index = index;
+
+            let iButtonsHTML = '';
+            if (card.iButtons && card.iButtons.length > 0) {
+                const btns = card.iButtons.map(btn => {
+                    const label = btn.term || (btn.type === 'why-it-matters' ? 'Why it matters' : btn.type);
+                    return `<button class="i-button" data-type="${btn.type}" data-term="${btn.term || ''}" data-content="${encodeURIComponent(btn.content)}">
+                        <span class="i-icon">i</span>${label}</button>`;
+                }).join('');
+                iButtonsHTML = `<div class="i-buttons">${btns}</div>`;
+            }
+
+            el.innerHTML = `
+                <div class="card-content">
+                    <div class="card-visual" style="background:${card.bgColor}">
+                        <div class="card-visual-icon">${card.icon}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-number">Step ${index + 1} of ${totalCards}</div>
+                        <h2 class="card-headline">${card.headline}</h2>
+                        <p class="card-summary">${card.summary}</p>
+                        ${iButtonsHTML}
+                    </div>
+                </div>`;
+
+            el.querySelectorAll('.i-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openModal(
+                        btn.dataset.term || getTypeLabel(btn.dataset.type),
+                        btn.dataset.type,
+                        decodeURIComponent(btn.dataset.content)
+                    );
+                });
+            });
+
+            return el;
+        }
+
+        function getTypeLabel(type) {
+            return { 'definition': 'Definition', 'context': 'How To', 'why-it-matters': 'Why It Matters', 'related': 'Related' }[type] || type;
+        }
+
+        function navigate(dir) {
+            const n = currentCard + dir;
+            if (n >= 0 && n < totalCards) updateCard(n);
+        }
+
+        function updateCard(index) {
+            document.querySelectorAll('.card').forEach((c, i) => {
+                c.classList.remove('active', 'prev');
+                if (i === index) c.classList.add('active');
+                else if (i < index) c.classList.add('prev');
+            });
+            document.querySelectorAll('.progress-segment').forEach((s, i) => {
+                s.classList.remove('active', 'viewed');
+                if (i === index) s.classList.add('active');
+                else if (i < index) s.classList.add('viewed');
+            });
+            currentCard = index;
+        }
+
+        function openModal(term, type, content) {
+            modalTerm.textContent = term;
+            modalType.textContent = getTypeLabel(type);
+            modalContent.textContent = content;
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() { modalOverlay.classList.remove('active'); }
+
+        init();
+    </script>
+</body>
+</html>
