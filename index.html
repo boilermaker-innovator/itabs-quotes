@@ -1,394 +1,435 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iTabs Quotes — Interactive Quote Estimators for Trades</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Quotes — Interactive Quote Estimators for Trades</title>
+    <meta property="og:title" content="iTabs Quotes — Interactive Quote Estimators for Trades">
+    <meta property="og:description" content="Config-driven interactive quote estimators for Australian trades businesses. One engine, infinite trades.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://boilermaker-innovator.github.io/itabs-quotes/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&family=Bricolage+Grotesque:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0c1117;
+            --bg-card: #151c25;
+            --bg-hover: #1a2332;
+            --border: #1e2a38;
+            --text: #e8ecf1;
+            --text-dim: #8896a7;
+            --text-muted: #5a6a7d;
+            --brand: #e8a838;
+            --brand-soft: rgba(232,168,56,0.12);
+            --success: #22c55e;
+            --success-soft: rgba(34,197,94,0.12);
+            --blue: #3b82f6;
+            --blue-soft: rgba(59,130,246,0.12);
+            --purple: #a855f7;
+            --purple-soft: rgba(168,85,247,0.12);
+            --radius: 14px;
+        }
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="iTabs Quotes — Interactive Quote Estimators for Trades">
-<meta property="og:description" content="Config-driven quote widgets for Australian trades businesses. One engine, infinite trades. Customers learn while quoting.">
-<meta property="og:url" content="https://boilermaker-innovator.github.io/itabs-quotes/">
-<meta name="description" content="Interactive quote estimator widgets for Australian trades businesses. Fencing, gates, and more. One engine, infinite trades.">
-<meta name="theme-color" content="#f59e0b">
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-<style>
-:root {
-  --bg: #0c1117;
-  --bg-card: #151c25;
-  --bg-hover: #1a2332;
-  --border: #222d3a;
-  --amber: #f59e0b;
-  --amber-glow: rgba(245, 158, 11, 0.12);
-  --green: #4ade80;
-  --blue: #3b82f6;
-  --text: #e8ecf1;
-  --text-dim: #8896a7;
-  --text-muted: #5a6a7d;
-  --radius: 16px;
-}
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 48px 0 40px;
+        }
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+        .logo-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
 
-.container {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 40px 20px 60px;
-}
+        .logo {
+            width: 52px;
+            height: 52px;
+            background: var(--brand-soft);
+            border: 1px solid rgba(232,168,56,0.25);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--brand);
+            font-family: 'Bricolage Grotesque', serif;
+            box-shadow: 0 4px 24px rgba(232,168,56,0.15);
+        }
 
-/* ── Header ── */
-.hero {
-  text-align: center;
-  margin-bottom: 48px;
-}
+        .logo span {
+            font-style: italic;
+            margin-right: 1px;
+        }
 
-.logo-mark {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
+        .logo-text {
+            font-family: 'Bricolage Grotesque', serif;
+            font-size: 32px;
+            font-weight: 800;
+        }
 
-.logo-icon {
-  width: 44px;
-  height: 44px;
-  background: var(--amber);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  font-weight: 700;
-  color: #0c1117;
-  font-family: 'JetBrains Mono', monospace;
-}
+        .logo-text em { color: var(--brand); font-style: normal; }
 
-.logo-text {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
+        .header h1 {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text-dim);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
 
-.logo-text span {
-  color: var(--amber);
-}
+        /* Section Labels */
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin: 40px 0 16px;
+            padding-left: 4px;
+        }
 
-h1 {
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text-dim);
-  line-height: 1.5;
-  max-width: 500px;
-  margin: 0 auto;
-}
+        /* Cards */
+        .card-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-/* ── Section label ── */
-.section-label {
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: var(--text-muted);
-  margin-bottom: 16px;
-}
+        .card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.15s ease;
+            position: relative;
+        }
 
-/* ── Demo Cards ── */
-.demos {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 48px;
-}
+        .card:hover {
+            border-color: var(--brand);
+            background: var(--bg-hover);
+            transform: translateX(4px);
+        }
 
-.demo-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  text-decoration: none;
-  color: var(--text);
-  transition: all 0.2s ease;
-}
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
 
-.demo-card:hover {
-  background: var(--bg-hover);
-  border-color: rgba(255,255,255,0.1);
-  transform: translateY(-2px);
-}
+        .card-body { flex: 1; }
 
-.demo-dot {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  flex-shrink: 0;
-}
+        .card-name {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
 
-.demo-info {
-  flex: 1;
-  min-width: 0;
-}
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.4;
+        }
 
-.demo-name {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 3px;
-}
+        .card-tags {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
 
-.demo-desc {
-  font-size: 14px;
-  color: var(--text-dim);
-}
+        .tag {
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
 
-.demo-badges {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
+        .tag-fencing { background: var(--success-soft); color: var(--success); }
+        .tag-limestone { background: var(--brand-soft); color: var(--brand); }
+        .tag-perth { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+        .tag-v2 { background: var(--blue-soft); color: var(--blue); }
+        .tag-template { background: var(--purple-soft); color: var(--purple); }
+        .tag-tool { background: rgba(232,168,56,0.08); color: var(--brand); }
 
-.demo-badge {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.06);
-  color: var(--text-muted);
-}
+        .card-arrow {
+            color: var(--text-muted);
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: color 0.15s ease;
+        }
 
-.demo-badge.live {
-  background: rgba(74, 222, 128, 0.12);
-  color: var(--green);
-}
+        .card:hover .card-arrow { color: var(--brand); }
 
-.demo-arrow {
-  font-size: 20px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
+        /* How It Works */
+        .how-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
 
-.demo-card:hover .demo-arrow {
-  color: var(--text);
-}
+        .how-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 18px;
+            text-align: center;
+        }
 
-/* ── How it works ── */
-.how-it-works {
-  margin-bottom: 48px;
-}
+        .how-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--brand);
+            margin-bottom: 12px;
+        }
 
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
+        .how-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+        }
 
-.step-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 16px;
-  text-align: center;
-}
+        .how-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
 
-.step-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--amber);
-  margin-bottom: 10px;
-}
+        .how-desc {
+            font-size: 13px;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
 
-.step-icon {
-  font-size: 28px;
-  margin-bottom: 10px;
-}
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 48px 0 0;
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.8;
+        }
 
-.step-title {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
+        .footer a {
+            color: var(--brand);
+            text-decoration: none;
+            font-weight: 600;
+        }
 
-.step-desc {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.4;
-}
+        .footer a:hover { text-decoration: underline; }
 
-/* ── Footer ── */
-.footer {
-  text-align: center;
-  padding-top: 32px;
-  border-top: 1px solid var(--border);
-}
-
-.footer p {
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.footer a {
-  color: var(--amber);
-  text-decoration: none;
-}
-
-.footer a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .container { padding: 28px 16px 48px; }
-  .logo-text { font-size: 24px; }
-  h1 { font-size: 18px; }
-  .steps-grid { grid-template-columns: 1fr; }
-  .demo-card { padding: 16px; }
-}
-</style>
+        @media (max-width: 600px) {
+            .how-grid { grid-template-columns: 1fr; }
+            .header { padding: 32px 0 28px; }
+            .logo-text { font-size: 26px; }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
 
-<div class="container">
+        <div class="header">
+            <div class="logo-row">
+                <div class="logo"><span>i</span>Q</div>
+                <div class="logo-text">iTabs <em>Quotes</em></div>
+            </div>
+            <h1>Interactive quote estimators for Australian trades businesses. One engine, infinite trades.</h1>
+        </div>
 
-  <!-- Hero -->
-  <div class="hero">
-    <div class="logo-mark">
-      <div class="logo-icon">iQ</div>
-      <div class="logo-text">iTabs <span>Quotes</span></div>
+        <!-- Branded Widgets -->
+        <div class="section-label">Live Branded Widgets</div>
+        <div class="card-grid">
+            <a class="card" href="allwest-fencing.html">
+                <div class="card-icon" style="background:var(--success-soft);">🏗️</div>
+                <div class="card-body">
+                    <div class="card-name">Allwest Fencing</div>
+                    <div class="card-desc">Branded fencing quote estimator for Allwest Fencing Perth</div>
+                    <div class="card-tags">
+                        <span class="tag tag-fencing">Fencing</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="teamwork-fencing.html">
+                <div class="card-icon" style="background:var(--success-soft);">🏗️</div>
+                <div class="card-body">
+                    <div class="card-name">Teamwork Fencing</div>
+                    <div class="card-desc">Branded fencing quote estimator for Teamwork Fencing Perth</div>
+                    <div class="card-tags">
+                        <span class="tag tag-fencing">Fencing</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="thefenceking.html">
+                <div class="card-icon" style="background:var(--success-soft);">🏗️</div>
+                <div class="card-body">
+                    <div class="card-name">The Fence King</div>
+                    <div class="card-desc">Branded fencing quote estimator for The Fence King Perth</div>
+                    <div class="card-tags">
+                        <span class="tag tag-fencing">Fencing</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="perth-picket-fencing.html">
+                <div class="card-icon" style="background:var(--success-soft);">🏗️</div>
+                <div class="card-body">
+                    <div class="card-name">Perth Picket Fencing</div>
+                    <div class="card-desc">Branded fencing quote estimator for Perth Picket Fencing</div>
+                    <div class="card-tags">
+                        <span class="tag tag-fencing">Fencing</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="firm-fencing-limestone.html">
+                <div class="card-icon" style="background:var(--brand-soft);">🧱</div>
+                <div class="card-body">
+                    <div class="card-name">Firm Fencing — Limestone</div>
+                    <div class="card-desc">Branded limestone retaining wall estimator for Firm Fencing Perth</div>
+                    <div class="card-tags">
+                        <span class="tag tag-limestone">Limestone</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section-label">How It Works for the Tradie</div>
+        <div class="how-grid">
+            <div class="how-card">
+                <div class="how-num">01</div>
+                <div class="how-icon">📱</div>
+                <div class="how-title">Customer quotes themselves</div>
+                <div class="how-desc">Picks options, sees a ballpark price. No login, no app.</div>
+            </div>
+            <div class="how-card">
+                <div class="how-num">02</div>
+                <div class="how-icon">📋</div>
+                <div class="how-title">You get a spec sheet</div>
+                <div class="how-desc">Every selection emailed to you. No more 20 questions on the phone.</div>
+            </div>
+            <div class="how-card">
+                <div class="how-num">03</div>
+                <div class="how-icon">🧠</div>
+                <div class="how-title">Educated leads</div>
+                <div class="how-desc">i-buttons teach customers about coastal tips, bushfire zones & more.</div>
+            </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="section-label">Tools & Guides</div>
+        <div class="card-grid">
+            <a class="card" href="itabs-publisher.html">
+                <div class="card-icon" style="background:var(--brand-soft);">🚀</div>
+                <div class="card-body">
+                    <div class="card-name">iTabs Publisher</div>
+                    <div class="card-desc">Paste HTML, hit publish, get a live GitHub Pages URL instantly</div>
+                    <div class="card-tags">
+                        <span class="tag tag-tool">Tool</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="itabs-config-builder.html">
+                <div class="card-icon" style="background:var(--brand-soft);">⚙️</div>
+                <div class="card-body">
+                    <div class="card-name">Config Builder</div>
+                    <div class="card-desc">Build widget configurations interactively</div>
+                    <div class="card-tags">
+                        <span class="tag tag-tool">Tool</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="guides/gmail-guide.html">
+                <div class="card-icon" style="background:var(--purple-soft);">📖</div>
+                <div class="card-body">
+                    <div class="card-name">Gmail + Claude Memory Guide</div>
+                    <div class="card-desc">Never lose an AI session again — interactive iTabs walkthrough</div>
+                    <div class="card-tags">
+                        <span class="tag tag-template">Guide</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+        </div>
+
+        <!-- Developer Demos -->
+        <div class="section-label" style="opacity:0.5;">Developer Demos</div>
+        <div class="card-grid">
+            <a class="card" href="fencing-v2.html" style="opacity:0.6;">
+                <div class="card-icon" style="background:var(--blue-soft);">🔧</div>
+                <div class="card-body">
+                    <div class="card-name">Fencing v2 — Step-Through</div>
+                    <div class="card-desc">New engine: one step at a time, progress bar, number inputs</div>
+                    <div class="card-tags">
+                        <span class="tag tag-v2">v2 Engine</span>
+                        <span class="tag tag-fencing">Fencing</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+            <a class="card" href="painting-v2.html" style="opacity:0.6;">
+                <div class="card-icon" style="background:var(--blue-soft);">🎨</div>
+                <div class="card-body">
+                    <div class="card-name">Painting v2 — Step-Through</div>
+                    <div class="card-desc">Per-room pricing, wall condition, paint quality — proves engine universality</div>
+                    <div class="card-tags">
+                        <span class="tag tag-v2">v2 Engine</span>
+                        <span class="tag tag-template">Painting</span>
+                        <span class="tag tag-perth">Perth</span>
+                    </div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>
+        </div>
+
+        <div class="footer">
+            Built by <a href="https://itabs.ai">iTabs</a> — one engine, infinite trades.<br>
+            Want one for your business? <a href="https://itabs.ai">Get in touch</a>.
+        </div>
+
     </div>
-    <h1>Interactive quote estimators for Australian trades businesses. One engine, infinite trades.</h1>
-  </div>
-
-  <!-- Live Demos -->
-  <div class="section-label">Live Demos</div>
-  <div class="demos">
-
-    <a href="fosters-fencing.html" class="demo-card">
-      <div class="demo-dot" style="background: rgba(74, 222, 128, 0.12); color: #4ade80;">&#9878;</div>
-      <div class="demo-info">
-        <div class="demo-name">Fosters Fencing Perth</div>
-        <div class="demo-desc">Colorbond, aluminium, timber, pool & security fencing</div>
-        <div class="demo-badges">
-          <span class="demo-badge">Fencing</span>
-          <span class="demo-badge">Per-metre pricing</span>
-          <span class="demo-badge">Perth</span>
-        </div>
-      </div>
-      <div class="demo-arrow">&#8250;</div>
-    </a>
-
-    <a href="skilled-fencing.html" class="demo-card">
-      <div class="demo-dot" style="background: rgba(59, 130, 246, 0.12); color: #3b82f6;">&#9878;</div>
-      <div class="demo-info">
-        <div class="demo-name">Skilled Fencing Perth</div>
-        <div class="demo-desc">Colorbond, aluminium slats, pool fencing & custom gates</div>
-        <div class="demo-badges">
-          <span class="demo-badge">Fencing</span>
-          <span class="demo-badge">Per-metre pricing</span>
-          <span class="demo-badge">Perth</span>
-        </div>
-      </div>
-      <div class="demo-arrow">&#8250;</div>
-    </a>
-
-  </div>
-
-  <!-- How it works -->
-  <div class="how-it-works">
-    <div class="section-label">How it works for the tradie</div>
-    <div class="steps-grid">
-      <div class="step-box">
-        <div class="step-num">01</div>
-        <div class="step-icon">📱</div>
-        <div class="step-title">Customer quotes themselves</div>
-        <div class="step-desc">Picks options, sees a ballpark price. No login, no app.</div>
-      </div>
-      <div class="step-box">
-        <div class="step-num">02</div>
-        <div class="step-icon">📋</div>
-        <div class="step-title">You get a spec sheet</div>
-        <div class="step-desc">Every selection emailed to you. No more 20 questions on the phone.</div>
-      </div>
-      <div class="step-box">
-        <div class="step-num">03</div>
-        <div class="step-icon">🧠</div>
-        <div class="step-title">Educated leads</div>
-        <div class="step-desc">i-buttons teach customers about coastal tips, bushfire zones & more.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Engine demos -->
-  <div class="section-label">Engine Demos</div>
-  <div class="demos">
-    <a href="fencing.html" class="demo-card">
-      <div class="demo-dot" style="background: var(--amber-glow); color: var(--amber);">&#9881;</div>
-      <div class="demo-info">
-        <div class="demo-name">Generic Fencing Template</div>
-        <div class="demo-desc">Base config — sliders, toggles, per-metre pricing</div>
-        <div class="demo-badges">
-          <span class="demo-badge">Template</span>
-        </div>
-      </div>
-      <div class="demo-arrow">&#8250;</div>
-    </a>
-
-    <a href="gateworld.html" class="demo-card">
-      <div class="demo-dot" style="background: var(--amber-glow); color: var(--amber);">&#9881;</div>
-      <div class="demo-info">
-        <div class="demo-name">Gateworld Gate Estimator</div>
-        <div class="demo-desc">10-step select flow, pre/post adjustments, per-unit pricing</div>
-        <div class="demo-badges">
-          <span class="demo-badge">Template</span>
-        </div>
-      </div>
-      <div class="demo-arrow">&#8250;</div>
-    </a>
-  </div>
-  <a href="fencing-v2.html" class="demo-card">
-  <div class="demo-icon">🔧</div>
-  <div class="demo-info">
-    <div class="demo-name">Fencing v2 — Step-Through</div>
-    <div class="demo-desc">New engine: one step at a time, progress bar, number inputs</div>
-    <div class="demo-tags"><span class="tag">v2 Engine</span><span class="tag">Fencing</span><span class="tag">Perth</span></div>
-  </div>
-  <div class="demo-arrow">›</div>
-</a>
-<a href="painting-v2.html" class="demo-card">
-  <div class="demo-icon">🎨</div>
-  <div class="demo-info">
-    <div class="demo-name">Painting v2 — Step-Through</div>
-    <div class="demo-desc">Per-room pricing, wall condition, paint quality — proves engine universality</div>
-    <div class="demo-tags"><span class="tag">v2 Engine</span><span class="tag">Painting</span><span class="tag">Perth</span></div>
-  </div>
-  <div class="demo-arrow">›</div>
-</a>
-
-  <!-- Footer -->
-  <div class="footer">
-    <p>Built by <a href="https://itabs.ai">iTabs</a> — one engine, infinite trades.<br>
-    Want one for your business? Get in touch.</p>
-  </div>
-
-</div>
-
 </body>
 </html>
