@@ -1,71 +1,927 @@
-# Never Lose an AI Session Again — Gmail + Claude Workflow
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iTabs | Never Lose an AI Session Again</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-## The Problem: AI Amnesia
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --i-button: #f59e0b;
+            --i-button-hover: #d97706;
+            --card-radius: 16px;
+            --transition: 0.2s ease;
+        }
 
-Every time you start a new Claude chat, it forgets everything from your last one. Your decisions, your progress, what you built — gone. You end up repeating yourself, losing context, and drowning in dozens of scattered chats you can't find anything in.
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
 
-This is the #1 complaint from people using AI for projects. You spend 30 minutes getting Claude up to speed before you can do any actual work.
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
 
-## The Discovery: Gmail Is Your AI Memory
+        .container {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: var(--bg-primary);
+        }
 
-Claude can connect to your Gmail. At the end of every session, Claude drafts an email to yourself with a complete summary of what happened. Next session, Claude searches your Gmail to find where you left off. Your inbox becomes your project memory.
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px 8px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
 
-No new apps to install. No new habits to learn. Your AI memory just lives where you already are.
+        .progress-segment {
+            flex: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
 
-## One Word Triggers Everything
+        .progress-segment.active {
+            background: var(--text-primary);
+        }
 
-You set up a trigger word — like "summary" — and save it to Claude's memory. From that point on, in any chat, just type that word and Claude automatically creates a session log and drafts an email to yourself. One word. That's it.
+        .progress-segment.viewed {
+            background: var(--text-primary);
+        }
 
-**Claude Memory** persists across conversations. Set it once and it works forever.
+        /* Header */
+        .header {
+            padding: 48px 16px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-**How to set it up:** Tell Claude: "When I say summary, create a session log and draft an email to myself at [your email] with the subject MYPROJECT-LOG and the date." Claude saves this to memory and does it automatically from then on.
+        .channel-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--i-button);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            color: #000;
+        }
 
-## Branded Emails in Your Inbox
+        .header-info {
+            flex: 1;
+        }
 
-The session log emails aren't plain text — Claude sends them as styled HTML emails with colour-coded sections for what was discussed, what was built, decisions made, and next steps. Easy to scan on your phone.
+        .channel-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-**Codename system:** Each project gets a unique codename in the email subject line (like MYPROJECT-LOG). Search Gmail for that codename and every session log for that project appears instantly.
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-## Next Session: Instant Pickup
+        /* Cards Container */
+        .cards-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
 
-When you start a new chat, Claude searches your Gmail for your most recent session logs and picks up exactly where you left off. No copy-pasting, no reminding it what you're working on.
+        .card {
+            position: absolute;
+            inset: 0;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+        }
 
-In your Claude Project Instructions, tell Claude: "At the start of each chat, search Gmail for recent emails with my project codename to find the latest session logs."
+        .card.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
 
-## Works From Your Phone
+        .card.prev {
+            transform: translateX(-100%);
+        }
 
-This entire system runs from your phone. No desktop apps needed, no special software. Just Claude in your browser and Gmail in your pocket.
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: var(--card-radius);
+            overflow-y: auto;
+        }
 
-**The full workflow:**
-1. Chat with Claude as normal
-2. When you're done, say "summary"
-3. Claude creates the log and drafts an email
-4. Open Gmail, find the draft, hit send
-5. Next session, Claude reads it back
+        /* Card Hero */
+        .card-hero {
+            width: 100%;
+            padding: 32px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: var(--bg-tertiary);
+        }
 
-## Level Up: Claude Projects
+        .card-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
 
-For even more power, create a Claude Project — a dedicated workspace with Project Instructions (your AI coach personality) and Project Knowledge (uploaded context files). Every chat inside the project starts with full context automatically.
+        .card-number {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-- **Project Instructions** — tells Claude how to behave, your bad habits to watch for, workflows, and rules
-- **Project Knowledge** — files Claude reads at the start of every chat (project brief, session logs, technical docs)
-- **Combined with Gmail** — Projects give you the coach and context. Gmail gives you the session history that grows over time.
+        .card-headline {
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 12px;
+        }
 
-## Set It Up in 5 Minutes
+        .card-summary {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            flex: 1;
+        }
 
-**Step 1: Connect Gmail**
-Open Claude (claude.ai). Start a chat and ask Claude to check your Gmail. Approve the permission. One-time only.
+        .card-summary strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
 
-**Step 2: Set trigger word**
-Tell Claude: "Please remember this — when I say summary, create a session log covering what we discussed, what was built, decisions made, and what's next. Then draft an email to [your email] with the subject MYPROJECT-LOG and today's date."
+        .card-summary code {
+            background: var(--bg-tertiary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--i-button);
+        }
 
-**Step 3: Test it**
-Have a quick chat. Type "summary". Claude creates the log and drafts the email. Go to Gmail drafts, find it, hit send. Search Gmail for your codename. If it shows up — you're done.
+        /* i-Buttons */
+        .i-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
 
-**Step 4 (optional): Create a Project**
-Create a Claude Project for your main focus area. Add Project Instructions telling Claude how to behave. Add a context file with your project details. Now every chat starts smart.
+        .i-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-tertiary);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background var(--transition);
+            font-family: inherit;
+        }
+
+        .i-button:hover {
+            background: rgba(245, 158, 11, 0.2);
+        }
+
+        .i-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--i-button);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            font-style: italic;
+            flex-shrink: 0;
+        }
+
+        /* Download Button */
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: var(--i-button);
+            color: #000;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 16px;
+            font-family: inherit;
+            transition: background var(--transition), transform 0.1s ease;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            background: var(--i-button-hover);
+        }
+
+        .download-btn:active {
+            transform: scale(0.98);
+        }
+
+        .download-icon {
+            font-size: 20px;
+        }
+
+        /* Steps list */
+        .steps {
+            margin-top: 12px;
+        }
+
+        .step {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .step-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .step-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Navigation */
+        .nav-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 25%;
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .nav-zone.left { left: 0; }
+        .nav-zone.right { right: 0; }
+
+        /* Footer */
+        .footer {
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 12px;
+            transition: color var(--transition);
+        }
+
+        .footer a:hover {
+            color: var(--i-button);
+        }
+
+        /* Swipe hint */
+        .swipe-hint {
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            white-space: nowrap;
+        }
+
+        .swipe-hint.hidden {
+            opacity: 0;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 430px;
+            max-height: 60vh;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 12px;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .modal-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title span:first-child {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .type-badge {
+            font-size: 11px;
+            background: var(--bg-tertiary);
+            padding: 3px 8px;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-close {
+            background: var(--bg-tertiary);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 18px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 16px 20px 24px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress -->
+        <div class="progress-container" id="progress"></div>
+
+        <!-- Header -->
+        <div class="header">
+            <div class="channel-avatar">i</div>
+            <div class="header-info">
+                <div class="channel-name">iTabs Guide</div>
+                <div class="subtitle">Never Lose an AI Session Again</div>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="cards-wrapper" id="cardsWrapper">
+            <!-- Nav zones -->
+            <div class="nav-zone left" id="navLeft"></div>
+            <div class="nav-zone right" id="navRight"></div>
+            <div class="swipe-hint" id="swipeHint">← Swipe or tap edges →</div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <a href="https://itabs.ai" target="_blank">Powered by iTabs</a>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span id="modalTerm"></span>
+                    <span class="type-badge" id="modalType"></span>
+                </div>
+                <button class="modal-close" id="modalClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-content" id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GUIDE DATA
+        // ============================================
+        const GUIDE_DATA = {
+            cards: [
+                {
+                    emoji: "🧠",
+                    headline: "The Problem: AI Amnesia",
+                    summary: "Every time you start a new Claude chat, it forgets everything from your last one. Your decisions, your progress, what you built — <strong>gone</strong>.<br><br>You end up repeating yourself, losing context, and drowning in dozens of scattered chats you can't find anything in.<br><br>This is the #1 complaint from people using AI for real projects. You spend 30 minutes getting Claude up to speed before you can do any actual work.",
+                    iButtons: [
+                        {type: "why-it-matters", term: "Why this matters", content: "AI tools like Claude are stateless by design — each conversation starts fresh with no memory of previous ones. For casual questions this is fine, but for ongoing projects it creates a massive friction point. People work around it by copy-pasting notes, keeping separate docs, or just repeating themselves. All of these waste time."},
+                        {type: "context", term: "Claude Memory", content: "Claude does have a built-in memory feature that can remember facts about you across conversations (like your name, preferences, and key details). But it's designed for personal context, not full session histories. It can't store everything you discussed, built, or decided in a working session. That's the gap this workflow fills."}
+                    ]
+                },
+                {
+                    emoji: "📬",
+                    headline: "The Discovery: Gmail Is Your AI Memory",
+                    summary: "Claude can connect to your Gmail. At the end of every session, Claude drafts an email to yourself with a complete summary of what happened.<br><br>Next session, Claude searches your Gmail to find where you left off. Your inbox becomes your project memory.<br><br><strong>No new apps to install. No new habits to learn.</strong> Your AI memory just lives where you already are.",
+                    iButtons: [
+                        {type: "how-it-works", term: "How it works", content: "Claude has built-in Gmail integration. Once you approve the connection (one-time permission), Claude can search your inbox and create email drafts. The workflow uses drafts — not sent emails — so you always review before anything lands in your inbox. You hit send yourself."},
+                        {type: "context", term: "Why Gmail?", content: "Gmail is something nearly everyone already has and checks daily. It has powerful search, works on every device, and stores emails indefinitely for free. By using Gmail as the storage layer, you don't need to learn a new tool, install an app, or change your habits. Your AI project history just lives alongside your regular email."}
+                    ]
+                },
+                {
+                    emoji: "⚡",
+                    headline: "One Word Triggers Everything",
+                    summary: "You set up a trigger word — like <code>summary</code> — and save it to Claude's memory. From that point on, in any chat, just type that word and Claude automatically creates a session log and drafts an email to yourself.<br><br><strong>One word. That's it.</strong><br><br>Claude's memory persists across conversations. Set it once and it works forever.",
+                    iButtons: [
+                        {type: "how-to", term: "How to set it up", content: "Tell Claude: \"When I say summary, create a session log and draft an email to myself at [your email] with the subject MYPROJECT-LOG and the date.\" Claude saves this to memory and does it automatically from then on. You can use any trigger word you like — summary, done, wrap, log — whatever feels natural."},
+                        {type: "definition", term: "Claude Memory", content: "Claude Memory is a feature where Claude remembers specific instructions and facts about you across all conversations. When you tell Claude to 'remember' something, it stores that instruction and applies it in every future chat. This is different from conversation history — Memory persists even when you start a brand new chat."},
+                        {type: "context", term: "Session log format", content: "The session log is structured into four sections: What We Discussed (key topics covered), What Was Built (files, code, tools created), Decisions Made (choices locked in or ruled out), and What's Next (immediate next steps and open questions). This structure makes it easy to scan and pick up where you left off."}
+                    ]
+                },
+                {
+                    emoji: "🏷️",
+                    headline: "Branded Emails You Can Search",
+                    summary: "Each project gets a unique <strong>codename</strong> in the email subject line — like <code>MYPROJECT-LOG</code>.<br><br>Search Gmail for that codename and every session log for that project appears instantly. Months of project history, findable in seconds.<br><br>Multiple projects? Multiple codenames. Each project's history stays clean and searchable.",
+                    iButtons: [
+                        {type: "example", term: "Codename examples", content: "Use ALL CAPS with hyphens for readability. Examples: STARTUP-LOG for a startup build, RENO-LOG for a home renovation, THESIS-LOG for academic research, WEBAPP-LOG for a web app project. Pick something short and memorable that's unique to your project."},
+                        {type: "why-it-matters", term: "Why codenames work", content: "Gmail search is extremely fast and reliable. By using a unique codename that wouldn't appear in normal emails, you get instant, zero-noise search results. Every session log for that project appears in order. It's like having a project folder in your inbox without actually needing to organise anything."}
+                    ]
+                },
+                {
+                    emoji: "🔄",
+                    headline: "Next Session: Instant Pickup",
+                    summary: "When you start a new chat, Claude searches your Gmail for your most recent session logs and picks up <strong>exactly where you left off</strong>.<br><br>No copy-pasting, no reminding it what you're working on, no re-explaining your project.<br><br>In your Claude Project, tell Claude: <em>\"At the start of each chat, search Gmail for recent emails with my project codename to find the latest session logs.\"</em>",
+                    iButtons: [
+                        {type: "context", term: "Claude Projects", content: "A Claude Project is a dedicated workspace with persistent instructions and uploaded knowledge files. Every chat inside the project starts with that context automatically. Combined with Gmail session logs, you get both a consistent AI personality/rules AND a growing session history. Projects provide the coach, Gmail provides the memory."},
+                        {type: "how-it-works", term: "The pickup flow", content: "When you start a new chat, Claude reads your Project Instructions which tell it to search Gmail for your codename. It finds the most recent session log, reads it, and summarises where you left off and what the planned next steps were. Then it asks what you want to focus on today. The whole process takes seconds."}
+                    ]
+                },
+                {
+                    emoji: "📱",
+                    headline: "Works From Your Phone",
+                    summary: "This entire system runs from your phone. No desktop apps needed, no special software. Just Claude in your browser and Gmail in your pocket.<br><br><strong>The full workflow:</strong>",
+                    steps: [
+                        "Chat with Claude as normal",
+                        "When you're done, say <strong>\"summary\"</strong>",
+                        "Claude creates the log and drafts an email",
+                        "Open Gmail, find the draft, hit send",
+                        "Next session — Claude reads it back"
+                    ],
+                    iButtons: [
+                        {type: "why-it-matters", term: "Why mobile matters", content: "Many people do their best thinking and planning away from their desk — on the train, at a coffee shop, between meetings. If your AI workflow requires a desktop app or complex setup, you'll only use it when you're sitting at your computer. This workflow runs anywhere you have a phone, which means you can capture ideas and make progress in any spare moment."}
+                    ]
+                },
+                {
+                    emoji: "🚀",
+                    headline: "Level Up: Claude Projects",
+                    summary: "For even more power, create a <strong>Claude Project</strong> — a dedicated workspace with persistent instructions and uploaded context files.<br><br><strong>Project Instructions</strong> — tells Claude how to behave, your workflows, and rules to follow.<br><br><strong>Project Knowledge</strong> — files Claude reads at the start of every chat (project brief, technical docs).<br><br><strong>Combined with Gmail</strong> — Projects give you the coach and context. Gmail gives you the session history that grows over time.",
+                    iButtons: [
+                        {type: "how-to", term: "Creating a Project", content: "In Claude, click the Projects section in the sidebar. Create a new project with a clear name. Add Project Instructions telling Claude your trigger word, codename, email, and any rules for how it should behave. Upload any reference files as Project Knowledge. Every new chat in that project starts with full context automatically."},
+                        {type: "context", term: "What to put in Instructions", content: "Your Project Instructions are like a briefing document for Claude. Include: your trigger word and email for session logs, your project codename, key context about what you're building, rules or preferences (like 'always suggest next steps' or 'keep responses concise'), and any bad habits you want Claude to watch for. Think of it as training your AI teammate."}
+                    ]
+                },
+                {
+                    emoji: "⚙️",
+                    headline: "Set It Up in 5 Minutes",
+                    summary: "Everything you need to get started:",
+                    steps: [
+                        "<strong>Connect Gmail</strong> — Open Claude, ask it to check your Gmail. Approve the permission. One-time only.",
+                        "<strong>Set your trigger word</strong> — Tell Claude to remember your summary trigger, email, and codename.",
+                        "<strong>Test it</strong> — Have a quick chat, type your trigger word. Check Gmail drafts for the log.",
+                        "<strong>Create a Project</strong> (optional) — Add instructions telling Claude to search Gmail at the start of each chat."
+                    ],
+                    iButtons: [
+                        {type: "how-to", term: "The exact prompt", content: "Copy this and send it to Claude:\n\n\"Please remember this — when I say summary, create a session log covering what we discussed, what was built, decisions made, and what's next. Then draft an email to [YOUR EMAIL] with the subject MYPROJECT-LOG and today's date.\"\n\nReplace [YOUR EMAIL] and MYPROJECT-LOG with your own details. That's it — you're set up."},
+                        {type: "definition", term: "What's a SKILL.md?", content: "A SKILL.md is a portable instruction file you can add to a Claude Project as Project Knowledge. It teaches Claude a specific workflow in detail — like the full session persistence system. Instead of manually setting everything up, you drop the SKILL.md into your project and Claude knows exactly how to handle session logs, Gmail drafts, codenames, and pickup. It's the difference between explaining the system yourself and handing Claude the manual."}
+                    ]
+                },
+                {
+                    emoji: "📥",
+                    headline: "Download the SKILL.md",
+                    summary: "Want Claude to handle all of this automatically? Download the <strong>SKILL.md</strong> file and add it to your Claude Project as Project Knowledge.<br><br>It teaches Claude the entire session persistence workflow — trigger words, session log format, Gmail drafts, codename system, and automatic pickup at the start of each session.<br><br><strong>Drop it in. Done.</strong>",
+                    hasDownload: true,
+                    iButtons: [
+                        {type: "how-to", term: "How to install", content: "1. Download the SKILL.md file using the button below.\n2. Open Claude and go to your Project.\n3. Click 'Project Knowledge' and upload the file.\n4. Start a new chat in the project — Claude now knows the full workflow.\n\nYou'll still need to tell Claude your email address and preferred codename, but the system is ready to go."},
+                        {type: "context", term: "Built with iTabs", content: "iTabs is an interactive content format that uses contextual 'i' buttons to reveal layered information on demand. This guide was built with iTabs. The SKILL.md was generated from the same system documented in this guide — session persistence in action. Learn more at itabs.ai"}
+                    ]
+                }
+            ]
+        };
+
+        // ============================================
+        // SKILL.MD CONTENT (embedded for download)
+        // ============================================
+        const SKILL_MD_CONTENT = `---
+name: gmail-session-persistence
+description: Gmail-based session persistence for Claude. Use this skill whenever the user says their trigger word (default "summary") to create a session log and draft a Gmail. Also use at the start of any new conversation to search Gmail for previous session logs and restore context. Triggers on session log requests, project continuity, "where did we leave off", "catch me up", or any reference to picking up from a previous session.
+---
+
+# Gmail Session Persistence
+
+Turn Gmail into your AI memory. At the end of each session, one trigger word creates a complete session log and drafts it to your inbox. At the start of the next session, Claude searches Gmail and picks up exactly where you left off.
+
+## Setup (User does this once)
+
+Tell Claude to save this to memory:
+
+> "When I say **summary**, do the following:
+> 1. Create a markdown session log covering: what was discussed, what was built, decisions made, and what's next.
+> 2. Draft a Gmail to [YOUR EMAIL] with the subject: **[YOUR-CODENAME] — [today's date]** (e.g. MYPROJECT-LOG — 4 Mar 2026).
+> 3. Tell me to check drafts and hit send.
+> 4. Also output the log as a downloadable .md file."
+
+Replace \\\`[YOUR EMAIL]\\\` with your actual email and \\\`[YOUR-CODENAME]\\\` with a unique project codename (all caps, hyphenated).
 
 ---
 
-*Interactive version: [gmail-guide.html](gmail-guide.html)*
-*Built with [iTabs](https://itabs.ai)*
+## How It Works
+
+### Trigger: End of Session
+
+When the user says their trigger word:
+
+1. **Create the session log** in this format:
+
+\\\`\\\`\\\`markdown
+# [CODENAME] Session Log — [Date]
+
+## What We Discussed
+- Key topics and conversations covered this session
+
+## What Was Built
+- Files created, code written, tools configured
+- Include filenames and URLs where relevant
+
+## Decisions Made
+- Choices locked in, directions confirmed
+- Things explicitly ruled out or parked
+
+## What's Next
+- Immediate next steps for the next session
+- Open questions to resolve
+- Parked ideas (noted but not urgent)
+\\\`\\\`\\\`
+
+2. **Draft a Gmail** to the user's email address with:
+   - **Subject:** \\\`[CODENAME] — [date]\\\` (e.g. \\\`MYPROJECT-LOG — 4 Mar 2026\\\`)
+   - **Body:** The full session log in clean, readable HTML
+   - Keep formatting simple — headers, bullet points, readable on mobile
+
+3. **Tell the user** to check Gmail drafts and hit send.
+
+4. **Output as .md file** to \\\`/mnt/user-data/outputs/\\\` for download.
+
+### Trigger: Start of Session
+
+At the beginning of a new conversation, if the user asks to pick up where they left off (or if Project Instructions say to do this automatically):
+
+1. **Search Gmail** for recent emails matching the project codename
+2. **Read the most recent session log(s)** to restore context
+3. **Summarise briefly** what was covered last time and what the planned next steps were
+4. **Ask the user** what they want to focus on today
+
+---
+
+## Codename System
+
+Each project gets a unique codename used in email subject lines. This makes Gmail search instant:
+
+- \\\`MYPROJECT-LOG\\\` — search Gmail for this exact string, every session log appears
+- Use ALL CAPS with hyphens for readability
+- One codename per project, consistent across all sessions
+
+Examples:
+- \\\`STARTUP-LOG\\\` — for a startup build project
+- \\\`RENO-LOG\\\` — for a home renovation project
+- \\\`THESIS-LOG\\\` — for academic research
+
+---
+
+## Tips
+
+- **Multiple projects:** Use different codenames. Each project's history stays clean and searchable.
+- **Phone workflow:** This entire system works from your phone — Claude in browser, Gmail in your pocket.
+- **Pair with Claude Projects:** Use Project Instructions to tell Claude your codename, trigger word, and to auto-search Gmail at session start. Project Knowledge can hold your project brief and reference files. Gmail handles the growing session history.
+- **Draft → Send pattern:** Claude creates drafts (not sent emails) so you always have a chance to review before sending. This keeps you in control.
+
+---
+
+## Requirements
+
+- Gmail must be connected to Claude (approve permission once when prompted)
+- User must save the trigger word and email details to Claude's memory (one-time setup)
+
+---
+
+*Built with iTabs (https://itabs.ai) — interactive content that works everywhere.*
+`;
+
+        // ============================================
+        // APP
+        // ============================================
+        let currentCard = 0;
+        const totalCards = GUIDE_DATA.cards.length;
+
+        const progress = document.getElementById('progress');
+        const cardsWrapper = document.getElementById('cardsWrapper');
+        const navLeft = document.getElementById('navLeft');
+        const navRight = document.getElementById('navRight');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalTerm = document.getElementById('modalTerm');
+        const modalType = document.getElementById('modalType');
+        const modalContent = document.getElementById('modalContent');
+        const modalClose = document.getElementById('modalClose');
+        const swipeHint = document.getElementById('swipeHint');
+
+        function init() {
+            // Create progress segments
+            for (let i = 0; i < totalCards; i++) {
+                const segment = document.createElement('div');
+                segment.className = 'progress-segment';
+                progress.appendChild(segment);
+            }
+
+            // Create cards
+            GUIDE_DATA.cards.forEach((card, index) => {
+                const cardEl = createCard(card, index);
+                cardsWrapper.insertBefore(cardEl, navLeft);
+            });
+
+            updateCard(0);
+
+            // Events
+            navLeft.addEventListener('click', () => navigate(-1));
+            navRight.addEventListener('click', () => navigate(1));
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') navigate(-1);
+                if (e.key === 'ArrowRight') navigate(1);
+                if (e.key === 'Escape') closeModal();
+            });
+
+            // Touch swipe
+            let touchStartX = 0;
+            cardsWrapper.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+            });
+            cardsWrapper.addEventListener('touchend', (e) => {
+                const touchEndX = e.changedTouches[0].clientX;
+                const diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > 50) {
+                    navigate(diff > 0 ? 1 : -1);
+                }
+            });
+
+            [navLeft, navRight].forEach(el => {
+                el.addEventListener('click', () => {
+                    swipeHint.classList.add('hidden');
+                }, { once: true });
+            });
+        }
+
+        function createCard(card, index) {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.dataset.index = index;
+
+            // Steps HTML
+            let stepsHTML = '';
+            if (card.steps) {
+                stepsHTML = '<div class="steps">' + card.steps.map((step, i) => `
+                    <div class="step">
+                        <div class="step-num">${i + 1}</div>
+                        <div class="step-text">${step}</div>
+                    </div>
+                `).join('') + '</div>';
+            }
+
+            // i-Buttons HTML
+            let iButtonsHTML = '';
+            if (card.iButtons && card.iButtons.length > 0) {
+                const buttons = card.iButtons.map(btn => {
+                    const label = btn.term || getTypeLabel(btn.type);
+                    return `<button class="i-button" data-type="${btn.type}" data-term="${btn.term || ''}" data-content="${encodeURIComponent(btn.content)}">
+                        <span class="i-icon">i</span>
+                        ${label}
+                    </button>`;
+                }).join('');
+                iButtonsHTML = `<div class="i-buttons">${buttons}</div>`;
+            }
+
+            // Download button HTML
+            let downloadHTML = '';
+            if (card.hasDownload) {
+                downloadHTML = `<button class="download-btn" id="downloadSkill">
+                    <span class="download-icon">📥</span>
+                    Download SKILL.md
+                </button>`;
+            }
+
+            cardEl.innerHTML = `
+                <div class="card-content">
+                    <div class="card-hero">${card.emoji}</div>
+                    <div class="card-body">
+                        <div class="card-number">Step ${index + 1} of ${totalCards}</div>
+                        <h2 class="card-headline">${card.headline}</h2>
+                        <div class="card-summary">${card.summary}</div>
+                        ${stepsHTML}
+                        ${iButtonsHTML}
+                        ${downloadHTML}
+                    </div>
+                </div>
+            `;
+
+            // i-button handlers
+            cardEl.querySelectorAll('.i-button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openModal(
+                        btn.dataset.term || getTypeLabel(btn.dataset.type),
+                        btn.dataset.type,
+                        decodeURIComponent(btn.dataset.content)
+                    );
+                });
+            });
+
+            // Download handler
+            const dlBtn = cardEl.querySelector('#downloadSkill');
+            if (dlBtn) {
+                dlBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    downloadSkillMd();
+                });
+            }
+
+            return cardEl;
+        }
+
+        function downloadSkillMd() {
+            const blob = new Blob([SKILL_MD_CONTENT], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'SKILL.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function getTypeLabel(type) {
+            const labels = {
+                'definition': 'Definition',
+                'context': 'Context',
+                'why-it-matters': 'Why It Matters',
+                'how-it-works': 'How It Works',
+                'how-to': 'How To',
+                'example': 'Example',
+                'related': 'Related'
+            };
+            return labels[type] || type;
+        }
+
+        function navigate(direction) {
+            const newIndex = currentCard + direction;
+            if (newIndex >= 0 && newIndex < totalCards) {
+                updateCard(newIndex);
+            }
+        }
+
+        function updateCard(index) {
+            const cards = document.querySelectorAll('.card');
+            const segments = document.querySelectorAll('.progress-segment');
+
+            cards.forEach((card, i) => {
+                card.classList.remove('active', 'prev');
+                if (i === index) card.classList.add('active');
+                else if (i < index) card.classList.add('prev');
+            });
+
+            segments.forEach((seg, i) => {
+                seg.classList.remove('active', 'viewed');
+                if (i === index) seg.classList.add('active');
+                else if (i < index) seg.classList.add('viewed');
+            });
+
+            currentCard = index;
+        }
+
+        function openModal(term, type, content) {
+            modalTerm.textContent = term;
+            modalType.textContent = getTypeLabel(type);
+            modalContent.textContent = content;
+            modalOverlay.classList.add('active');
+        }
+
+        function closeModal() {
+            modalOverlay.classList.remove('active');
+        }
+
+        init();
+    </script>
+</body>
+</html>
