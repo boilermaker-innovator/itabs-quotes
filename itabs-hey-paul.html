@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iTabs | Hey Paul 👋</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-tertiary: #1e1e2e;
+            --text-primary: #ffffff; --text-secondary: #9090b0;
+            --accent: #7c3aed; --accent2: #06b6d4; --i-button: #f59e0b;
+            --card-radius: 16px; --transition: 0.2s ease;
+        }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+        .container { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; position: relative; }
+
+        .progress-container { display: flex; gap: 4px; padding: 12px 16px 8px; position: absolute; top: 0; left: 0; right: 0; z-index: 100; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
+        .progress-segment { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; transition: background var(--transition); }
+        .progress-segment.viewed { background: rgba(255,255,255,0.6); }
+        .progress-segment.active { background: var(--accent); }
+
+        .cards-wrapper { flex: 1; position: relative; overflow: hidden; }
+        .card { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; pointer-events: none; }
+        .card.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+        .card.prev { opacity: 0; transform: translateX(-100%); }
+
+        .card-hero { padding: 52px 20px 20px; min-height: 38%; display: flex; flex-direction: column; justify-content: flex-end; }
+        .hero-default { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .hero-purple  { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+        .hero-cyan    { background: linear-gradient(135deg, #164e63 0%, #0c4a6e 100%); }
+        .hero-amber   { background: linear-gradient(135deg, #78350f 0%, #431407 100%); }
+        .hero-green   { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); }
+
+        .card-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
+        .tag-purple { color: #a78bfa; } .tag-cyan { color: #67e8f9; } .tag-amber { color: #fcd34d; } .tag-green { color: #6ee7b7; }
+        .card-headline { font-size: clamp(20px, 5vw, 26px); font-weight: 700; line-height: 1.25; }
+        .hero-default em { color: #cbd5e1; font-style: normal; }
+        .hero-purple  em { color: #a78bfa; font-style: normal; }
+        .hero-cyan    em { color: #67e8f9; font-style: normal; }
+        .hero-amber   em { color: #fcd34d; font-style: normal; }
+        .hero-green   em { color: #6ee7b7; font-style: normal; }
+
+        .card-body { flex: 1; padding: 20px; background: var(--bg-secondary); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .card-summary { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+        .analogy-box { background: var(--bg-tertiary); border-radius: 12px; padding: 14px 16px; border-left: 3px solid var(--accent2); }
+        .analogy-title { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 6px; }
+        .analogy-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+        .i-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .i-button { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; color: var(--i-button); font-size: 13px; font-weight: 600; cursor: pointer; transition: all var(--transition); }
+        .i-button:hover { background: rgba(245,158,11,0.2); }
+        .i-dot { width: 18px; height: 18px; background: var(--i-button); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0; }
+
+        .nav-area { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--bg-secondary); border-top: 1px solid rgba(255,255,255,0.06); }
+        .nav-btn { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); color: var(--text-primary); font-size: 18px; cursor: pointer; transition: all var(--transition); display: flex; align-items: center; justify-content: center; }
+        .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .nav-btn:not(:disabled):hover { background: rgba(255,255,255,0.1); }
+        .card-counter { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: flex-end; justify-content: center; z-index: 200; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-sheet { width: 100%; max-width: 430px; background: var(--bg-tertiary); border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; box-sizing: border-box; }
+        .modal-overlay.active .modal-sheet { transform: translateY(0); }
+        .modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px; }
+        .modal-term { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .modal-type { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--i-button); margin-bottom: 12px; }
+        .modal-content { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .modal-close { margin-top: 20px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; }
+
+        .cta-link { display: block; text-align: center; padding: 14px 20px; background: linear-gradient(135deg, #059669, #10b981); border-radius: 12px; color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="progress-container" id="progress"></div>
+    <div class="cards-wrapper" id="cardsWrapper"></div>
+    <div class="nav-area">
+        <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+        <span class="card-counter" id="counter">1 / 5</span>
+        <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-term" id="modalTerm"></div>
+        <div class="modal-type" id="modalType"></div>
+        <div class="modal-content" id="modalContent"></div>
+        <button class="modal-close" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<script>
+const cards = [
+    {
+        tag: "01 / THE REPLY",
+        tagClass: "",
+        headline: "You asked who needs help <em>building</em>.",
+        heroClass: "hero-default",
+        summary: "I figured the most honest answer wasn't a paragraph — it was a product demo. This is iTabs. You're looking at it right now. Swipe through and I'll explain why I think it matters. Then you can decide if we should grab a coffee.",
+        analogy: null,
+        iButtons: [
+            {
+                label: "Why a widget?",
+                type: "why-it-matters",
+                term: "The Widget IS the Pitch",
+                content: "Every founder sends the same LinkedIn message. I build interactive tools for tradies who can't code. Sending you a live example seemed more useful than describing one. If it makes you curious — that's the point."
+            }
+        ]
+    },
+    {
+        tag: "02 / THE BLOKE",
+        tagClass: "tag-purple",
+        headline: "Boilermaker by day. <em>Builder</em> by night.",
+        heroClass: "hero-purple",
+        summary: "Jon Gwynne. 50. Perth. I weld pipes in mining shutdowns for a living. In my spare time I build AI-powered web tools — no developers, no code team, just Claude and a lot of late nights. 240+ repos on GitHub and counting.",
+        analogy: {
+            title: "Think of it like...",
+            text: "A tradie who also builds the tools other tradies need. Domain knowledge meets vibe coding."
+        },
+        iButtons: [
+            {
+                label: "What's vibe coding?",
+                type: "definition",
+                term: "Vibe Coding",
+                content: "Building software through natural language with AI — describing what you want and iterating fast. No traditional coding background needed. It's how solo founders with big ideas but small budgets are shipping real products in 2026."
+            }
+        ]
+    },
+    {
+        tag: "03 / THE PRODUCT",
+        tagClass: "tag-cyan",
+        headline: "Tradies need quotes. Not <em>websites</em>.",
+        heroClass: "hero-cyan",
+        summary: "iTabs builds mobile-first quote estimator widgets for Perth tradies — swipeable, interactive, zero server costs. A landscaper gets a link. His customers tap through, see rough pricing, and submit a lead. No app store. No developer. Just a URL.",
+        analogy: null,
+        iButtons: [
+            {
+                label: "The real insight",
+                type: "why-it-matters",
+                term: "Why Tradies, Not Startups",
+                content: "Perth has 80,000+ registered tradies. Most have a phone, a ute, and no digital presence beyond a Facebook page from 2018. They don't need a $10k website — they need something that works on a job site in 30 seconds. That's the gap iTabs fills."
+            },
+            {
+                label: "What's the format?",
+                type: "definition",
+                term: "Single HTML File",
+                content: "Every iTabs widget is one self-contained HTML file hosted on GitHub Pages. No database, no subscription, no ongoing hosting cost. The tradie gets a link they can share anywhere — text, WhatsApp, Instagram bio, QR code on their van."
+            }
+        ]
+    },
+    {
+        tag: "04 / THE PROOF",
+        tagClass: "tag-amber",
+        headline: "Rick the landscaper is the <em>case study</em>.",
+        heroClass: "hero-amber",
+        summary: "Rick runs Trim & Brick in Perth. He was my first real test. I built him a quote estimator widget — his customers swipe through, pick their services, and submit a lead. But the unexpected win? Rick hands his contractor briefs to subbies, and those briefs have the iTabs brand on them. Every subbie becomes a sales touchpoint.",
+        analogy: {
+            title: "The Rick Distribution Engine",
+            text: "Rick's iTabs-branded paperwork reaches every contractor he works with. Organic word-of-mouth to other tradies who all need the same thing."
+        },
+        iButtons: [
+            {
+                label: "Why this matters",
+                type: "context",
+                term: "Proof of Concept First",
+                content: "I'm not pitching a product I imagine tradies need. I'm pitching one a real tradie is using right now. Rick's widget is live. The leads are flowing. That's the foundation for everything that follows — including the Morning Startup Perth pitch on March 25."
+            }
+        ]
+    },
+    {
+        tag: "05 / THE ASK",
+        tagClass: "tag-green",
+        headline: "We're both at <em>Riff</em> this month.",
+        heroClass: "hero-green",
+        summary: "You're running Innovation Shed on the 20th. I'm pitching at Morning Startup Perth on the 25th. Same venue, five days apart. I'd love to grab a quick coffee between now and then — not to pitch you, just to compare notes from a fellow Perth builder.",
+        analogy: null,
+        iButtons: [
+            {
+                label: "What I'm really after",
+                type: "context",
+                term: "An honest conversation",
+                content: "You've worked with Perth startups for years. I'm a boilermaker who builds AI tools for tradies. I suspect you'd have a perspective on whether iTabs has legs beyond Rick's back yard — and I'm genuinely curious what Innovation Shed is building. No agenda beyond that."
+            }
+        ],
+        ctaLink: "https://www.linkedin.com/in/jongwynne/",
+        ctaLabel: "Connect with Jon on LinkedIn →"
+    }
+];
+
+let currentCard = 0;
+const totalCards = cards.length;
+const modalOverlay = document.getElementById('modalOverlay');
+const modalTerm = document.getElementById('modalTerm');
+const modalType = document.getElementById('modalType');
+const modalContent = document.getElementById('modalContent');
+
+function init() {
+    const progress = document.getElementById('progress');
+    const wrapper = document.getElementById('cardsWrapper');
+    cards.forEach((card, i) => {
+        const seg = document.createElement('div');
+        seg.className = 'progress-segment' + (i === 0 ? ' active' : '');
+        progress.appendChild(seg);
+        wrapper.appendChild(buildCard(card, i));
+    });
+    document.getElementById('counter').textContent = `1 / ${totalCards}`;
+    document.getElementById('prevBtn').disabled = true;
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowRight') navigate(1);
+        if (e.key === 'ArrowLeft') navigate(-1);
+        if (e.key === 'Escape') closeModal();
+    });
+    let startX = 0;
+    const cw = document.getElementById('cardsWrapper');
+    cw.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    cw.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+    });
+}
+
+function buildCard(card, index) {
+    const el = document.createElement('div');
+    el.className = 'card' + (index === 0 ? ' active' : '');
+    const analogyHTML = card.analogy ? `<div class="analogy-box"><div class="analogy-title">${card.analogy.title}</div><div class="analogy-text">${card.analogy.text}</div></div>` : '';
+    const iButtonsHTML = card.iButtons && card.iButtons.length ? `<div class="i-buttons">${card.iButtons.map(b => `<button class="i-button" data-term="${b.term}" data-type="${b.type}" data-content="${encodeURIComponent(b.content)}"><span class="i-dot">i</span>${b.label}</button>`).join('')}</div>` : '';
+    const ctaHTML = card.ctaLink ? `<a class="cta-link" href="${card.ctaLink}" target="_blank">${card.ctaLabel}</a>` : '';
+    el.innerHTML = `
+        <div class="card-hero ${card.heroClass}">
+            <div class="card-tag ${card.tagClass}">${card.tag}</div>
+            <h2 class="card-headline">${card.headline}</h2>
+        </div>
+        <div class="card-body">
+            <p class="card-summary">${card.summary}</p>
+            ${analogyHTML}
+            ${iButtonsHTML}
+            ${ctaHTML}
+        </div>`;
+    el.querySelectorAll('.i-button').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            openModal(btn.dataset.term, btn.dataset.type, decodeURIComponent(btn.dataset.content));
+        });
+    });
+    return el;
+}
+
+function navigate(direction) {
+    const next = currentCard + direction;
+    if (next >= 0 && next < totalCards) updateCard(next);
+}
+
+function updateCard(index) {
+    document.querySelectorAll('.card').forEach((c, i) => {
+        c.classList.remove('active', 'prev');
+        if (i === index) c.classList.add('active');
+        else if (i < index) c.classList.add('prev');
+    });
+    document.querySelectorAll('.progress-segment').forEach((s, i) => {
+        s.classList.remove('active', 'viewed');
+        if (i === index) s.classList.add('active');
+        else if (i < index) s.classList.add('viewed');
+    });
+    currentCard = index;
+    document.getElementById('counter').textContent = `${index + 1} / ${totalCards}`;
+    document.getElementById('prevBtn').disabled = index === 0;
+    document.getElementById('nextBtn').disabled = index === totalCards - 1;
+}
+
+function openModal(term, type, content) {
+    const typeLabels = { 'definition': 'Definition', 'context': 'Context', 'why-it-matters': 'Why It Matters', 'related': 'Related' };
+    modalTerm.textContent = term;
+    modalType.textContent = typeLabels[type] || type;
+    modalContent.textContent = content;
+    modalOverlay.classList.add('active');
+}
+
+function closeModal() { modalOverlay.classList.remove('active'); }
+
+init();
+</script>
+</body>
+</html>
