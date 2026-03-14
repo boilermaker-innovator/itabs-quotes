@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Quote Estimator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .widget-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .checkbox-item:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        
+        .estimate-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.2s ease;
+        }
+        
+        .estimate-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .price {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .timeline {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="header">
+            <div class="logo">iTabs</div>
+            <div class="subtitle">Get an instant quote for your custom widget</div>
+        </div>
+        
+        <form id="quoteForm">
+            <div class="form-group">
+                <label for="projectType">Project Type</label>
+                <select id="projectType" required>
+                    <option value="">Select project type</option>
+                    <option value="basic">Basic Widget</option>
+                    <option value="advanced">Advanced Widget</option>
+                    <option value="enterprise">Enterprise Solution</option>
+                    <option value="custom">Custom Integration</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="complexity">Complexity Level</label>
+                <select id="complexity" required>
+                    <option value="">Select complexity</option>
+                    <option value="simple">Simple (Basic forms, static content)</option>
+                    <option value="moderate">Moderate (Interactive elements, API calls)</option>
+                    <option value="complex">Complex (Advanced logic, integrations)</option>
+                    <option value="enterprise">Enterprise (Custom architecture)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Features Required</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="responsive" value="responsive">
+                        <label for="responsive">Responsive Design</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="api" value="api">
+                        <label for="api">API Integration</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="database" value="database">
+                        <label for="database">Database Connection</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="auth" value="auth">
+                        <label for="auth">User Authentication</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="analytics" value="analytics">
+                        <label for="analytics">Analytics Tracking</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="customization" value="customization">
+                        <label for="customization">Custom Styling</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeline">Preferred Timeline</label>
+                <select id="timeline" required>
+                    <option value="">Select timeline</option>
+                    <option value="rush">Rush (1-3 days)</option>
+                    <option value="standard">Standard (1-2 weeks)</option>
+                    <option value="extended">Extended (2-4 weeks)</option>
+                    <option value="flexible">Flexible (1+ months)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Project Description</label>
+                <textarea id="description" rows="4" placeholder="Describe your widget requirements..."></textarea>
+            </div>
+            
+            <button type="submit" class="estimate-button">Get Instant Quote</button>
+        </form>
+        
+        <div id="result" class="result">
+            <h3>Your Estimated Quote</h3>
+            <div class="price" id="estimatedPrice">$0</div>
+            <div class="timeline" id="estimatedTimeline">Timeline estimate</div>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('quoteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const projectType = document.getElementById('projectType').value;
+            const complexity = document.getElementById('complexity').value;
+            const timeline = document.getElementById('timeline').value;
+            const features = document.querySelectorAll('input[type="checkbox"]:checked');
+            
+            let basePrice = 0;
+            let timelineMultiplier = 1;
+            let estimatedDays = 7;
+            
+            // Base price calculation
+            switch(projectType) {
+                case 'basic': basePrice = 500; break;
+                case 'advanced': basePrice = 1200; break;
+                case 'enterprise': basePrice = 2500; break;
+                case 'custom': basePrice = 1800; break;
+            }
+            
+            // Complexity multiplier
+            switch(complexity) {
+                case 'simple': basePrice *= 1; estimatedDays = 3; break;
+                case 'moderate': basePrice *= 1.5; estimatedDays = 7; break;
+                case 'complex': basePrice *= 2.2; estimatedDays = 14; break;
+                case 'enterprise': basePrice *= 3; estimatedDays = 21; break;
+            }
+            
+            // Features addon
+            basePrice += features.length * 200;
+            
+            // Timeline adjustment
+            switch(timeline) {
+                case 'rush': timelineMultiplier = 1.8; estimatedDays = Math.ceil(estimatedDays * 0.5); break;
+                case 'standard': timelineMultiplier = 1; break;
+                case 'extended': timelineMultiplier = 0.9; estimatedDays = Math.ceil(estimatedDays * 1.5); break;
+                case 'flexible': timelineMultiplier = 0.8; estimatedDays = Math.ceil(estimatedDays * 2); break;
+            }
+            
+            const finalPrice = Math.round(basePrice * timelineMultiplier);
+            
+            document.getElementById('estimatedPrice').textContent = `$${finalPrice.toLocaleString()}`;
+            document.getElementById('estimatedTimeline').textContent = `Estimated completion: ${estimatedDays} days`;
+            document.getElementById('result').style.display = 'block';
+            
+            // Smooth scroll to result
+            document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
