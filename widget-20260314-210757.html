@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Quote Estimator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .widget-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .widget-header {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .widget-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .widget-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .widget-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2196F3;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .tabs-container {
+            display: flex;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #2196F3;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .estimate-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+
+        .estimate-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .price-display {
+            font-size: 32px;
+            font-weight: 700;
+            color: #2196F3;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .price-breakdown {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .widget-container {
+                margin: 10px;
+            }
+            
+            .widget-body {
+                padding: 20px;
+            }
+            
+            .tabs-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-header">
+            <h1>iTabs Quote Estimator</h1>
+            <p>Get an instant estimate for your tablet project</p>
+        </div>
+        
+        <div class="widget-body">
+            <div class="tabs-container">
+                <button class="tab active" onclick="switchTab('basic')">Basic Info</button>
+                <button class="tab" onclick="switchTab('features')">Features</button>
+                <button class="tab" onclick="switchTab('support')">Support</button>
+            </div>
+
+            <form id="quoteForm">
+                <div id="basic" class="tab-content active">
+                    <div class="form-group">
+                        <label for="quantity">Number of Tablets</label>
+                        <input type="number" id="quantity" min="1" max="1000" value="10" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="duration">Project Duration</label>
+                        <select id="duration" required>
+                            <option value="">Select duration</option>
+                            <option value="1">1 month</option>
+                            <option value="3">3 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12">12 months</option>
+                            <option value="24">24 months</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deployment">Deployment Type</label>
+                        <select id="deployment" required>
+                            <option value="">Select deployment</option>
+                            <option value="standard">Standard Setup</option>
+                            <option value="premium">Premium Setup</option>
+                            <option value="enterprise">Enterprise Setup</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="features" class="tab-content">
+                    <div class="form-group">
+                        <label>Additional Features</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="kiosk" value="kiosk">
+                                <label for="kiosk">Kiosk Mode</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="analytics" value="analytics">
+                                <label for="analytics">Analytics Dashboard</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="customization" value="customization">
+                                <label for="customization">Custom Branding</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="integration" value="integration">
+                                <label for="integration">API Integration</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="support" class="tab-content">
+                    <div class="form-group">
+                        <label for="support-level">Support Level</label>
+                        <select id="support-level" required>
+                            <option value="">Select support level</option>
+                            <option value="basic">Basic Support</option>
+                            <option value="premium">Premium Support</option>
+                            <option value="enterprise">Enterprise Support</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="training">Training Required</label>
+                        <select id="training">
+                            <option value="none">No Training</option>
+                            <option value="basic">Basic Training (2 hours)</option>
+                            <option value="advanced">Advanced Training (8 hours)</option>
+                            <option value="comprehensive">Comprehensive Training (16 hours)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" class="estimate-button" onclick="calculateQuote()">
+                    Get Instant Quote
+                </button>
+            </form>
+
+            <div id="result" class="result-container">
+                <div class="price-display" id="totalPrice">$0</div>
+                <div class="price-breakdown" id="breakdown"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content and mark tab as active
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function calculateQuote() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const duration = parseInt(document.getElementById('duration').value) || 0;
+            const deployment = document.getElementById('deployment').value;
+            const supportLevel = document.getElementById('support-level').value;
+            const training = document.getElementById('training').value;
+
+            if (quantity === 0 || duration === 0 || !deployment || !supportLevel) {
+                alert('Please fill in all required fields in the Basic Info and Support tabs.');
+                return;
+            }
+
+            let basePrice = 0;
+            let breakdown = [];
+
+            // Base tablet cost
+            const tabletCost = quantity * 25 * duration;
+            basePrice += tabletCost;
+            breakdown.push(`Tablet rental (${quantity} tablets × ${duration} months): $${tabletCost}`);
+
+            // Deployment cost
+            let deploymentCost = 0;
+            switch(deployment) {
+                case 'standard':
+                    deploymentCost = quantity * 50;
+                    break;
+                case 'premium':
+                    deploymentCost = quantity * 100;
+                    break;
+                case 'enterprise':
+                    deploymentCost = quantity * 200;
+                    break;
+            }
+            basePrice += deploymentCost;
+            breakdown.push(`${deployment.charAt(0).toUpperCase() + deployment.slice(1)} deployment: $${deploymentCost}`);
+
+            // Additional features
+            const features = document.querySelectorAll('#features input[type="checkbox"]:checked');
+            let featureCost = 0;
+            features.forEach(feature => {
+                const cost = quantity * 10;
+                featureCost += cost;
+                breakdown.push(`${feature.nextElementSibling.textContent}: $${cost}`);
+            });
+            basePrice += featureCost;
+
+            // Support cost
+            let supportCost = 0;
+            switch(supportLevel) {
+                case 'basic':
+                    supportCost = duration * 100;
+                    break;
+                case 'premium':
+                    supportCost = duration * 250;
+                    break;
+                case 'enterprise':
+                    supportCost = duration * 500;
+                    break;
+            }
+            basePrice += supportCost;
+            breakdown.push(`${supportLevel.charAt(0).toUpperCase() + supportLevel.slice(1)} support: $${supportCost}`);
+
+            // Training cost
+            let trainingCost = 0;
+            switch(training) {
+                case 'basic':
+                    trainingCost = 200;
+                    break;
+                case 'advanced':
+                    trainingCost = 800;
+                    break;
+                case 'comprehensive':
+                    trainingCost = 1600;
+                    break;
+            }
+            if (trainingCost > 0) {
+                basePrice += trainingCost;
+                breakdown.push(`${training.charAt(0).toUpperCase() + training.slice(1)} training: $${trainingCost}`);
+            }
+
+            // Display results
+            document.getElementById('totalPrice').textContent = `$${basePrice.toLocaleString()}`;
+            document.getElementById('breakdown').innerHTML = breakdown.join('<br>') + '<br><strong>Total: $' + basePrice.toLocaleString() + '</strong>';
+            document.getElementById('result').classList.add('show');
+        }
+    </script>
+</body>
+</html>
