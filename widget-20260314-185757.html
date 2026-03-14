@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Quote Estimator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .widget-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .tabs-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-option {
+            padding: 10px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-option.selected {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .price {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .breakdown {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="header">
+            <div class="logo">iTabs</div>
+            <div class="subtitle">Get Your Quote in Seconds</div>
+        </div>
+        
+        <form id="quoteForm">
+            <div class="form-group">
+                <label for="projectType">Project Type</label>
+                <select id="projectType" required>
+                    <option value="">Select project type</option>
+                    <option value="website">Website Development</option>
+                    <option value="mobile">Mobile App</option>
+                    <option value="webapp">Web Application</option>
+                    <option value="ecommerce">E-commerce Store</option>
+                    <option value="custom">Custom Software</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="complexity">Complexity Level</label>
+                <select id="complexity" required>
+                    <option value="">Select complexity</option>
+                    <option value="basic">Basic</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="enterprise">Enterprise</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Number of Tabs/Sections</label>
+                <div class="tabs-container">
+                    <div class="tab-option" data-value="3">3</div>
+                    <div class="tab-option" data-value="5">5</div>
+                    <div class="tab-option" data-value="8">8</div>
+                    <div class="tab-option" data-value="12">12+</div>
+                </div>
+                <input type="hidden" id="tabCount" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeline">Timeline (weeks)</label>
+                <select id="timeline" required>
+                    <option value="">Select timeline</option>
+                    <option value="1">1-2 weeks (Rush)</option>
+                    <option value="3">3-4 weeks (Standard)</option>
+                    <option value="6">6-8 weeks (Extended)</option>
+                    <option value="12">12+ weeks (Long-term)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="calculate-btn">Calculate Quote</button>
+        </form>
+        
+        <div id="result" class="result">
+            <div class="price" id="finalPrice">$0</div>
+            <div>Estimated Project Cost</div>
+            <div class="breakdown" id="breakdown"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabOptions = document.querySelectorAll('.tab-option');
+            const tabCountInput = document.getElementById('tabCount');
+            const form = document.getElementById('quoteForm');
+            const result = document.getElementById('result');
+            
+            // Tab selection
+            tabOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    tabOptions.forEach(opt => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                    tabCountInput.value = this.dataset.value;
+                });
+            });
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                calculateQuote();
+            });
+            
+            function calculateQuote() {
+                const projectType = document.getElementById('projectType').value;
+                const complexity = document.getElementById('complexity').value;
+                const tabCount = parseInt(document.getElementById('tabCount').value);
+                const timeline = parseInt(document.getElementById('timeline').value);
+                
+                if (!projectType || !complexity || !tabCount || !timeline) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+                
+                // Base pricing
+                const basePrices = {
+                    website: 1500,
+                    mobile: 3000,
+                    webapp: 2500,
+                    ecommerce: 4000,
+                    custom: 5000
+                };
+                
+                const complexityMultipliers = {
+                    basic: 1,
+                    intermediate: 1.5,
+                    advanced: 2.2,
+                    enterprise: 3.5
+                };
+                
+                const timelineMultipliers = {
+                    1: 2,    // Rush
+                    3: 1,    // Standard
+                    6: 0.8,  // Extended
+                    12: 0.7  // Long-term
+                };
+                
+                let basePrice = basePrices[projectType];
+                let complexityMultiplier = complexityMultipliers[complexity];
+                let timelineMultiplier = timelineMultipliers[timeline];
+                let tabMultiplier = 1 + (tabCount - 3) * 0.15;
+                
+                let finalPrice = Math.round(basePrice * complexityMultiplier * timelineMultiplier * tabMultiplier);
+                
+                // Display result
+                document.getElementById('finalPrice').textContent = `$${finalPrice.toLocaleString()}`;
+                document.getElementById('breakdown').innerHTML = `
+                    <div>Base: $${basePrice.toLocaleString()}</div>
+                    <div>Complexity: ${complexity} (${complexityMultiplier}x)</div>
+                    <div>Tabs/Sections: ${tabCount} (${tabMultiplier.toFixed(2)}x)</div>
+                    <div>Timeline: ${timeline === 1 ? '1-2' : timeline === 3 ? '3-4' : timeline === 6 ? '6-8' : '12+'} weeks (${timelineMultiplier}x)</div>
+                `;
+                
+                result.classList.add('show');
+                result.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+</body>
+</html>
