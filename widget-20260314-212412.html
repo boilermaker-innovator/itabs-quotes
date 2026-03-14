@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            background: #1a1a1a;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+        }
+
+        .cards-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #1f1f1f;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            touch-action: pan-y;
+        }
+
+        .card.active {
+            transform: translateX(0);
+        }
+
+        .card.prev {
+            transform: translateX(-100%);
+        }
+
+        .card.next {
+            transform: translateX(100%);
+        }
+
+        .hero-section {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .hero-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .body-section {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .summary-text {
+            color: #e0e0e0;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .i-button {
+            background: #fbbf24;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .i-button:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+        }
+
+        .i-button::before {
+            content: 'i';
+            background: #000;
+            color: #fbbf24;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .nav-dot.active {
+            background: #fbbf24;
+        }
+
+        .modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1f1f1f;
+            border-radius: 24px 24px 0 0;
+            padding: 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            transform: translateY(0);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #333;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #333;
+        }
+
+        .modal-content {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .swipe-hint {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+            z-index: 5;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        @media (max-width: 430px) {
+            body {
+                padding: 0;
+            }
+            
+            .widget-container {
+                border-radius: 0;
+                height: 100vh;
+            }
+            
+            .cards-container {
+                height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-container">
+            <div class="card active">
+                <div class="hero-section">
+                    <h2 class="hero-title">Project Alpha</h2>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">
+                        A comprehensive solution designed to streamline your workflow and enhance productivity. 
+                        This innovative approach combines cutting-edge technology with user-friendly design 
+                        to deliver exceptional results for your business needs.
+                    </p>
+                    <button class="i-button" onclick="openModal('modal1')">Learn More</button>
+                </div>
+            </div>
+
+            <div class="card next">
+                <div class="hero-section">
+                    <h2 class="hero-title">Beta Solutions</h2>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">
+                        Transform your digital experience with our advanced platform that integrates seamlessly 
+                        with your existing systems. Built for scalability and performance, it adapts to your 
+                        growing business requirements while maintaining security and reliability.
+                    </p>
+                    <button class="i-button" onclick="openModal('modal2')">Explore Features</button>
+                </div>
+            </div>
+
+            <div class="card next">
+                <div class="hero-section">
+                    <h2 class="hero-title">Gamma Services</h2>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">
+                        Unlock new possibilities with our premium service offering that delivers measurable 
+                        results. Our expert team provides 24/7 support and personalized consultation to 
+                        ensure your success every step of the way.
+                    </p>
+                    <button class="i-button" onclick="openModal('modal3')">Get Started</button>
+                </div>
+            </div>
+
+            <div class="swipe-hint">Swipe →</div>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-dot active" onclick="goToCard(0)"></div>
+            <div class="nav-dot" onclick="goToCard(1)"></div>
+            <div class="nav-dot" onclick="goToCard(2)"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" onclick="closeModal()"></div>
+    
+    <div class="modal" id="modal1">
+        <div class="modal-header">
+            <h3 class="modal-title">Project Alpha Details</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Project Alpha represents a breakthrough in workflow optimization. Our solution includes:</p>
+            <br>
+            <ul style="padding-left: 20px;">
+                <li>Advanced automation tools</li>
+                <li>Real-time analytics dashboard</li>
+                <li>Seamless integration capabilities</li>
+                <li>Enterprise-grade security</li>
+                <li>24/7 technical support</li>
+            </ul>
+            <br>
+            <p>Experience the difference with our proven methodology that has helped thousands of businesses achieve their goals.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="modal2">
+        <div class="modal-header">
+            <h3 class="modal-title">Beta Solutions Features</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Beta Solutions offers a comprehensive suite of features designed for modern businesses:</p>
+            <br>
+            <ul style="padding-left: 20px;">
+                <li>Cloud-based architecture</li>
+                <li>Mobile-responsive interface</li>
+                <li>Custom API integrations</li>
+                <li>Advanced reporting tools</li>
+                <li>Multi-user collaboration</li>
+            </ul>
+            <br>
+            <p>Scale your operations with confidence using our robust and reliable platform trusted by industry leaders.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="modal3">
+        <div class="modal-header">
+            <h3 class="modal-title">Gamma Services Overview</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Gamma Services provides premium consulting and implementation support:</p>
+            <br>
+            <ul style="padding-left: 20px;">
+                <li>Personalized consultation</li>
+                <li>Custom implementation</li>
+                <li>Training and onboarding</li>
+                <li>Ongoing optimization</li>
+                <li>Priority support</li>
+            </ul>
+            <br>
+            <p>Partner with our expert team to maximize your ROI and achieve sustainable growth for your business.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 3;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const cards = document.querySelectorAll('.card');
+        const navDots = document.querySelectorAll('.nav-dot');
+        const cardsContainer = document.querySelector('.cards-container');
+
+        function updateCards() {
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev', 'next');
+                if (index === currentCard) {
+                    card.classList.add('active');
+                } else if (index < currentCard) {
+                    card.classList.add('prev');
+                } else {
+                    card.classList.add('next');
+                }
+            });
+
+            navDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function goToCard(index) {
+            currentCard = index;
+            updateCards();
+        }
+
+        function nextCard() {
+            currentCard = (currentCard + 1) % totalCards;
+            updateCards();
+        }
+
+        function prevCard() {
+            currentCard = (currentCard - 1 + totalCards) % totalCards;
+            updateCards();
+        }
+
+        // Touch events
+        cardsContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        cardsContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+        });
+
+        cardsContainer.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const diffX = startX - currentX;
+            const threshold = 50;
+
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+            cardsContainer.style.cursor = 'grabbing';
+        });
+
+        cardsContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX;
+        });
+
+        cardsContainer.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            cardsContainer.style.cursor = 'grab';
+
+            const diffX = startX - currentX;
+            const threshold = 50;
+
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        cardsContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+            cardsContainer.style.cursor = 'grab';
+        });
+
+        // Modal functions
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const overlay = document.querySelector('.modal-overlay');
+            
+            overlay.classList.add('active');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modals = document.querySelectorAll('.modal');
+            const overlay = document.querySelector('.modal-overlay');
+            
+            modals.forEach(modal => modal.classList.remove('active'));
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevCard();
+            } else if (e.key === 'ArrowRight') {
+                nextCard();
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Auto-hide swipe hint after first interaction
+        let hasInteracted = false;
+        cardsContainer.addEventListener('touchstart', hideSwipeHint);
+        cardsContainer.addEventListener('mousedown', hideSwipeHint);
+
+        function hideSwipeHint() {
+            if (!hasInteracted) {
+                document.querySelector('.swipe-hint').style.display = 'none';
+                hasInteracted = true;
+            }
+        }
+
+        // Initialize
+        updateCards();
+        cardsContainer.style.cursor = 'grab';
+    </script>
+</body>
+</html>
