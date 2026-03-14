@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Swipeable Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #111;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .card-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .card-wrapper {
+            display: flex;
+            width: 500vw;
+            height: 100%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .card {
+            width: 100vw;
+            height: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-section {
+            height: 40%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card:nth-child(4) .hero-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .card:nth-child(5) .hero-section {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .body-section {
+            flex: 1;
+            background: #1a1a1a;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 2rem;
+            flex: 1;
+        }
+
+        .i-buttons-container {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .i-button {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: #000;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+        }
+
+        .i-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(251, 191, 36, 0.4);
+        }
+
+        .i-button:active {
+            transform: translateY(0);
+        }
+
+        .navigation-dots {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot.active {
+            background: #fbbf24;
+            transform: scale(1.2);
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #222;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1000;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .sheet-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .sheet-content {
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .body-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .i-buttons-container {
+                gap: 0.75rem;
+            }
+            
+            .i-button {
+                padding: 0.65rem 1.25rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card-wrapper" id="cardWrapper">
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Explore</h1>
+                        <p class="hero-subtitle">Discover new possibilities</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Embark on a journey of discovery with our comprehensive exploration tools. Uncover hidden insights, analyze trends, and make data-driven decisions that propel your projects forward.</p>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Features', 'Advanced analytics dashboard with real-time data visualization, customizable reports, and intelligent insights powered by machine learning algorithms.')">Features</button>
+                        <button class="i-button" onclick="openModal('Get Started', 'Begin your exploration journey in just three simple steps: Connect your data sources, configure your preferences, and start discovering actionable insights immediately.')">Get Started</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Create</h1>
+                        <p class="hero-subtitle">Build something amazing</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Transform your ideas into reality with our powerful creation suite. Access professional-grade tools, templates, and resources designed to bring your vision to life with ease and precision.</p>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Tools', 'Professional design suite including vector graphics editor, photo manipulation tools, template library with over 10,000 premium designs, and collaborative workspace features.')">Tools</button>
+                        <button class="i-button" onclick="openModal('Templates', 'Extensive collection of professionally designed templates for websites, mobile apps, presentations, marketing materials, and social media content. All fully customizable.')">Templates</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Connect</h1>
+                        <p class="hero-subtitle">Bridge the digital divide</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Seamlessly integrate with your favorite platforms and services. Our robust API ecosystem enables smooth data flow and communication across all your essential business tools.</p>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Integrations', 'Connect with over 500 popular services including CRM systems, marketing automation platforms, cloud storage, communication tools, and enterprise software solutions.')">Integrations</button>
+                        <button class="i-button" onclick="openModal('API Docs', 'Comprehensive API documentation with code examples, SDKs for popular programming languages, interactive testing environment, and dedicated developer support.')">API Docs</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Analyze</h1>
+                        <p class="hero-subtitle">Data-driven insights</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Unlock the power of your data with advanced analytics and intelligent reporting. Generate actionable insights that drive strategic decision-making and fuel business growth.</p>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Reports', 'Automated report generation with customizable metrics, scheduled delivery, interactive dashboards, trend analysis, and predictive modeling capabilities.')">Reports</button>
+                        <button class="i-button" onclick="openModal('Metrics', 'Track key performance indicators with real-time monitoring, custom metric creation, goal setting, performance benchmarking, and detailed trend analysis.')">Metrics</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Scale</h1>
+                        <p class="hero-subtitle">Grow without limits</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Future-proof your operations with scalable infrastructure and enterprise-grade solutions. Our platform grows with your business, ensuring optimal performance at every stage.</p>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Enterprise', 'Enterprise-grade security, unlimited scalability, dedicated support team, custom integrations, SLA guarantees, and advanced compliance features for large organizations.')">Enterprise</button>
+                        <button class="i-button" onclick="openModal('Pricing', 'Flexible pricing plans designed to scale with your business. Start free, upgrade as you grow. No hidden fees, transparent billing, and volume discounts available.')">Pricing</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-dots">
+            <div class="dot active" onclick="goToCard(0)"></div>
+            <div class="dot" onclick="goToCard(1)"></div>
+            <div class="dot" onclick="goToCard(2)"></div>
+            <div class="dot" onclick="goToCard(3)"></div>
+            <div class="dot" onclick="goToCard(4)"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-header">
+            <h3 class="sheet-title" id="modalTitle">Title</h3>
+            <button class="close-button" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="sheet-content" id="modalContent">
+            Content goes here
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 5;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        const cardWrapper = document.getElementById('cardWrapper');
+        const dots = document.querySelectorAll('.dot');
+
+        // Touch events
+        cardWrapper.addEventListener('touchstart', handleTouchStart, { passive: true });
+        cardWrapper.addEventListener('touchmove', handleTouchMove, { passive: true });
+        cardWrapper.addEventListener('touchend', handleTouchEnd);
+
+        // Mouse events for desktop
+        cardWrapper.addEventListener('mousedown', handleMouseDown);
+        cardWrapper.addEventListener('mousemove', handleMouseMove);
+        cardWrapper.addEventListener('mouseup', handleMouseUp);
+        cardWrapper.addEventListener('mouseleave', handleMouseUp);
+
+        function handleTouchStart(e) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            cardWrapper.style.transition = 'none';
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+            const diffX = currentX - startX;
+            const translateX = -currentCard * 100 + (diffX / window.innerWidth) * 100;
+            cardWrapper.style.transform = `translateX(${translateX}vw)`;
+        }
+
+        function handleTouchEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            cardWrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            
+            const diffX = currentX - startX;
+            const threshold = window.innerWidth * 0.2;
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0 && currentCard > 0) {
+                    goToCard(currentCard - 1);
+                } else if (diffX < 0 && currentCard < totalCards - 1) {
+                    goToCard(currentCard + 1);
+                } else {
+                    goToCard(currentCard);
+                }
+            } else {
+                goToCard(currentCard);
+            }
+        }
+
+        function handleMouseDown(e) {
+            startX = e.clientX;
+            isDragging = true;
+            cardWrapper.style.transition = 'none';
+            e.preventDefault();
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            currentX = e.clientX;
+            const diffX = currentX - startX;
+            const translateX = -currentCard * 100 + (diffX / window.innerWidth) * 100;
+            cardWrapper.style.transform = `translateX(${translateX}vw)`;
+        }
+
+        function handleMouseUp() {
+            if (!isDragging) return;
+            isDragging = false;
+            cardWrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            
+            const diffX = currentX - startX;
+            const threshold = window.innerWidth * 0.2;
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0 && currentCard > 0) {
+                    goToCard(currentCard - 1);
+                } else if (diffX < 0 && currentCard < totalCards - 1) {
+                    goToCard(currentCard + 1);
+                } else {
+                    goToCard(currentCard);
+                }
+            } else {
+                goToCard(currentCard);
+            }
+        }
+
+        function goToCard(index) {
+            currentCard = Math.max(0, Math.min(index, totalCards - 1));
+            cardWrapper.style.transform = `translateX(-${currentCard * 100}vw)`;
+            
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentCard);
+            });
+        }
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('overlay').classList.add('open');
+            document.getElementById('bottomSheet').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('open');
+            document.getElementById('bottomSheet').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentCard > 0) {
+                goToCard(currentCard - 1);
+            } else if (e.key === 'ArrowRight' && currentCard < totalCards - 1) {
+                goToCard(currentCard + 1);
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
