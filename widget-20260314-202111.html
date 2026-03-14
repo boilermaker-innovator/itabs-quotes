@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Quote Estimator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .widget-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .widget-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .result-section {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        .result-section.show {
+            display: block;
+        }
+        
+        .price-display {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .breakdown {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .slider-container {
+            margin-top: 10px;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .slider-value {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-header">
+            <div class="logo">iTabs</div>
+            <div class="subtitle">Get your custom quote in seconds</div>
+        </div>
+        
+        <form id="quoteForm">
+            <div class="form-group">
+                <label for="projectType">Project Type</label>
+                <select id="projectType" name="projectType" required>
+                    <option value="">Select project type</option>
+                    <option value="website">Website Development</option>
+                    <option value="mobile">Mobile App</option>
+                    <option value="webapp">Web Application</option>
+                    <option value="ecommerce">E-commerce Platform</option>
+                    <option value="custom">Custom Software</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="complexity">Project Complexity</label>
+                <select id="complexity" name="complexity" required>
+                    <option value="">Select complexity</option>
+                    <option value="basic">Basic (Simple functionality)</option>
+                    <option value="intermediate">Intermediate (Moderate features)</option>
+                    <option value="advanced">Advanced (Complex features)</option>
+                    <option value="enterprise">Enterprise (Full-scale solution)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeline">Timeline (weeks)</label>
+                <div class="slider-container">
+                    <input type="range" id="timeline" name="timeline" min="2" max="52" value="8" class="slider">
+                    <div class="slider-value" id="timelineValue">8 weeks</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Additional Features</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="database" name="features" value="database">
+                        <label for="database">Database Integration</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="api" name="features" value="api">
+                        <label for="api">API Development</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="auth" name="features" value="auth">
+                        <label for="auth">User Authentication</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="payment" name="features" value="payment">
+                        <label for="payment">Payment Integration</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="analytics" name="features" value="analytics">
+                        <label for="analytics">Analytics Dashboard</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="responsive" name="features" value="responsive">
+                        <label for="responsive">Responsive Design</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="budget">Budget Range</label>
+                <select id="budget" name="budget" required>
+                    <option value="">Select budget range</option>
+                    <option value="small">$1,000 - $5,000</option>
+                    <option value="medium">$5,000 - $15,000</option>
+                    <option value="large">$15,000 - $50,000</option>
+                    <option value="enterprise">$50,000+</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="calculate-btn">Calculate Quote</button>
+        </form>
+        
+        <div class="result-section" id="resultSection">
+            <div class="price-display" id="finalPrice">$0</div>
+            <div class="breakdown" id="breakdown"></div>
+        </div>
+    </div>
+    
+    <script>
+        const timelineSlider = document.getElementById('timeline');
+        const timelineValue = document.getElementById('timelineValue');
+        const form = document.getElementById('quoteForm');
+        const resultSection = document.getElementById('resultSection');
+        const finalPrice = document.getElementById('finalPrice');
+        const breakdown = document.getElementById('breakdown');
+        
+        // Update timeline display
+        timelineSlider.addEventListener('input', function() {
+            timelineValue.textContent = this.value + ' weeks';
+        });
+        
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateQuote();
+        });
+        
+        function calculateQuote() {
+            const formData = new FormData(form);
+            const projectType = formData.get('projectType');
+            const complexity = formData.get('complexity');
+            const timeline = parseInt(formData.get('timeline'));
+            const budget = formData.get('budget');
+            const features = formData.getAll('features');
+            
+            // Base pricing
+            const basePrices = {
+                'website': 2500,
+                'mobile': 8000,
+                'webapp': 12000,
+                'ecommerce': 15000,
+                'custom': 20000
+            };
+            
+            const complexityMultipliers = {
+                'basic': 0.8,
+                'intermediate': 1.0,
+                'advanced': 1.5,
+                'enterprise': 2.5
+            };
+            
+            const featurePrices = {
+                'database': 1500,
+                'api': 2000,
+                'auth': 1000,
+                'payment': 1800,
+                'analytics': 2500,
+                'responsive': 800
+            };
+            
+            // Calculate base price
+            let basePrice = basePrices[projectType] || 0;
+            basePrice *= complexityMultipliers[complexity] || 1;
+            
+            // Timeline adjustment (rush jobs cost more, longer timelines cost less)
+            if (timeline < 4) {
+                basePrice *= 1.5; // Rush multiplier
+            } else if (timeline > 20) {
+                basePrice *= 0.9; // Discount for longer timelines
+            }
+            
+            // Add feature costs
+            let featureCost = 0;
+            features.forEach(feature => {
+                featureCost += featurePrices[feature] || 0;
+            });
+            
+            const totalPrice = Math.round(basePrice + featureCost);
+            
+            // Display results
+            finalPrice.textContent = '$' + totalPrice.toLocaleString();
+            
+            let breakdownHTML = '<div class="breakdown-item"><span>Base Price:</span><span>$' + Math.round(basePrice).toLocaleString() + '</span></div>';
+            if (featureCost > 0) {
+                breakdownHTML += '<div class="breakdown-item"><span>Additional Features:</span><span>$' + featureCost.toLocaleString() + '</span></div>';
+            }
+            breakdownHTML += '<div class="breakdown-item" style="border-top: 1px solid #ddd; padding-top: 10px; margin-top: 10px; font-weight: bold;"><span>Total Estimate:</span><span>$' + totalPrice.toLocaleString() + '</span></div>';
+            breakdownHTML += '<div style="margin-top: 15px; font-size: 12px; color: #888; text-align: center;">*This is an estimate. Final pricing may vary based on specific requirements.</div>';
+            
+            breakdown.innerHTML = breakdownHTML;
+            resultSection.classList.add('show');
+            
+            // Smooth scroll to results
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
