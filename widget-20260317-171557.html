@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Swipeable Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+        }
+        
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        
+        .cards-container {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+        
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card.active {
+            transform: translateX(0);
+        }
+        
+        .card.prev {
+            transform: translateX(-100%);
+        }
+        
+        .card.next {
+            transform: translateX(100%);
+        }
+        
+        .hero-section {
+            height: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .hero-section.card2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .hero-section.card3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .body-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .summary-text {
+            color: #cccccc;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .i-button {
+            background: #f59e0b;
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .i-button:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background: #f59e0b;
+            width: 24px;
+            border-radius: 4px;
+        }
+        
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            max-width: 430px;
+            margin: 0 auto;
+        }
+        
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+        
+        .bottom-sheet-header {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .bottom-sheet-content {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        @media (max-width: 430px) {
+            .widget-container {
+                border-radius: 0;
+                height: 100vh;
+            }
+            
+            .bottom-sheet {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-container" id="cardsContainer">
+            <div class="card active">
+                <div class="hero-section">
+                    <div>Welcome to iTabs</div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Discover amazing features and capabilities with our innovative platform. Experience seamless integration and powerful tools designed for modern workflows.
+                    </div>
+                    <button class="i-button" onclick="openBottomSheet('Features Overview', 'Explore our comprehensive suite of tools including real-time collaboration, advanced analytics, custom workflows, and seamless integrations with your favorite platforms.')">
+                        Learn More
+                    </button>
+                    <button class="i-button" onclick="openBottomSheet('Getting Started', 'Begin your journey with our step-by-step onboarding process. Set up your workspace, invite team members, and configure your first project in minutes.')">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card next">
+                <div class="hero-section card2">
+                    <div>Advanced Analytics</div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Gain deep insights into your data with powerful analytics tools. Track performance, identify trends, and make data-driven decisions with confidence.
+                    </div>
+                    <button class="i-button" onclick="openBottomSheet('Analytics Dashboard', 'Access real-time metrics, custom reports, and interactive visualizations. Monitor KPIs, track user behavior, and analyze performance across all your projects.')">
+                        View Dashboard
+                    </button>
+                    <button class="i-button" onclick="openBottomSheet('Custom Reports', 'Create tailored reports that matter to your business. Schedule automated reports, export data in multiple formats, and share insights with stakeholders.')">
+                        Create Reports
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card next">
+                <div class="hero-section card3">
+                    <div>Team Collaboration</div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Work together seamlessly with built-in collaboration tools. Share projects, communicate in real-time, and keep everyone aligned on goals.
+                    </div>
+                    <button class="i-button" onclick="openBottomSheet('Team Features', 'Invite unlimited team members, set permissions and roles, create shared workspaces, and collaborate on projects with real-time editing and commenting.')">
+                        Team Setup
+                    </button>
+                    <button class="i-button" onclick="openBottomSheet('Communication Tools', 'Stay connected with integrated chat, video calls, screen sharing, and project discussions. Never miss important updates with smart notifications.')">
+                        Communication
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <div class="nav-dot active" onclick="goToCard(0)"></div>
+            <div class="nav-dot" onclick="goToCard(1)"></div>
+            <div class="nav-dot" onclick="goToCard(2)"></div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay" onclick="closeBottomSheet()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="bottom-sheet-header">
+            <h3 id="sheetTitle">Title</h3>
+            <button class="close-btn" onclick="closeBottomSheet()">&times;</button>
+        </div>
+        <div class="bottom-sheet-content">
+            <p id="sheetContent">Content</p>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 3;
+        let startX = 0;
+        let isDragging = false;
+        
+        const cardsContainer = document.getElementById('cardsContainer');
+        const cards = document.querySelectorAll('.card');
+        const navDots = document.querySelectorAll('.nav-dot');
+        
+        function updateCards() {
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev', 'next');
+                if (index === currentCard) {
+                    card.classList.add('active');
+                } else if (index < currentCard) {
+                    card.classList.add('prev');
+                } else {
+                    card.classList.add('next');
+                }
+            });
+            
+            navDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+        
+        function goToCard(index) {
+            currentCard = index;
+            updateCards();
+        }
+        
+        function nextCard() {
+            currentCard = (currentCard + 1) % totalCards;
+            updateCards();
+        }
+        
+        function prevCard() {
+            currentCard = (currentCard - 1 + totalCards) % totalCards;
+            updateCards();
+        }
+        
+        // Touch events
+        cardsContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+        
+        cardsContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+            
+            isDragging = false;
+        });
+        
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+        });
+        
+        cardsContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            
+            const endX = e.clientX;
+            const diffX = startX - endX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+            
+            isDragging = false;
+        });
+        
+        // Bottom sheet functions
+        function openBottomSheet(title, content) {
+            document.getElementById('sheetTitle').textContent = title;
+            document.getElementById('sheetContent').textContent = content;
+            document.getElementById('overlay').classList.add('open');
+            document.getElementById('bottomSheet').classList.add('open');
+        }
+        
+        function closeBottomSheet() {
+            document.getElementById('overlay').classList.remove('open');
+            document.getElementById('bottomSheet').classList.remove('open');
+        }
+        
+        // Auto-advance cards every 5 seconds
+        setInterval(() => {
+            if (!document.getElementById('bottomSheet').classList.contains('open')) {
+                nextCard();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
