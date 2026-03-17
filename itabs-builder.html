@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Widget Builder</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f5; display: flex; justify-content: center; padding: 2rem 1rem; min-height: 100vh; }
+  .wrap { background: white; border-radius: 12px; padding: 2rem; max-width: 560px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.08); height: fit-content; }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+  .sub { font-size: 13px; color: #666; margin-bottom: 1.5rem; }
+  .field { margin-bottom: 14px; }
+  label { font-size: 12px; color: #666; display: block; margin-bottom: 4px; }
+  input, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; }
+  input:focus, textarea:focus { outline: none; border-color: #888; }
+  textarea { resize: vertical; min-height: 90px; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .theme-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .theme-pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; border: 1px solid #ddd; cursor: pointer; background: white; transition: all 0.15s; }
+  .theme-pill[data-theme="green"].active { border-color: #3B6D11; color: #3B6D11; background: #EAF3DE; font-weight: 600; }
+  .theme-pill[data-theme="blue"].active { border-color: #185FA5; color: #185FA5; background: #E6F1FB; font-weight: 600; }
+  .theme-pill[data-theme="amber"].active { border-color: #854F0B; color: #854F0B; background: #FAEEDA; font-weight: 600; }
+  .theme-pill[data-theme="coral"].active { border-color: #993C1D; color: #993C1D; background: #FAECE7; font-weight: 600; }
+  .theme-pill[data-theme="teal"].active { border-color: #0F6E56; color: #0F6E56; background: #E1F5EE; font-weight: 600; }
+  .theme-pill[data-theme="gray"].active { border-color: #5F5E5A; color: #5F5E5A; background: #F1EFE8; font-weight: 600; }
+  #status { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 1rem; display: none; }
+  #status.success { background: #EAF3DE; color: #3B6D11; display: block; }
+  #status.error { background: #FCEBEB; color: #A32D2D; display: block; }
+  #status.info { background: #E6F1FB; color: #185FA5; display: block; }
+  .btn { width: 100%; height: 44px; border-radius: 8px; border: none; background: #111; color: white; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; }
+  .btn:hover { background: #333; }
+  .btn:disabled { opacity: 0.5; cursor: wait; }
+  hr { border: none; border-top: 1px solid #eee; margin: 1.5rem 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>iTabs Widget Builder</h1>
+  <p class="sub">Fill in the business details and hit submit — your widget will be built and emailed to you.</p>
+
+  <div id="status"></div>
+
+  <div class="two-col">
+    <div class="field">
+      <label>Business name</label>
+      <input type="text" id="businessName" placeholder="e.g. Rick's Trim & Brick" />
+    </div>
+    <div class="field">
+      <label>Phone</label>
+      <input type="tel" id="phone" placeholder="0400 000 000" />
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="field">
+      <label>Trade type</label>
+      <input type="text" id="trade" placeholder="e.g. Landscaping" />
+    </div>
+    <div class="field">
+      <label>Suburb / area</label>
+      <input type="text" id="suburb" placeholder="e.g. Joondalup Perth" />
+    </div>
+  </div>
+  <div class="field">
+    <label>Services (one per line)</label>
+    <textarea id="services" placeholder="Retaining walls&#10;Paving&#10;Brick edging&#10;Garden beds"></textarea>
+  </div>
+  <div class="field">
+    <label>Colour theme</label>
+    <div class="theme-row">
+      <span class="theme-pill" data-theme="green" onclick="setTheme('green')">Green</span>
+      <span class="theme-pill" data-theme="blue" onclick="setTheme('blue')">Blue</span>
+      <span class="theme-pill" data-theme="amber" onclick="setTheme('amber')">Amber</span>
+      <span class="theme-pill" data-theme="coral" onclick="setTheme('coral')">Coral</span>
+      <span class="theme-pill" data-theme="teal" onclick="setTheme('teal')">Teal</span>
+      <span class="theme-pill" data-theme="gray" onclick="setTheme('gray')">Stone</span>
+    </div>
+  </div>
+  <div class="field">
+    <label>Notes for Claude (optional)</label>
+    <input type="text" id="notes" placeholder="e.g. Key selling points, vibe, anything special" />
+  </div>
+
+  <hr>
+  <button class="btn" id="submitBtn" onclick="submitForm()">Build my iTabs widget →</button>
+</div>
+
+<script>
+const WEBHOOK = 'https://hook.eu2.make.com/ux7jpras9okhp8ynv14b9w1rm2okji0e';
+let selectedTheme = '';
+
+function setTheme(t) {
+  selectedTheme = t;
+  document.querySelectorAll('.theme-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-theme="'+t+'"]').classList.add('active');
+}
+
+function showStatus(msg, type) {
+  const s = document.getElementById('status');
+  s.textContent = msg;
+  s.className = type;
+}
+
+async function submitForm() {
+  const businessName = document.getElementById('businessName').value.trim();
+  if (!businessName) { showStatus('Please enter a business name.', 'error'); return; }
+
+  const payload = {
+    businessName,
+    phone: document.getElementById('phone').value,
+    trade: document.getElementById('trade').value,
+    suburb: document.getElementById('suburb').value,
+    services: document.getElementById('services').value,
+    theme: selectedTheme || 'green',
+    notes: document.getElementById('notes').value
+  };
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  showStatus('Submitting to Make.com...', 'info');
+
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok || res.type === 'opaque') {
+      showStatus('Sent! Your widget is being built — check your email for the live URL in a couple of minutes.', 'success');
+      btn.textContent = 'Submitted ✓';
+    } else {
+      throw new Error('HTTP ' + res.status);
+    }
+  } catch(e) {
+    showStatus('Error: ' + e.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Build my iTabs widget →';
+  }
+}
+</script>
+</body>
+</html>
