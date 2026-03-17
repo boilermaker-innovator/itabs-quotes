@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            height: 100vh;
+            background: #1e1e1e;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+        }
+
+        @media (min-width: 431px) {
+            .widget-container {
+                height: 80vh;
+                max-height: 800px;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        .cards-container {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card.active {
+            transform: translateX(0);
+        }
+
+        .card.prev {
+            transform: translateX(-100%);
+        }
+
+        .card.next {
+            transform: translateX(100%);
+        }
+
+        .hero-section {
+            height: 40%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .body-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .summary-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .i-button {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+        }
+
+        .i-button:hover {
+            background: #ffb300;
+            transform: translateY(-1px);
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-dot.active {
+            background: #ffc107;
+            transform: scale(1.2);
+        }
+
+        .modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2d2d2d;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffc107;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-content {
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-container" id="cardsContainer">
+            <div class="card active">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>Featured</h1>
+                        <p>Discover amazing content</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Experience our premium features and services designed to enhance your daily workflow. Get access to exclusive tools and insights that will transform the way you work.
+                    </div>
+                    <button class="i-button" onclick="openModal('Learn More', 'Discover all the powerful features available in our premium package. From advanced analytics to priority support, we have everything you need to succeed.')">Learn More</button>
+                    <button class="i-button" onclick="openModal('Get Started', 'Ready to begin your journey? Sign up today and get instant access to all features with our 30-day free trial. No credit card required.')">Get Started</button>
+                </div>
+            </div>
+
+            <div class="card next">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>Trending</h1>
+                        <p>What's popular now</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Stay up to date with the latest trends and popular content. See what everyone is talking about and join the conversation with trending topics and discussions.
+                    </div>
+                    <button class="i-button" onclick="openModal('View Trends', 'Explore the most popular topics, hashtags, and discussions happening right now. Stay connected with what matters most in your industry.')">View Trends</button>
+                    <button class="i-button" onclick="openModal('Join Discussion', 'Become part of the conversation. Share your thoughts, connect with like-minded individuals, and contribute to trending discussions.')">Join Discussion</button>
+                </div>
+            </div>
+
+            <div class="card next">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1>Personal</h1>
+                        <p>Customized for you</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Get personalized recommendations and content tailored specifically to your interests and preferences. Our AI-powered system learns from your behavior to deliver the perfect experience.
+                    </div>
+                    <button class="i-button" onclick="openModal('Customize', 'Personalize your experience by setting preferences, choosing topics of interest, and configuring your dashboard to match your workflow.')">Customize</button>
+                    <button class="i-button" onclick="openModal('My Profile', 'Manage your profile, view your activity history, and update your preferences. Keep track of your progress and achievements.')">My Profile</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-dot active" onclick="goToCard(0)"></div>
+            <div class="nav-dot" onclick="goToCard(1)"></div>
+            <div class="nav-dot" onclick="goToCard(2)"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle"></div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const cards = document.querySelectorAll('.card');
+        const dots = document.querySelectorAll('.nav-dot');
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        function updateCards() {
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev', 'next');
+                if (index === currentCard) {
+                    card.classList.add('active');
+                } else if (index < currentCard) {
+                    card.classList.add('prev');
+                } else {
+                    card.classList.add('next');
+                }
+            });
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function goToCard(index) {
+            currentCard = index;
+            updateCards();
+        }
+
+        function nextCard() {
+            currentCard = (currentCard + 1) % cards.length;
+            updateCards();
+        }
+
+        function prevCard() {
+            currentCard = (currentCard - 1 + cards.length) % cards.length;
+            updateCards();
+        }
+
+        // Touch events
+        document.getElementById('cardsContainer').addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        document.getElementById('cardsContainer').addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+        });
+
+        document.getElementById('cardsContainer').addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        // Mouse events for desktop
+        document.getElementById('cardsContainer').addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX;
+        });
+
+        document.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // Initialize
+        updateCards();
+    </script>
+</body>
+</html>
