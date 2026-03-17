@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+        }
+        
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            height: 80vh;
+            max-height: 700px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .cards-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .cards-container {
+            display: flex;
+            width: 500%;
+            height: 100%;
+            transition: transform 0.3s ease-out;
+        }
+        
+        .card {
+            width: 20%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #222;
+        }
+        
+        .hero-section {
+            height: 40%;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: white;
+            position: relative;
+        }
+        
+        .card:nth-child(1) .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .card:nth-child(4) .hero-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .card:nth-child(5) .hero-section {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+        
+        .hero-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .hero-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .body-section {
+            flex: 1;
+            padding: 30px;
+            background: #1a1a1a;
+        }
+        
+        .body-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ccc;
+            margin-bottom: 30px;
+        }
+        
+        .i-button {
+            background: #ffa500;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .i-button:hover {
+            background: #ff8c00;
+            transform: translateY(-2px);
+        }
+        
+        .indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .indicator.active {
+            background: #ffa500;
+        }
+        
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-radius: 20px 20px 0 0;
+            padding: 30px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        .bottom-sheet.active {
+            transform: translateY(0);
+        }
+        
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .sheet-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .sheet-content {
+            color: #ccc;
+            line-height: 1.6;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        @media (max-width: 430px) {
+            .widget-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper">
+            <div class="cards-container" id="cardsContainer">
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-title">Productivity</div>
+                        <div class="hero-subtitle">Boost your daily workflow</div>
+                    </div>
+                    <div class="body-section">
+                        <div class="body-text">
+                            Discover tools and techniques to maximize your productivity and achieve more in less time. Learn from industry experts and implement proven strategies.
+                        </div>
+                        <button class="i-button" onclick="openModal('Productivity Tips', 'Master time management, eliminate distractions, and create efficient workflows. Learn about the Pomodoro technique, task batching, and priority matrix methods.')">Learn More</button>
+                        <button class="i-button" onclick="openModal('Tools', 'Essential productivity apps and software: Notion, Todoist, Slack, Trello, and more. Compare features and find the perfect fit for your workflow.')">View Tools</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-title">Design</div>
+                        <div class="hero-subtitle">Create stunning visuals</div>
+                    </div>
+                    <div class="body-section">
+                        <div class="body-text">
+                            Master the art of visual design with modern tools and techniques. From UI/UX principles to graphic design fundamentals, elevate your creative skills.
+                        </div>
+                        <button class="i-button" onclick="openModal('Design Principles', 'Learn about color theory, typography, composition, and visual hierarchy. Understand how to create designs that communicate effectively and engage users.')">Principles</button>
+                        <button class="i-button" onclick="openModal('Software', 'Professional design software guide: Adobe Creative Suite, Figma, Sketch, and Canva. Choose the right tools for your design projects.')">Software</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-title">Technology</div>
+                        <div class="hero-subtitle">Stay ahead of innovation</div>
+                    </div>
+                    <div class="body-section">
+                        <div class="body-text">
+                            Explore the latest technological trends and innovations. From AI and machine learning to blockchain and IoT, understand how technology shapes our future.
+                        </div>
+                        <button class="i-button" onclick="openModal('AI & ML', 'Artificial Intelligence and Machine Learning fundamentals. Explore applications, tools, and how these technologies are transforming industries worldwide.')">AI & ML</button>
+                        <button class="i-button" onclick="openModal('Trends', 'Latest tech trends: Web3, metaverse, quantum computing, and sustainable technology. Stay informed about emerging technologies and their impact.')">Trends</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-title">Business</div>
+                        <div class="hero-subtitle">Scale your success</div>
+                    </div>
+                    <div class="body-section">
+                        <div class="body-text">
+                            Build and grow your business with proven strategies and insights. Learn from successful entrepreneurs and discover frameworks for sustainable growth.
+                        </div>
+                        <button class="i-button" onclick="openModal('Strategy', 'Business strategy fundamentals: market analysis, competitive positioning, and growth planning. Develop a roadmap for long-term success.')">Strategy</button>
+                        <button class="i-button" onclick="openModal('Marketing', 'Digital marketing essentials: SEO, social media, content marketing, and analytics. Build your brand and reach your target audience effectively.')">Marketing</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-title">Health</div>
+                        <div class="hero-subtitle">Optimize your wellbeing</div>
+                    </div>
+                    <div class="body-section">
+                        <div class="body-text">
+                            Prioritize your physical and mental health with evidence-based approaches. Discover nutrition, fitness, and mindfulness practices for a balanced lifestyle.
+                        </div>
+                        <button class="i-button" onclick="openModal('Fitness', 'Complete fitness guide: strength training, cardio, flexibility, and recovery. Create a sustainable workout routine that fits your lifestyle and goals.')">Fitness</button>
+                        <button class="i-button" onclick="openModal('Nutrition', 'Nutrition fundamentals: macronutrients, meal planning, and healthy eating habits. Learn how proper nutrition supports your energy and overall health.')">Nutrition</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="indicators">
+            <div class="indicator active" onclick="goToSlide(0)"></div>
+            <div class="indicator" onclick="goToSlide(1)"></div>
+            <div class="indicator" onclick="goToSlide(2)"></div>
+            <div class="indicator" onclick="goToSlide(3)"></div>
+            <div class="indicator" onclick="goToSlide(4)"></div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-header">
+            <div class="sheet-title" id="sheetTitle"></div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="sheet-content" id="sheetContent"></div>
+    </div>
+    
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 5;
+        const cardsContainer = document.getElementById('cardsContainer');
+        const indicators = document.querySelectorAll('.indicator');
+        
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        function updateSlide() {
+            cardsContainer.style.transform = `translateX(-${currentSlide * 20}%)`;
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+        
+        function goToSlide(slideIndex) {
+            currentSlide = slideIndex;
+            updateSlide();
+        }
+        
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlide();
+        }
+        
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlide();
+        }
+        
+        // Touch events
+        cardsContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+        
+        cardsContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+        });
+        
+        cardsContainer.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            const diffX = startX - currentX;
+            const threshold = 50;
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+            
+            isDragging = false;
+        });
+        
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+            cardsContainer.style.cursor = 'grabbing';
+        });
+        
+        cardsContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX;
+        });
+        
+        cardsContainer.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            const diffX = startX - currentX;
+            const threshold = 50;
+            
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+            
+            isDragging = false;
+            cardsContainer.style.cursor = 'grab';
+        });
+        
+        cardsContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+            cardsContainer.style.cursor = 'grab';
+        });
+        
+        cardsContainer.style.cursor = 'grab';
+        
+        // Modal functions
+        function openModal(title, content) {
+            document.getElementById('sheetTitle').textContent = title;
+            document.getElementById('sheetContent').textContent = content;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('bottomSheet').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('bottomSheet').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
