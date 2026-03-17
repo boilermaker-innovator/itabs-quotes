@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Swipeable Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            position: relative;
+            background: #1a1a1a;
+            border-radius: 0;
+        }
+
+        @media (min-width: 431px) {
+            .widget-container {
+                border-radius: 20px;
+                box-shadow: 0 0 0 1px #333, 0 20px 40px rgba(0, 0, 0, 0.7);
+                margin: 20px;
+            }
+        }
+
+        .cards-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        @media (min-width: 431px) {
+            .cards-wrapper {
+                height: 800px;
+            }
+        }
+
+        .cards-container {
+            display: flex;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .card {
+            min-width: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+        }
+
+        .card-hero {
+            height: 40%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .card:nth-child(2) .card-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .card-hero {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card:nth-child(4) .card-hero {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            flex: 1;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .summary-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #cccccc;
+            margin-bottom: 20px;
+        }
+
+        .i-button {
+            background: #fbbf24;
+            color: #000000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s ease;
+            align-self: flex-start;
+        }
+
+        .i-button:hover {
+            background: #f59e0b;
+        }
+
+        .i-button::before {
+            content: "i";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            background: #000000;
+            color: #fbbf24;
+            border-radius: 50%;
+            font-size: 12px;
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .nav-dot.active {
+            background: #fbbf24;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 100%;
+            max-width: 430px;
+            background: #2a2a2a;
+            border-radius: 20px 20px 0 0;
+            padding: 30px 20px 40px;
+            transition: transform 0.3s ease;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active .bottom-sheet {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: #666;
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .sheet-content h3 {
+            color: #fbbf24;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .sheet-content p {
+            line-height: 1.6;
+            color: #cccccc;
+            margin-bottom: 15px;
+        }
+
+        .close-modal {
+            background: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .touch-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper">
+            <div class="cards-container" id="cardsContainer">
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h1>Welcome</h1>
+                            <p>Discover amazing content</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Explore our innovative solutions designed to transform your digital experience. Our platform offers cutting-edge tools and seamless integration to help you achieve your goals efficiently.</p>
+                        <button class="i-button" onclick="openModal('modal1')">Learn More</button>
+                        <p class="summary-text">Get started with our comprehensive suite of features that adapt to your needs and scale with your growth.</p>
+                        <button class="i-button" onclick="openModal('modal2')">Get Started</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h1>Features</h1>
+                            <p>Powerful capabilities</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Our advanced analytics dashboard provides real-time insights into your performance metrics, helping you make data-driven decisions with confidence.</p>
+                        <button class="i-button" onclick="openModal('modal3')">View Analytics</button>
+                        <p class="summary-text">Streamline your workflow with intelligent automation tools that reduce manual tasks and increase productivity.</p>
+                        <button class="i-button" onclick="openModal('modal4')">Automation Tools</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h1>Solutions</h1>
+                            <p>Tailored for you</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Enterprise-grade security ensures your data remains protected with end-to-end encryption and compliance with industry standards.</p>
+                        <button class="i-button" onclick="openModal('modal5')">Security Details</button>
+                        <p class="summary-text">24/7 customer support with dedicated account managers to ensure your success every step of the way.</p>
+                        <button class="i-button" onclick="openModal('modal6')">Contact Support</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h1>Connect</h1>
+                            <p>Join our community</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Connect with thousands of users in our vibrant community. Share insights, get help, and collaborate on innovative projects.</p>
+                        <button class="i-button" onclick="openModal('modal7')">Join Community</button>
+                        <p class="summary-text">Access exclusive resources, webinars, and training materials to maximize your platform experience.</p>
+                        <button class="i-button" onclick="openModal('modal8')">Resources</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="navigation">
+                <div class="nav-dot active" onclick="goToCard(0)"></div>
+                <div class="nav-dot" onclick="goToCard(1)"></div>
+                <div class="nav-dot" onclick="goToCard(2)"></div>
+                <div class="nav-dot" onclick="goToCard(3)"></div>
+            </div>
+            
+            <div class="touch-area" id="touchArea"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="sheet-handle"></div>
+            <div class="sheet-content" id="sheetContent">
+                <h3>Information</h3>
+                <p>Modal content will appear here.</p>
+                <button class="close-modal" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 4;
+        let startX = 0;
+        let isDragging = false;
+        let currentTranslate = 0;
+        let prevTranslate = 0;
+
+        const cardsContainer = document.getElementById('cardsContainer');
+        const touchArea = document.getElementById('touchArea');
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        const modalContents = {
+            modal1: {
+                title: "Learn More",
+                content: "Discover how our platform revolutionizes digital workflows with AI-powered automation, intuitive interfaces, and seamless integrations. Our solution adapts to your unique business needs while providing scalable infrastructure that grows with your organization."
+            },
+            modal2: {
+                title: "Get Started",
+                content: "Begin your journey in just a few clicks. Our onboarding process guides you through setup, configuration, and initial deployment. Access our quick-start templates and comprehensive documentation to accelerate your implementation."
+            },
+            modal3: {
+                title: "Analytics Dashboard",
+                content: "Gain deep insights with our advanced analytics engine. Track key performance indicators, visualize trends, and generate custom reports. Real-time data processing ensures you always have the latest information at your fingertips."
+            },
+            modal4: {
+                title: "Automation Tools",
+                content: "Streamline repetitive tasks with our intelligent automation suite. Create custom workflows, set up triggers and conditions, and integrate with your existing tools. Reduce manual work by up to 80% while improving accuracy and consistency."
+            },
+            modal5: {
+                title: "Security & Compliance",
+                content: "Enterprise-level security with SOC 2 Type II certification, GDPR compliance, and bank-grade encryption. Multi-factor authentication, role-based access controls, and comprehensive audit logs ensure your data remains secure and compliant."
+            },
+            modal6: {
+                title: "Customer Support",
+                content: "Our dedicated support team is available 24/7 to assist you. Access live chat, phone support, and our comprehensive knowledge base. Premium customers receive dedicated account managers and priority response times."
+            },
+            modal7: {
+                title: "Join Our Community",
+                content: "Connect with over 50,000 active users in our community forums. Share best practices, get answers to technical questions, and collaborate on innovative solutions. Regular community events and networking opportunities available."
+            },
+            modal8: {
+                title: "Learning Resources",
+                content: "Access our extensive library of tutorials, documentation, and training materials. Interactive courses, video walkthroughs, and certification programs help you master the platform and advance your skills."
+            }
+        };
+
+        // Touch events
+        touchArea.addEventListener('touchstart', touchStart);
+        touchArea.addEventListener('touchmove', touchMove);
+        touchArea.addEventListener('touchend', touchEnd);
+
+        // Mouse events for desktop
+        touchArea.addEventListener('mousedown', touchStart);
+        touchArea.addEventListener('mousemove', touchMove);
+        touchArea.addEventListener('mouseup', touchEnd);
+        touchArea.addEventListener('mouseleave', touchEnd);
+
+        function touchStart(event) {
+            isDragging = true;
+            startX = event.type.includes('mouse') ? event.clientX : event.touches[0].clientX;
+            cardsContainer.style.transition = 'none';
+        }
+
+        function touchMove(event) {
+            if (!isDragging) return;
+            
+            event.preventDefault();
+            const currentX = event.type.includes('mouse') ? event.clientX : event.touches[0].clientX;
+            const diff = currentX - startX;
+            currentTranslate = prevTranslate + diff;
+            
+            cardsContainer.style.transform = `translateX(${currentTranslate}px)`;
+        }
+
+        function touchEnd() {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            const movedBy = currentTranslate - prevTranslate;
+            
+            if (movedBy < -100 && currentCard < totalCards - 1) {
+                currentCard++;
+            } else if (movedBy > 100 && currentCard > 0) {
+                currentCard--;
+            }
+            
+            setPositionByIndex();
+        }
+
+        function setPositionByIndex() {
+            currentTranslate = currentCard * -430;
+            prevTranslate = currentTranslate;
+            cardsContainer.style.transition = 'transform 0.3s ease';
+            cardsContainer.style.transform = `translateX(${currentTranslate}px)`;
+            updateNavigation();
+        }
+
+        function goToCard(index) {
+            currentCard = index;
+            setPositionByIndex();
+        }
+
+        function updateNavigation() {
+            navDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function openModal(modalId) {
+            const modal = modalContents[modalId];
+            document.getElementById('sheetContent').innerHTML = `
+                <h3>${modal.title}</h3>
+                <p>${modal.content}</p>
+                <button class="close-modal" onclick="closeModal()">Close</button>
+            `;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Initialize
+        setPositionByIndex();
+    </script>
+</body>
+</html>
