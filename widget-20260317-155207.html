@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+        }
+
+        .cards-wrapper {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            opacity: 0;
+        }
+
+        .card.active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .card.prev {
+            transform: translateX(-100%);
+            opacity: 1;
+        }
+
+        .hero-section {
+            height: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .hero-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .body-section {
+            padding: 30px 25px;
+            background: #1a1a1a;
+        }
+
+        .summary-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #e0e0e0;
+        }
+
+        .i-button {
+            background: #ffa500;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            margin: 0 10px 10px 0;
+            transition: background-color 0.3s ease;
+        }
+
+        .i-button:hover {
+            background: #ff8c00;
+        }
+
+        .dots-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: background 0.3s ease;
+        }
+
+        .dot.active {
+            background: #ffa500;
+        }
+
+        .modal {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            transform: translateY(100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #444;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .touch-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 50px;
+            z-index: 10;
+        }
+
+        @media (min-width: 431px) {
+            .widget-container {
+                box-shadow: 0 0 50px rgba(255, 165, 0, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper">
+            <div class="card active">
+                <div class="hero-section">
+                    <h1 class="hero-title">Welcome</h1>
+                    <p class="hero-subtitle">Discover amazing features</p>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Experience the power of our innovative platform designed to streamline your workflow and boost productivity. Get started with our comprehensive suite of tools.</p>
+                    <button class="i-button" onclick="openModal('Learn More', 'Dive deeper into our platform features including advanced analytics, real-time collaboration, and seamless integrations with your favorite tools.')">Learn More</button>
+                    <button class="i-button" onclick="openModal('Features', 'Our platform includes dashboard analytics, team collaboration tools, project management, automated workflows, and 24/7 customer support.')">Features</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <h1 class="hero-title">Analytics</h1>
+                    <p class="hero-subtitle">Data-driven insights</p>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Transform your data into actionable insights with our powerful analytics dashboard. Track performance metrics, identify trends, and make informed decisions.</p>
+                    <button class="i-button" onclick="openModal('Dashboard', 'Access comprehensive charts, graphs, and real-time data visualization. Custom reporting tools help you track KPIs and generate detailed analytics reports.')">Dashboard</button>
+                    <button class="i-button" onclick="openModal('Reports', 'Generate automated reports with customizable templates. Export data in multiple formats and schedule regular report delivery to stakeholders.')">Reports</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <h1 class="hero-title">Collaboration</h1>
+                    <p class="hero-subtitle">Work together seamlessly</p>
+                </div>
+                <div class="body-section">
+                    <p class="summary-text">Connect your team with powerful collaboration tools. Share files, communicate in real-time, and manage projects efficiently from anywhere in the world.</p>
+                    <button class="i-button" onclick="openModal('Team Chat', 'Instant messaging with file sharing, voice calls, and video conferencing. Create channels for different projects and departments.')">Team Chat</button>
+                    <button class="i-button" onclick="openModal('File Sharing', 'Secure cloud storage with version control, permission management, and real-time collaborative editing capabilities.')">File Sharing</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="touch-area" id="touchArea"></div>
+
+        <div class="dots-indicator">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const cards = document.querySelectorAll('.card');
+        const dots = document.querySelectorAll('.dot');
+        const totalCards = cards.length;
+        let startX = 0;
+        let isDragging = false;
+
+        const touchArea = document.getElementById('touchArea');
+
+        touchArea.addEventListener('touchstart', handleTouchStart, { passive: true });
+        touchArea.addEventListener('touchmove', handleTouchMove, { passive: true });
+        touchArea.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        touchArea.addEventListener('mousedown', handleMouseDown);
+        touchArea.addEventListener('mousemove', handleMouseMove);
+        touchArea.addEventListener('mouseup', handleMouseUp);
+        touchArea.addEventListener('mouseleave', handleMouseUp);
+
+        function handleTouchStart(e) {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        }
+
+        function handleTouchMove(e) {
+            if (!isDragging) return;
+        }
+
+        function handleTouchEnd(e) {
+            if (!isDragging) return;
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+            isDragging = false;
+        }
+
+        function handleMouseDown(e) {
+            startX = e.clientX;
+            isDragging = true;
+        }
+
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+        }
+
+        function handleMouseUp(e) {
+            if (!isDragging) return;
+            const endX = e.clientX;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+            isDragging = false;
+        }
+
+        function nextCard() {
+            currentCard = (currentCard + 1) % totalCards;
+            updateCards();
+        }
+
+        function prevCard() {
+            currentCard = (currentCard - 1 + totalCards) % totalCards;
+            updateCards();
+        }
+
+        function updateCards() {
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev');
+                if (index === currentCard) {
+                    card.classList.add('active');
+                }
+            });
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('modalOverlay').classList.add('show');
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('show');
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // Auto-swipe functionality (optional)
+        let autoSwipeInterval = setInterval(() => {
+            nextCard();
+        }, 5000);
+
+        // Pause auto-swipe when user interacts
+        touchArea.addEventListener('touchstart', () => {
+            clearInterval(autoSwipeInterval);
+            autoSwipeInterval = setInterval(() => {
+                nextCard();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
