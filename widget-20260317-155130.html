@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            min-height: 600px;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .cards-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .cards-container {
+            display: flex;
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+
+        .card {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-hero {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .card:nth-child(2) .card-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .card-hero {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .hero-content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .card-body {
+            padding: 24px;
+            flex: 1;
+            background: #1a1a1a;
+        }
+
+        .card-body h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .card-body p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #cccccc;
+            margin-bottom: 24px;
+        }
+
+        .i-button {
+            background: #ffa500;
+            color: #000000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 12px;
+            margin-bottom: 12px;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .i-button:hover {
+            background: #ff8c00;
+            transform: translateY(-1px);
+        }
+
+        .swipe-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #ffa500;
+            transform: scale(1.2);
+        }
+
+        .modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            transition: bottom 0.3s ease;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            bottom: 0;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffa500;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content p {
+            color: #cccccc;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        @media (min-width: 431px) {
+            body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper">
+            <div class="cards-container" id="cardsContainer">
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2>Premium Features</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h3>Unlock Advanced Tools</h3>
+                        <p>Access our full suite of premium features including advanced analytics, custom integrations, and priority support. Designed for professionals who need more.</p>
+                        <button class="i-button" onclick="openModal('premium-modal')">Learn More</button>
+                        <button class="i-button" onclick="openModal('pricing-modal')">View Pricing</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2>Team Collaboration</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h3>Work Together Seamlessly</h3>
+                        <p>Invite team members, share projects, and collaborate in real-time. Built-in communication tools and project management features keep everyone aligned.</p>
+                        <button class="i-button" onclick="openModal('team-modal')">Team Features</button>
+                        <button class="i-button" onclick="openModal('invite-modal')">Invite Members</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2>API Integration</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h3>Connect Everything</h3>
+                        <p>Integrate with your existing tools and workflows using our comprehensive API. Webhooks, custom endpoints, and extensive documentation included.</p>
+                        <button class="i-button" onclick="openModal('api-modal')">API Docs</button>
+                        <button class="i-button" onclick="openModal('webhook-modal')">Webhooks</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="swipe-indicators">
+            <div class="indicator active"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+
+    <div class="modal" id="premium-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Premium Features</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Our premium tier includes advanced analytics dashboards, custom branding options, unlimited projects, and dedicated account management.</p>
+            <p>Get detailed insights into your data with our AI-powered analytics engine and export capabilities.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="pricing-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Pricing Plans</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p><strong>Starter:</strong> $9/month - Basic features for individuals</p>
+            <p><strong>Professional:</strong> $29/month - Advanced tools and integrations</p>
+            <p><strong>Enterprise:</strong> Custom pricing - Full feature set with dedicated support</p>
+        </div>
+    </div>
+
+    <div class="modal" id="team-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Team Features</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Collaborate with unlimited team members, assign roles and permissions, and track project progress in real-time.</p>
+            <p>Built-in chat, file sharing, and task management keep your team organized and productive.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="invite-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Invite Team Members</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Send invitations via email or share invite links. Set permissions and access levels for each team member.</p>
+            <p>Team members can join instantly and start collaborating on shared projects immediately.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="api-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">API Documentation</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Our RESTful API provides access to all platform features. Comprehensive documentation with code examples in multiple languages.</p>
+            <p>Rate limiting, authentication, and error handling are all covered in our developer guide.</p>
+        </div>
+    </div>
+
+    <div class="modal" id="webhook-modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Webhook Integration</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content">
+            <p>Set up webhooks to receive real-time notifications about events in your account. Supports custom headers and retry logic.</p>
+            <p>Perfect for triggering automated workflows and keeping external systems in sync.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        const cardsContainer = document.getElementById('cardsContainer');
+        const indicators = document.querySelectorAll('.indicator');
+        const totalCards = 3;
+
+        // Touch events
+        cardsContainer.addEventListener('touchstart', handleStart, { passive: true });
+        cardsContainer.addEventListener('touchmove', handleMove, { passive: false });
+        cardsContainer.addEventListener('touchend', handleEnd, { passive: true });
+
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', handleStart);
+        cardsContainer.addEventListener('mousemove', handleMove);
+        cardsContainer.addEventListener('mouseup', handleEnd);
+        cardsContainer.addEventListener('mouseleave', handleEnd);
+
+        function handleStart(e) {
+            isDragging = true;
+            startX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
+            cardsContainer.style.transition = 'none';
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            currentX = (e.type === 'mousemove' ? e.clientX : e.touches[0].clientX) - startX;
+            const translateX = -(currentCard * 100) + (currentX / cardsContainer.offsetWidth * 100);
+            cardsContainer.style.transform = `translateX(${translateX}%)`;
+        }
+
+        function handleEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            cardsContainer.style.transition = 'transform 0.3s ease';
+            
+            const threshold = 50;
+            if (currentX > threshold && currentCard > 0) {
+                currentCard--;
+            } else if (currentX < -threshold && currentCard < totalCards - 1) {
+                currentCard++;
+            }
+            
+            updateCards();
+            currentX = 0;
+        }
+
+        function updateCards() {
+            const translateX = -(currentCard * 100);
+            cardsContainer.style.transform = `translateX(${translateX}%)`;
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function openModal(modalId) {
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('active');
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        // Initialize
+        updateCards();
+    </script>
+</body>
+</html>
