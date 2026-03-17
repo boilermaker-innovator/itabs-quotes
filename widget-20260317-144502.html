@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            height: 100vh;
+            background-color: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .cards-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .hero-section {
+            height: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card:nth-child(4) .hero-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .hero-content h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .body-section {
+            height: 50%;
+            background-color: #2a2a2a;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .summary-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #cccccc;
+            margin-bottom: 30px;
+        }
+
+        .i-buttons-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .i-button {
+            background-color: #ffa500;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .i-button:hover {
+            background-color: #ff8c00;
+            transform: translateY(-2px);
+        }
+
+        .indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: background-color 0.3s ease;
+        }
+
+        .indicator.active {
+            background-color: #ffa500;
+        }
+
+        .swipe-hint {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 100%;
+            max-width: 430px;
+            background-color: #2a2a2a;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 30px;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-sheet.active {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sheet-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffa500;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .sheet-content {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper" id="cardsWrapper">
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h2>Innovation</h2>
+                        <p>Leading the future</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Discover cutting-edge solutions that transform the way we work and live. Our innovative approach combines technology with human insight to create meaningful experiences.
+                    </div>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Learn More', 'Explore our innovative solutions and see how we\'re shaping the future through technology and creativity.')">Learn More</button>
+                        <button class="i-button" onclick="openModal('Get Started', 'Ready to begin your journey? Contact our team to discuss your specific needs and requirements.')">Get Started</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h2>Design</h2>
+                        <p>Beautiful experiences</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Crafting beautiful and intuitive designs that captivate users and deliver exceptional experiences. Every pixel is carefully considered to create harmonious digital products.
+                    </div>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('View Portfolio', 'Browse through our collection of award-winning designs and see the creative process behind each project.')">View Portfolio</button>
+                        <button class="i-button" onclick="openModal('Design Process', 'Learn about our comprehensive design methodology from research to final implementation.')">Process</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h2>Technology</h2>
+                        <p>Powering tomorrow</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Leveraging the latest technologies to build robust, scalable solutions. From AI and machine learning to cloud computing, we harness the power of modern tech stacks.
+                    </div>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Tech Stack', 'Discover the cutting-edge technologies we use to build world-class applications and platforms.')">Tech Stack</button>
+                        <button class="i-button" onclick="openModal('Solutions', 'Explore our comprehensive technology solutions tailored for modern businesses.')">Solutions</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h2>Partnership</h2>
+                        <p>Growing together</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Building lasting partnerships based on trust, collaboration, and shared success. We believe in working closely with our clients to achieve exceptional results together.
+                    </div>
+                    <div class="i-buttons-container">
+                        <button class="i-button" onclick="openModal('Partners', 'Meet our trusted partners and learn how we collaborate to deliver outstanding results.')">Our Partners</button>
+                        <button class="i-button" onclick="openModal('Join Us', 'Interested in partnering with us? Let\'s discuss how we can work together to achieve great things.')">Join Us</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="indicators" id="indicators">
+            <div class="indicator active"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+        </div>
+
+        <div class="swipe-hint">
+            ← Swipe →
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="sheet-header">
+            <div class="sheet-title" id="sheetTitle">Title</div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="sheet-content" id="sheetContent">
+            Content goes here...
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 4;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const cardsWrapper = document.getElementById('cardsWrapper');
+        const indicators = document.getElementById('indicators').children;
+
+        function updateCard(index) {
+            currentCard = index;
+            cardsWrapper.style.transform = `translateX(-${index * 100}%)`;
+            
+            // Update indicators
+            for (let i = 0; i < indicators.length; i++) {
+                indicators[i].classList.toggle('active', i === index);
+            }
+        }
+
+        function nextCard() {
+            currentCard = (currentCard + 1) % totalCards;
+            updateCard(currentCard);
+        }
+
+        function prevCard() {
+            currentCard = (currentCard - 1 + totalCards) % totalCards;
+            updateCard(currentCard);
+        }
+
+        // Touch events
+        cardsWrapper.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        cardsWrapper.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+            const diffX = startX - currentX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+                isDragging = false;
+            }
+        });
+
+        cardsWrapper.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        // Mouse events for desktop
+        cardsWrapper.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+        });
+
+        cardsWrapper.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX;
+            const diffX = startX - currentX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+                isDragging = false;
+            }
+        });
+
+        cardsWrapper.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevCard();
+            } else if (e.key === 'ArrowRight') {
+                nextCard();
+            }
+        });
+
+        // Modal functions
+        function openModal(title, content) {
+            document.getElementById('sheetTitle').textContent = title;
+            document.getElementById('sheetContent').textContent = content;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('bottomSheet').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('bottomSheet').classList.remove('active');
+        }
+
+        // Auto-advance cards (optional)
+        setInterval(nextCard, 5000);
+    </script>
+</body>
+</html>
