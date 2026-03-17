@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Cards Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .cards-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 600px;
+        }
+
+        .cards-container {
+            display: flex;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            height: 100%;
+        }
+
+        .card {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1f1f1f;
+        }
+
+        .hero-section {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section:nth-child(1) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .body-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .summary-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .i-button {
+            background: #ffa726;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+
+        .i-button:hover {
+            background: #ff9800;
+            transform: translateY(-2px);
+        }
+
+        .indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #ffa726;
+            transform: scale(1.2);
+        }
+
+        .modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: #1f1f1f;
+            border-radius: 20px 20px 0 0;
+            z-index: 1000;
+            transition: bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            bottom: 0;
+        }
+
+        .modal-content {
+            padding: 30px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .handle {
+            width: 40px;
+            height: 4px;
+            background: #666;
+            border-radius: 2px;
+            margin: 15px auto 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper">
+            <div class="cards-container" id="cardsContainer">
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <div class="hero-title">Service Excellence</div>
+                            <div class="hero-subtitle">Premium Solutions</div>
+                        </div>
+                    </div>
+                    <div class="body-section">
+                        <div class="summary-text">
+                            Discover our comprehensive range of premium services designed to elevate your experience. We combine cutting-edge technology with personalized attention to deliver exceptional results that exceed expectations.
+                        </div>
+                        <button class="i-button" onclick="openModal('modal1')">Learn More</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <div class="hero-title">Innovation Hub</div>
+                            <div class="hero-subtitle">Future Forward</div>
+                        </div>
+                    </div>
+                    <div class="body-section">
+                        <div class="summary-text">
+                            Step into the future with our innovative solutions that transform the way you work and live. Our team of experts continuously develops breakthrough technologies to keep you ahead of the curve.
+                        </div>
+                        <button class="i-button" onclick="openModal('modal2')">Explore Innovation</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="hero-section">
+                        <div class="hero-content">
+                            <div class="hero-title">Global Network</div>
+                            <div class="hero-subtitle">Connected Worldwide</div>
+                        </div>
+                    </div>
+                    <div class="body-section">
+                        <div class="summary-text">
+                            Join our extensive global network that connects millions of users worldwide. Experience seamless collaboration and unlimited possibilities through our robust platform and dedicated support system.
+                        </div>
+                        <button class="i-button" onclick="openModal('modal3')">Join Network</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="indicators">
+            <div class="indicator active" onclick="goToSlide(0)"></div>
+            <div class="indicator" onclick="goToSlide(1)"></div>
+            <div class="indicator" onclick="goToSlide(2)"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+
+    <div class="modal" id="modal1">
+        <div class="handle"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Service Excellence</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-text">
+                Our service excellence program encompasses a wide range of premium offerings designed to meet your unique needs. From consultation to implementation, our dedicated team ensures every detail is perfected to deliver outstanding results.
+
+                <br><br>Key features include:
+                <br>• 24/7 premium support
+                <br>• Customized solutions
+                <br>• Expert consultation
+                <br>• Performance optimization
+                <br>• Quality assurance
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal2">
+        <div class="handle"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Innovation Hub</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-text">
+                Our Innovation Hub is where tomorrow's solutions are born today. We invest heavily in research and development to bring you breakthrough technologies that solve real-world challenges and create new opportunities.
+
+                <br><br>Innovation areas include:
+                <br>• Artificial Intelligence
+                <br>• IoT Solutions
+                <br>• Blockchain Technology
+                <br>• Advanced Analytics
+                <br>• Next-gen Interfaces
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal3">
+        <div class="handle"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Global Network</div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-text">
+                Connect with millions of users across 195 countries through our robust global network. Experience seamless collaboration, instant communication, and unlimited growth potential in our thriving community.
+
+                <br><br>Network benefits:
+                <br>• Worldwide connectivity
+                <br>• Real-time collaboration
+                <br>• Multi-language support
+                <br>• Secure communications
+                <br>• Community resources
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 3;
+        let startX = 0;
+        let isMoving = false;
+
+        const cardsContainer = document.getElementById('cardsContainer');
+        const indicators = document.querySelectorAll('.indicator');
+
+        function updateSlide() {
+            cardsContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlide();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlide();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlide();
+        }
+
+        // Touch events for swiping
+        cardsContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isMoving = true;
+        });
+
+        cardsContainer.addEventListener('touchmove', (e) => {
+            if (!isMoving) return;
+            e.preventDefault();
+        });
+
+        cardsContainer.addEventListener('touchend', (e) => {
+            if (!isMoving) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+            
+            isMoving = false;
+        });
+
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isMoving = true;
+            e.preventDefault();
+        });
+
+        cardsContainer.addEventListener('mousemove', (e) => {
+            if (!isMoving) return;
+            e.preventDefault();
+        });
+
+        cardsContainer.addEventListener('mouseup', (e) => {
+            if (!isMoving) return;
+            
+            const endX = e.clientX;
+            const diffX = startX - endX;
+            
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+            
+            isMoving = false;
+        });
+
+        cardsContainer.addEventListener('mouseleave', () => {
+            isMoving = false;
+        });
+
+        function openModal(modalId) {
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        // Auto-slide functionality
+        setInterval(() => {
+            if (!isMoving) {
+                nextSlide();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
