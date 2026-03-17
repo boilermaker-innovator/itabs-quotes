@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            background-color: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+        }
+
+        @media (min-width: 431px) {
+            .widget-container {
+                height: 80vh;
+                border-radius: 20px;
+                box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        .cards-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a1a;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card.active {
+            transform: translateX(0);
+        }
+
+        .card.prev {
+            transform: translateX(-100%);
+        }
+
+        .hero-section {
+            height: 40%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card:nth-child(4) .hero-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .hero-content {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .hero-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .body-section {
+            flex: 1;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .body-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .body-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #b0b0b0;
+            margin-bottom: 30px;
+            flex: 1;
+        }
+
+        .i-button {
+            background-color: #ffa726;
+            color: #000;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+
+        .i-button:hover {
+            background-color: #ff9800;
+            transform: translateY(-2px);
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-dot.active {
+            background-color: #ffa726;
+            transform: scale(1.2);
+        }
+
+        .modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background-color: #2a2a2a;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+            transition: bottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1000;
+        }
+
+        .modal.show {
+            bottom: 0;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffa726;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-container" id="cardsContainer">
+            <div class="card active">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <div class="hero-title">Digital Innovation</div>
+                        <div class="hero-subtitle">Transform your business</div>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="body-title">Innovation Hub</div>
+                    <div class="body-text">Discover cutting-edge solutions that drive digital transformation. Our comprehensive approach combines technology expertise with strategic thinking to deliver results that matter for your business growth.</div>
+                    <button class="i-button" onclick="openModal('Digital Innovation Details', 'Our digital innovation services include AI integration, cloud migration, data analytics, and custom software development. We work with leading technologies to ensure your business stays ahead of the competition.')">Learn More</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <div class="hero-title">Creative Solutions</div>
+                        <div class="hero-subtitle">Design that inspires</div>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="body-title">Design Excellence</div>
+                    <div class="body-text">Experience the power of exceptional design that captivates audiences and drives engagement. Our creative team crafts visual experiences that tell your brand story in compelling ways.</div>
+                    <button class="i-button" onclick="openModal('Creative Solutions Portfolio', 'Our creative services span branding, web design, mobile app interfaces, and digital marketing materials. We focus on user experience and visual impact to create designs that convert visitors into customers.')">Explore Portfolio</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <div class="hero-title">Smart Analytics</div>
+                        <div class="hero-subtitle">Data-driven insights</div>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="body-title">Intelligence Platform</div>
+                    <div class="body-text">Unlock the potential of your data with advanced analytics and machine learning capabilities. Make informed decisions based on real-time insights and predictive modeling.</div>
+                    <button class="i-button" onclick="openModal('Analytics Dashboard', 'Our analytics platform provides real-time reporting, predictive analytics, customer segmentation, and performance tracking. Get actionable insights that help you optimize operations and increase ROI.')">View Dashboard</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <div class="hero-title">Global Reach</div>
+                        <div class="hero-subtitle">Worldwide impact</div>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <div class="body-title">Scale Globally</div>
+                    <div class="body-text">Expand your business presence across international markets with our global infrastructure and localization expertise. Reach new audiences and grow your revenue streams worldwide.</div>
+                    <button class="i-button" onclick="openModal('Global Expansion Guide', 'Our global services include market research, localization, international SEO, multi-currency support, and compliance management. We help businesses successfully enter and thrive in new markets.')">Get Started</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-dot active" onclick="goToCard(0)"></div>
+            <div class="nav-dot" onclick="goToCard(1)"></div>
+            <div class="nav-dot" onclick="goToCard(2)"></div>
+            <div class="nav-dot" onclick="goToCard(3)"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <div class="modal-title" id="modalTitle"></div>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const cards = document.querySelectorAll('.card');
+        const navDots = document.querySelectorAll('.nav-dot');
+        const cardsContainer = document.getElementById('cardsContainer');
+        let startX = 0;
+        let isDragging = false;
+
+        function updateCards() {
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev');
+                if (index === currentCard) {
+                    card.classList.add('active');
+                } else if (index < currentCard) {
+                    card.classList.add('prev');
+                }
+            });
+
+            navDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function goToCard(index) {
+            currentCard = index;
+            updateCards();
+        }
+
+        function nextCard() {
+            currentCard = (currentCard + 1) % cards.length;
+            updateCards();
+        }
+
+        function prevCard() {
+            currentCard = (currentCard - 1 + cards.length) % cards.length;
+            updateCards();
+        }
+
+        // Touch events
+        cardsContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        cardsContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        cardsContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+        });
+
+        cardsContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        cardsContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+
+            const endX = e.clientX;
+            const diffX = startX - endX;
+
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('overlay').classList.add('show');
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('show');
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // Auto-advance cards
+        setInterval(() => {
+            nextCard();
+        }, 5000);
+    </script>
+</body>
+</html>
