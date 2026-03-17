@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Swipeable Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            height: 100vh;
+            background: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+            border-radius: 0;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+        }
+        
+        @media (min-width: 431px) {
+            .widget-container {
+                height: 85vh;
+                border-radius: 25px;
+                max-height: 800px;
+            }
+        }
+        
+        .cards-wrapper {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .cards-container {
+            display: flex;
+            height: 100%;
+            transition: transform 0.3s ease-out;
+        }
+        
+        .card {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1e1e1e;
+        }
+        
+        .card-hero {
+            height: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .card:nth-child(2) .card-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .card:nth-child(3) .card-hero {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .card:nth-child(4) .card-hero {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .hero-content {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .hero-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .hero-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .card-body {
+            flex: 1;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .summary-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+        
+        .i-button {
+            background: #ffa726;
+            color: #1a1a1a;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        
+        .i-button:hover {
+            background: #ffb74d;
+            transform: translateY(-1px);
+        }
+        
+        .i-button:active {
+            transform: translateY(0);
+        }
+        
+        .dots-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: background 0.3s;
+        }
+        
+        .dot.active {
+            background: #ffa726;
+        }
+        
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: #2a2a2a;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 24px 40px;
+            transform: translateX(-50%) translateY(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 1000;
+        }
+        
+        .bottom-sheet.open {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        
+        .sheet-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffa726;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sheet-content {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 999;
+        }
+        
+        .overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .handle {
+            width: 40px;
+            height: 4px;
+            background: #4a4a4a;
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper">
+            <div class="cards-container" id="cardsContainer">
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2 class="hero-title">Premium Plan</h2>
+                            <p class="hero-subtitle">Advanced features for professionals</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Unlock the full potential with our Premium Plan. Get access to advanced analytics, priority support, and exclusive features designed for power users.</p>
+                        <button class="i-button" onclick="openModal('Features Overview', 'Advanced dashboard analytics, custom reporting tools, API access, priority email support, and early access to beta features.')">View Features</button>
+                        <button class="i-button" onclick="openModal('Pricing Details', 'Premium Plan: $29/month or $290/year (save 17%). Includes all standard features plus advanced analytics, priority support, and API access.')">See Pricing</button>
+                        <button class="i-button" onclick="openModal('Getting Started', 'Ready to upgrade? Click here to start your Premium Plan trial. Upgrade instantly and begin using advanced features within minutes.')">Get Started</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2 class="hero-title">Business Suite</h2>
+                            <p class="hero-subtitle">Complete solution for teams</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Scale your business with our comprehensive Business Suite. Team collaboration tools, advanced security, and enterprise-grade features.</p>
+                        <button class="i-button" onclick="openModal('Team Features', 'Collaborative workspaces, team member management, role-based permissions, shared dashboards, and real-time collaboration tools.')">Team Tools</button>
+                        <button class="i-button" onclick="openModal('Security & Compliance', 'Enterprise-grade security with SSO, 2FA, audit logs, data encryption, GDPR compliance, and advanced user permissions.')">Security Info</button>
+                        <button class="i-button" onclick="openModal('Business Pricing', 'Business Suite: $79/month or $790/year per team (up to 10 users). Additional users $8/month each. Includes all Premium features plus team tools.')">View Plans</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2 class="hero-title">Analytics Pro</h2>
+                            <p class="hero-subtitle">Data-driven insights platform</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Transform your data into actionable insights with Analytics Pro. Advanced reporting, custom dashboards, and AI-powered recommendations.</p>
+                        <button class="i-button" onclick="openModal('Analytics Features', 'Custom dashboard builder, advanced data visualization, automated reporting, predictive analytics, and AI-powered insights and recommendations.')">View Analytics</button>
+                        <button class="i-button" onclick="openModal('Integration Options', 'Connect with 50+ popular tools including Google Analytics, Salesforce, HubSpot, Slack, and custom API integrations for seamless data flow.')">Integrations</button>
+                        <button class="i-button" onclick="openModal('Demo Request', 'See Analytics Pro in action with a personalized demo. Schedule a 30-minute session with our team to explore features tailored to your needs.')">Request Demo</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-hero">
+                        <div class="hero-content">
+                            <h2 class="hero-title">Enterprise</h2>
+                            <p class="hero-subtitle">Custom solutions at scale</p>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="summary-text">Enterprise-grade solution with unlimited scalability. Custom integrations, dedicated support, and tailored features for large organizations.</p>
+                        <button class="i-button" onclick="openModal('Enterprise Features', 'Unlimited users and data, custom integrations, white-label options, dedicated account manager, SLA guarantees, and 24/7 phone support.')">Enterprise Info</button>
+                        <button class="i-button" onclick="openModal('Custom Solutions', 'Tailored solutions for your organization including custom development, specialized integrations, on-premise deployment options, and consultation services.')">Custom Setup</button>
+                        <button class="i-button" onclick="openModal('Contact Sales', 'Ready to discuss Enterprise solutions? Contact our sales team for a customized quote and implementation timeline tailored to your organization.')">Contact Sales</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dots-indicator">
+            <div class="dot active"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="handle"></div>
+        <div class="sheet-header">
+            <h3 class="sheet-title" id="modalTitle">Modal Title</h3>
+            <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <div class="sheet-content" id="modalContent">
+            Modal content goes here
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        const totalCards = 4;
+        const cardsContainer = document.getElementById('cardsContainer');
+        const dots = document.querySelectorAll('.dot');
+
+        // Touch events
+        cardsContainer.addEventListener('touchstart', handleStart, { passive: true });
+        cardsContainer.addEventListener('touchmove', handleMove, { passive: false });
+        cardsContainer.addEventListener('touchend', handleEnd, { passive: true });
+
+        // Mouse events for desktop
+        cardsContainer.addEventListener('mousedown', handleStart);
+        cardsContainer.addEventListener('mousemove', handleMove);
+        cardsContainer.addEventListener('mouseup', handleEnd);
+        cardsContainer.addEventListener('mouseleave', handleEnd);
+
+        function handleStart(e) {
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            cardsContainer.style.transition = 'none';
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            currentX = (e.type.includes('mouse') ? e.clientX : e.touches[0].clientX) - startX;
+            const translateX = -currentCard * 100 + (currentX / cardsContainer.offsetWidth) * 100;
+            cardsContainer.style.transform = `translateX(${translateX}%)`;
+        }
+
+        function handleEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            cardsContainer.style.transition = 'transform 0.3s ease-out';
+
+            const threshold = 50;
+            if (Math.abs(currentX) > threshold) {
+                if (currentX > 0 && currentCard > 0) {
+                    currentCard--;
+                } else if (currentX < 0 && currentCard < totalCards - 1) {
+                    currentCard++;
+                }
+            }
+
+            updateCards();
+            currentX = 0;
+        }
+
+        function updateCards() {
+            cardsContainer.style.transform = `translateX(-${currentCard * 100}%)`;
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('overlay').classList.add('open');
+            document.getElementById('bottomSheet').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('overlay').classList.remove('open');
+            document.getElementById('bottomSheet').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        // Prevent context menu on long press
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>
