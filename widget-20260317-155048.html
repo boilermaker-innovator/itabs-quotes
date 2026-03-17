@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            height: 90vh;
+            background: #1a1a1a;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #2a2a2a;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+
+        .card.active {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .card.next {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .card.prev {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        .hero-section {
+            height: 40%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            color: white;
+        }
+
+        .hero-section h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .hero-section p {
+            font-size: 1rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .body-section {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .summary-text {
+            color: #e0e0e0;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .i-button {
+            background: #ffb300;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            align-self: flex-start;
+        }
+
+        .i-button:hover {
+            background: #ff8f00;
+            transform: translateY(-1px);
+        }
+
+        .swipe-indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+
+        .indicator.active {
+            background: #ffb300;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            width: 100%;
+            max-width: 430px;
+            background: #2a2a2a;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .bottom-sheet {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            color: #ffb300;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="card-container" id="cardContainer">
+            <div class="card active">
+                <div class="hero-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h2>Digital Innovation</h2>
+                    <p>Transform your business with cutting-edge technology</p>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Discover how modern digital solutions can revolutionize your workflow and boost productivity. Our comprehensive approach ensures seamless integration with your existing systems.
+                    </div>
+                    <button class="i-button" onclick="openModal('Learn More', 'Our digital innovation services include cloud migration, automation, AI integration, and custom software development tailored to your specific business needs.')">Learn More</button>
+                </div>
+            </div>
+
+            <div class="card next">
+                <div class="hero-section" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <h2>Data Analytics</h2>
+                    <p>Make informed decisions with powerful insights</p>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Unlock the power of your data with advanced analytics and visualization tools. Turn raw data into actionable insights that drive business growth and strategic decision-making.
+                    </div>
+                    <button class="i-button" onclick="openModal('View Analytics', 'Our analytics platform provides real-time dashboards, predictive modeling, and custom reporting solutions to help you understand your business performance.')">View Analytics</button>
+                </div>
+            </div>
+
+            <div class="card next">
+                <div class="hero-section" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <h2>Cloud Solutions</h2>
+                    <p>Scalable infrastructure for modern businesses</p>
+                </div>
+                <div class="body-section">
+                    <div class="summary-text">
+                        Migrate to the cloud with confidence. Our expert team provides end-to-end cloud solutions including architecture design, migration planning, and ongoing optimization.
+                    </div>
+                    <button class="i-button" onclick="openModal('Cloud Services', 'We offer comprehensive cloud services including AWS, Azure, and Google Cloud implementations, with 24/7 monitoring and support.')">Cloud Services</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="swipe-indicators">
+            <div class="indicator active" onclick="goToSlide(0)"></div>
+            <div class="indicator" onclick="goToSlide(1)"></div>
+            <div class="indicator" onclick="goToSlide(2)"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="bottom-sheet">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle"></div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content" id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const cards = document.querySelectorAll('.card');
+        const indicators = document.querySelectorAll('.indicator');
+        const cardContainer = document.getElementById('cardContainer');
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        function updateCards() {
+            cards.forEach((card, index) => {
+                card.classList.remove('active', 'prev', 'next');
+                if (index === currentSlide) {
+                    card.classList.add('active');
+                } else if (index < currentSlide) {
+                    card.classList.add('prev');
+                } else {
+                    card.classList.add('next');
+                }
+            });
+
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentSlide);
+            });
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCards();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % cards.length;
+            updateCards();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + cards.length) % cards.length;
+            updateCards();
+        }
+
+        // Touch events
+        cardContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        cardContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+            e.preventDefault();
+        });
+
+        cardContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            const threshold = 50;
+
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        });
+
+        // Mouse events for desktop
+        cardContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+            e.preventDefault();
+        });
+
+        cardContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX;
+        });
+
+        cardContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffX = startX - currentX;
+            const threshold = 50;
+
+            if (Math.abs(diffX) > threshold) {
+                if (diffX > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        });
+
+        cardContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal(event) {
+            if (event && event.target !== document.getElementById('modalOverlay') && event.target.className !== 'close-btn') {
+                return;
+            }
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize
+        updateCards();
+    </script>
+</body>
+</html>
