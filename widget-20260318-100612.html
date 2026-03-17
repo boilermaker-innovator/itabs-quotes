@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plumber Services Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .widget-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .widget-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .widget-header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .widget-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+        }
+        .tab {
+            flex: 1;
+            padding: 18px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab:hover {
+            background: #e8e8e8;
+            color: #333;
+        }
+        .tab.active {
+            background: white;
+            color: #2a5298;
+        }
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2a5298;
+        }
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .service-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid #e0e0e0;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            border-color: #2a5298;
+        }
+        .service-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .service-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .service-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .price {
+            color: #2a5298;
+            font-weight: bold;
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(42, 82, 152, 0.4);
+        }
+        .contact-info {
+            background: #f0f7ff;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+        .contact-icon {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #2a5298;
+        }
+        .emergency-banner {
+            background: #ff4757;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .emergency-banner a {
+            color: white;
+            text-decoration: underline;
+        }
+        .hours-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        .hours-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .hours-table td:first-child {
+            font-weight: 600;
+            color: #333;
+        }
+        .hours-table td:last-child {
+            text-align: right;
+            color: #666;
+        }
+        .testimonial {
+            background: #f9f9f9;
+            border-left: 4px solid #2a5298;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .testimonial-text {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .testimonial-author {
+            color: #2a5298;
+            font-weight: 600;
+        }
+        .rating {
+            color: #ffd700;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="widget-header">
+            <h1>🔧 Pro Plumbing Services</h1>
+            <p>Professional • Reliable • 24/7 Emergency Service</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'services')">Services</button>
+            <button class="tab" onclick="openTab(event, 'booking')">Book Now</button>
+            <button class="tab" onclick="openTab(event, 'contact')">Contact</button>
+            <button class="tab" onclick="openTab(event, 'reviews')">Reviews</button>
+        </div>
+        
+        <div id="services" class="tab-content active">
+            <div class="emergency-banner">
+                🚨 24/7 Emergency Service Available - Call Now: <a href="tel:555-PLUMBER">555-PLUMBER</a>
+            </div>
+            
+            <h2 style="color: #333; margin-bottom: 20px;">Our Services</h2>
+            
+            <div class="service-grid">
+                <div class="service-card">
+                    <div class="service-icon">🚰</div>
+                    <h3>Leak Repair</h3>
+                    <p>Fast and effective leak detection and repair for all plumbing systems</p>
+                    <div class="price">From $89</div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">🚽</div>
+                    <h3>Toilet Repair</h3>
+                    <p>Complete toilet installation, repair, and replacement services</p>
+                    <div class="price">From $125</div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">🚿</div>
+                    <h3>Drain Cleaning</h3>
+                    <p>Professional drain cleaning and clog removal services</p>
+                    <div class="price">From $99</div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">💧</div>
+                    <h3>Water Heater</h3>
+                    <p>Installation, repair, and maintenance of water heaters</p>
+                    <div class="price">From $150</div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">🔧</div>
+                    <h3>Pipe Repair</h3>
+                    <p>Expert pipe repair and replacement for residential & commercial</p>
+                    <div class="price">From $110</div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">⚡</div>
+                    <h3>Emergency Service</h3>
+                    <p>24/7 emergency plumbing service available any time</p>
+                    <div class="price">Call Us</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="booking" class="tab-content">
+            <h2 style="color: #333; margin-bottom: 20px;">Schedule an Appointment</h2>
+            
+            <form>
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="John Doe">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required placeholder="john@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567">
+                </div>
+                
+                <div class="form-group">
+                    <label for="service">Service Needed *</label>
+                    <select id="service" name="service" required>
+                        <option value="">Select a service...</option>
+                        <option value="leak">Leak Repair</option>
+                        <option value="toilet">Toilet Repair</option>
+                        <option value="drain">Drain Cleaning</option>
+                        <option value="heater">Water Heater Service</option>
+                        <option value="pipe">Pipe Repair</option>
+                        <option value="emergency">Emergency Service</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="date">Preferred Date</label>
+                    <input type="date" id="date" name="date">
+                </div>
+                
+                <div class="form-group">
+                    <label for="time">Preferred Time</label>
+                    <select id="time" name="time">
+                        <option value="">Select a time...</option>
+                        <option value="morning">Morning (8am-12pm)</option>
+                        <option value="afternoon">Afternoon (12pm-5pm)</option>
+                        <option value="evening">Evening (5pm-8pm)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Describe Your Issue</label>
+                    <textarea id="message" name="message" placeholder="Please describe your plumbing issue in detail..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Submit Request</button>
+            </form>
+        </div>
+        
+        <div id="contact" class="tab-content">
+            <h2 style="color: #333; margin-bottom: 20px;">Get In Touch</h2>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <span class="contact-icon">📞</span>
+                    <div>
+                        <strong>Phone:</strong> (555) 765-8237<br>
+                        <strong>Emergency:</strong> (555) 765-8238
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="contact-icon">✉️</span>
+                    <div>
+                        <strong>Email:</strong> info@proplumbing.com
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="contact-icon">📍</span>
+                    <div>
+                        <strong>Address:</strong> 123 Main Street, Suite 100<br>
+                        Anytown, ST 12345
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <span class="contact-icon">🌐</span>
+                    <div>
+                        <strong>Website:</strong> www.proplumbing.com
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="color: #333; margin-top: 30px; margin-bottom: 15px;">Business Hours</h3>
+            
+            <table class="hours-table">
+                <tr>
+                    <td>Monday - Friday</td>
+                    <td>7:00 AM - 7:00 PM</td>
+                </tr>
+                <tr>
+                    <td>Saturday</td>
+                    <td>8:00 AM - 5:00 PM</td>
+                </tr>
+                <tr>
+                    <td>Sunday</td>
+                    <td>9:00 AM - 3:00 PM</td>
+                </tr>
+                <tr>
+                
