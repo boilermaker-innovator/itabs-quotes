@@ -17,7 +17,7 @@
   textarea { resize: vertical; min-height: 90px; }
   .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .theme-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-  .theme-pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; border: 1px solid #ddd; cursor: pointer; background: white; transition: all 0.15s; }
+  .theme-pill { padding: 5px 14px; border-radius: 20px; font-size: 12px; border: 1px solid #ddd; cursor: pointer; background: white; }
   .theme-pill[data-theme="green"].active { border-color: #3B6D11; color: #3B6D11; background: #EAF3DE; font-weight: 600; }
   .theme-pill[data-theme="blue"].active { border-color: #185FA5; color: #185FA5; background: #E6F1FB; font-weight: 600; }
   .theme-pill[data-theme="amber"].active { border-color: #854F0B; color: #854F0B; background: #FAEEDA; font-weight: 600; }
@@ -37,33 +37,36 @@
 <body>
 <div class="wrap">
   <h1>iTabs Widget Builder</h1>
-  <p class="sub">Fill in the business details and hit submit — your widget will be built and emailed to you.</p>
+  <p class="sub">Review the details below, edit if needed, then hit submit.</p>
 
   <div id="status"></div>
 
   <div class="two-col">
     <div class="field">
       <label>Business name</label>
-      <input type="text" id="businessName" placeholder="e.g. Rick's Trim & Brick" />
+      <input type="text" id="businessName" value="Limestone Retaining Walls" />
     </div>
     <div class="field">
       <label>Phone</label>
-      <input type="tel" id="phone" placeholder="0400 000 000" />
+      <input type="tel" id="phone" value="0431 526 649" />
     </div>
   </div>
   <div class="two-col">
     <div class="field">
       <label>Trade type</label>
-      <input type="text" id="trade" placeholder="e.g. Landscaping" />
+      <input type="text" id="trade" value="Limestone & Retaining Walls" />
     </div>
     <div class="field">
       <label>Suburb / area</label>
-      <input type="text" id="suburb" placeholder="e.g. Joondalup Perth" />
+      <input type="text" id="suburb" value="Perth WA" />
     </div>
   </div>
   <div class="field">
     <label>Services (one per line)</label>
-    <textarea id="services" placeholder="Retaining walls&#10;Paving&#10;Brick edging&#10;Garden beds"></textarea>
+    <textarea id="services">Limestone retaining walls
+Fencing packages
+Colour-matched mortar walls
+Garden & boundary walls</textarea>
   </div>
   <div class="field">
     <label>Colour theme</label>
@@ -73,12 +76,12 @@
       <span class="theme-pill" data-theme="amber" onclick="setTheme('amber')">Amber</span>
       <span class="theme-pill" data-theme="coral" onclick="setTheme('coral')">Coral</span>
       <span class="theme-pill" data-theme="teal" onclick="setTheme('teal')">Teal</span>
-      <span class="theme-pill" data-theme="gray" onclick="setTheme('gray')">Stone</span>
+      <span class="theme-pill active" data-theme="gray" onclick="setTheme('gray')">Stone</span>
     </div>
   </div>
   <div class="field">
-    <label>Notes for Claude (optional)</label>
-    <input type="text" id="notes" placeholder="e.g. Key selling points, vibe, anything special" />
+    <label>Notes for Claude</label>
+    <input type="text" id="notes" value="20 years experience, colour-matched mortar is their key differentiator, inexpensive for high quality" />
   </div>
 
   <hr>
@@ -87,7 +90,7 @@
 
 <script>
 const WEBHOOK = 'https://hook.eu2.make.com/ux7jpras9okhp8ynv14b9w1rm2okji0e';
-let selectedTheme = '';
+let selectedTheme = 'gray';
 
 function setTheme(t) {
   selectedTheme = t;
@@ -102,16 +105,13 @@ function showStatus(msg, type) {
 }
 
 async function submitForm() {
-  const businessName = document.getElementById('businessName').value.trim();
-  if (!businessName) { showStatus('Please enter a business name.', 'error'); return; }
-
   const payload = {
-    businessName,
+    businessName: document.getElementById('businessName').value,
     phone: document.getElementById('phone').value,
     trade: document.getElementById('trade').value,
     suburb: document.getElementById('suburb').value,
     services: document.getElementById('services').value,
-    theme: selectedTheme || 'green',
+    theme: selectedTheme,
     notes: document.getElementById('notes').value
   };
 
@@ -121,17 +121,13 @@ async function submitForm() {
   showStatus('Submitting to Make.com...', 'info');
 
   try {
-    const res = await fetch(WEBHOOK, {
+    await fetch(WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (res.ok || res.type === 'opaque') {
-      showStatus('Sent! Your widget is being built — check your email for the live URL in a couple of minutes.', 'success');
-      btn.textContent = 'Submitted ✓';
-    } else {
-      throw new Error('HTTP ' + res.status);
-    }
+    showStatus('Sent! Your widget is being built — check your email for the live URL in a couple of minutes.', 'success');
+    btn.textContent = 'Submitted ✓';
   } catch(e) {
     showStatus('Error: ' + e.message, 'error');
     btn.disabled = false;
