@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Plumbing Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .widget-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        .emergency-banner {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-bottom: 3px solid #1e3c72;
+            overflow-x: auto;
+        }
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: #e0e0e0;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #333;
+            min-width: 150px;
+        }
+        .tab:hover {
+            background: #d0d0d0;
+        }
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+            border-bottom: 4px solid #1e3c72;
+            margin-bottom: -3px;
+        }
+        .tab-content {
+            display: none;
+            padding: 40px 30px;
+            animation: fadeIn 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .service-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        .service-card h3 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        .service-card p {
+            color: #555;
+            line-height: 1.6;
+        }
+        .price {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .submit-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+        .submit-btn:hover {
+            transform: scale(1.05);
+        }
+        .info-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .info-section h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+        .info-list {
+            list-style: none;
+        }
+        .info-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+        .info-list li:before {
+            content: "✓";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+        .testimonial {
+            background: white;
+            padding: 20px;
+            border-left: 4px solid #1e3c72;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .testimonial-author {
+            font-weight: bold;
+            color: #1e3c72;
+            margin-top: 10px;
+        }
+        .stars {
+            color: #ffd700;
+            font-size: 1.2em;
+        }
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .contact-item {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .contact-item h4 {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .contact-item p {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="header">
+            <h1>🔧 ProFlow Plumbing</h1>
+            <p>Your Trusted Local Plumber - Available 24/7</p>
+        </div>
+        
+        <div class="emergency-banner">
+            🚨 EMERGENCY? CALL NOW: (555) 123-4567 - We're Always Available!
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="openTab(event, 'services')">Services</button>
+            <button class="tab" onclick="openTab(event, 'pricing')">Pricing</button>
+            <button class="tab" onclick="openTab(event, 'about')">About Us</button>
+            <button class="tab" onclick="openTab(event, 'reviews')">Reviews</button>
+            <button class="tab" onclick="openTab(event, 'contact')">Contact</button>
+        </div>
+        
+        <div id="services" class="tab-content active">
+            <h2 style="color: #1e3c72; margin-bottom: 20px;">Our Professional Services</h2>
+            <div class="service-grid">
+                <div class="service-card">
+                    <h3>🚿 Emergency Repairs</h3>
+                    <p>Burst pipes, major leaks, and urgent plumbing emergencies. We respond within 30 minutes!</p>
+                    <div class="price">From $150</div>
+                </div>
+                <div class="service-card">
+                    <h3>🚽 Drain Cleaning</h3>
+                    <p>Professional drain and sewer line cleaning using advanced hydro-jetting technology.</p>
+                    <div class="price">From $99</div>
+                </div>
+                <div class="service-card">
+                    <h3>💧 Leak Detection</h3>
+                    <p>Advanced leak detection services to find hidden water leaks and prevent damage.</p>
+                    <div class="price">From $125</div>
+                </div>
+                <div class="service-card">
+                    <h3>🔥 Water Heater Services</h3>
+                    <p>Installation, repair, and maintenance of all water heater types including tankless.</p>
+                    <div class="price">From $200</div>
+                </div>
+                <div class="service-card">
+                    <h3>🏠 Pipe Installation</h3>
+                    <p>Complete pipe installation and replacement for residential and commercial properties.</p>
+                    <div class="price">Custom Quote</div>
+                </div>
+                <div class="service-card">
+                    <h3>🔧 Fixture Installation</h3>
+                    <p>Expert installation of faucets, sinks, toilets, and other plumbing fixtures.</p>
+                    <div class="price">From $85</div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="pricing" class="tab-content">
+            <h2 style="color: #1e3c72; margin-bottom: 20px;">Transparent Pricing</h2>
+            <div class="info-section">
+                <h3>Standard Service Call</h3>
+                <ul class="info-list">
+                    <li>Base service call fee: $75 (waived with repair)</li>
+                    <li>Hourly rate: $95/hour</li>
+                    <li>Emergency after-hours rate: $145/hour</li>
+                    <li>Weekend and holiday rate: $125/hour</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h3>Common Repair Costs</h3>
+                <ul class="info-list">
+                    <li>Toilet repair: $150 - $350</li>
+                    <li>Faucet replacement: $120 - $300</li>
+                    <li>Garbage disposal installation: $200 - $400</li>
+                    <li>Water heater installation: $800 - $2,500</li>
+                    <li>Sewer line repair: $1,500 - $5,000</li>
+                    <li>Repiping (whole house): $4,000 - $15,000</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h3>Special Offers</h3>
+                <ul class="info-list">
+                    <li>Senior & Military Discount: 15% off</li>
+                    <li>First-time customer: $25 off any service</li>
+                    <li>Maintenance plan: Save 20% on regular visits</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="about" class="tab-content">
+            <h2 style="color: #1e3c72; margin-bottom: 20px;">About ProFlow Plumbing</h2>
+            <div class="info-section">
+                <p style="line-height: 1.8; font-size: 1.1em;">
+                    With over 25 years of experience serving the community, ProFlow Plumbing has built a reputation for excellence, reliability, and honest service. We're a family-owned business committed to providing the highest quality plumbing solutions at fair prices.
+                </p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Why Choose Us?</h3>
+                <ul class="info-list">
+                    <li>Licensed, bonded, and fully insured</li>
+                    <li>24/7 emergency service available</li>
+                    <li>Upfront, transparent pricing - no hidden fees</li>
+                    <li>100% satisfaction guarantee</li>
+                    <li>Experienced and professional technicians</li>
+                    <li>State-of-the-art equipment and techniques</li>
+                    <li>Eco-friendly and water-saving solutions</li>
+                    <li>Same-day service available</li>
+                </ul>
+            </div>
+            
+            <div class="info-section">
+                <h3>Service Areas</h3>
+                <p style="line-height: 1.8;">
+                    We proudly serve the greater metropolitan area including Downtown, Northside, Southside, Eastwood, Westfield, and surrounding suburbs. No job is too big or too small!
+                </p>
+            </div>
+        </div>
+        
+        <div id="reviews" class="tab-content">
+            <h2 style="color: #1e3c72; margin-bottom: 20px;">What Our Customers Say</h2>
+            
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p style="margin: 15px 0; font-style: italic;">
+                    "ProFlow came out within 30 minutes of my call for a burst pipe emergency. They fixed it quickly and cleaned up perfectly. Highly recommend!"
+                </p>
+                <div class="testimonial-author">- Sarah M., Northside</div>
+            </div>
+            
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p style="margin: 15px 0; font-style: italic;">
+                    "Honest, professional, and reasonably priced. They diagnosed my water heater issue and gave me options instead of just pushing the most expensive solution."
+                </p>
+                <div class="testimonial-author">- John D., Downtown</div>
+            </div>
+            
+            <div class="testimonial">
+                <div class="stars">★★★★★</div>
+                <p style="margin: 15px 0; font-style: italic;">
+                    "I've used ProFlow for several projects now. They installed a new toilet, fixed multiple leaks, and redid my kitchen plumbing. Always professional and on time!"
+                </p>
+                <div class="testimonial-author">- Maria R., Westfield
