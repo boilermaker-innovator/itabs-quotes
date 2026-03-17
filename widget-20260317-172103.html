@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            height: 100vh;
+            max-height: 932px;
+            background: #1a1a1a;
+            border-radius: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        @media (min-width: 431px) {
+            .widget-container {
+                border-radius: 24px;
+                height: 80vh;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            }
+        }
+
+        .cards-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card.active {
+            transform: translateX(0);
+        }
+
+        .card.prev {
+            transform: translateX(-100%);
+        }
+
+        .hero-section {
+            height: 40%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card:nth-child(2) .hero-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .hero-section {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card:nth-child(4) .hero-section {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .hero-content {
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .body-section {
+            flex: 1;
+            padding: 30px 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .body-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .body-summary {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #cccccc;
+            margin-bottom: 24px;
+            flex: 1;
+        }
+
+        .i-button {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 12px;
+        }
+
+        .i-button:hover {
+            background: #ffb300;
+            transform: translateY(-2px);
+        }
+
+        .navigation-dots {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .dot.active {
+            background: #ffc107;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            border-radius: 16px 16px 0 0;
+            padding: 20px 24px 40px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .bottom-sheet {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-header {
+            width: 40px;
+            height: 4px;
+            background: #666;
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .bottom-sheet-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .bottom-sheet-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #cccccc;
+        }
+
+        .close-modal {
+            background: #666;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.875rem;
+            writing-mode: vertical-rl;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-container" id="cardsContainer">
+            <div class="card active">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Welcome</h1>
+                        <p class="hero-subtitle">Discover amazing features</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <h2 class="body-title">Getting Started</h2>
+                    <p class="body-summary">Welcome to our innovative platform. This is your gateway to exploring powerful tools and features designed to enhance your experience. Swipe through to discover what we have to offer.</p>
+                    <button class="i-button" onclick="openModal('Welcome to our platform! Here you can find everything you need to get started. Our comprehensive suite of tools will help you achieve your goals efficiently.')">Learn More</button>
+                    <button class="i-button" onclick="openModal('Get started with our step-by-step guide. We will walk you through each feature and help you make the most of our platform.')">Get Started</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Features</h1>
+                        <p class="hero-subtitle">Powerful tools at your fingertips</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <h2 class="body-title">Core Features</h2>
+                    <p class="body-summary">Our platform offers a comprehensive set of features designed for modern users. From advanced analytics to seamless integration capabilities, everything you need is built right in.</p>
+                    <button class="i-button" onclick="openModal('Advanced Analytics: Real-time data visualization, custom dashboards, and detailed reporting tools to help you make informed decisions.')">Analytics</button>
+                    <button class="i-button" onclick="openModal('Integration Hub: Connect with over 100+ third-party services and tools. Seamless API access and webhook support included.')">Integrations</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Benefits</h1>
+                        <p class="hero-subtitle">Why choose our solution</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <h2 class="body-title">Key Benefits</h2>
+                    <p class="body-summary">Experience increased productivity and efficiency with our solution. Built for scale, designed for simplicity, and optimized for performance across all devices and platforms.</p>
+                    <button class="i-button" onclick="openModal('Boost Productivity: Streamline your workflow with automation tools, smart templates, and collaborative features that save time.')">Productivity</button>
+                    <button class="i-button" onclick="openModal('Enhanced Security: Enterprise-grade security with end-to-end encryption, multi-factor authentication, and compliance certifications.')">Security</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="hero-section">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Support</h1>
+                        <p class="hero-subtitle">We are here to help</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <h2 class="body-title">Get Support</h2>
+                    <p class="body-summary">Our dedicated support team is available 24/7 to assist you. Access our knowledge base, video tutorials, and community forums for immediate help and guidance.</p>
+                    <button class="i-button" onclick="openModal('24/7 Support: Our expert support team is available around the clock via chat, email, and phone to help resolve any issues quickly.')">Contact Support</button>
+                    <button class="i-button" onclick="openModal('Knowledge Base: Access hundreds of articles, tutorials, and guides. Search by topic or browse categories to find exactly what you need.')">Documentation</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-dots">
+            <div class="dot active" onclick="goToCard(0)"></div>
+            <div class="dot" onclick="goToCard(1)"></div>
+            <div class="dot" onclick="goToCard(2)"></div>
+            <div class="dot" onclick="goToCard(3)"></div>
+        </div>
+
+        <div class="swipe-indicator">SWIPE</div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="bottom-sheet-header"></div>
+            <h3 class="bottom-sheet-title">Information</h3>
+            <div class="bottom-sheet-content" id="modalContent"></div>
+            <button class="close-modal" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 4;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+
+        const cardsContainer = document.getElementById('cardsContainer');
+        const cards = document.querySelectorAll('.card');
+        const dots = document.querySelectorAll('.dot');
+
+        cardsContainer.addEventListener('touchstart', handleStart);
+        cardsContainer.addEventListener('touchmove', handleMove);
+        cardsContainer.addEventListener('touchend', handleEnd);
+
+        cardsContainer.addEventListener('mousedown', handleStart);
+        cardsContainer.addEventListener('mousemove', handleMove);
+        cardsContainer.addEventListener('mouseup', handleEnd);
+        cardsContainer.addEventListener('mouseleave', handleEnd);
+
+        function handleStart(e) {
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        }
+
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+        }
+
+        function handleEnd(e) {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const deltaX = currentX - startX;
+            const threshold = 50;
+
+            if (Math.abs(deltaX) > threshold) {
+                if (deltaX > 0 && currentCard > 0) {
+                    goToCard(currentCard - 1);
+                } else if (deltaX < 0 && currentCard < totalCards - 1) {
+                    goToCard(currentCard + 1);
+                }
+            }
+        }
+
+        function goToCard(index) {
+            cards[currentCard].classList.remove('active');
+            dots[currentCard].classList.remove('active');
+            
+            currentCard = index;
+            
+            cards[currentCard].classList.add('active');
+            dots[currentCard].classList.add('active');
+
+            cards.forEach((card, i) => {
+                card.classList.remove('prev');
+                if (i < currentCard) {
+                    card.classList.add('prev');
+                }
+            });
+        }
+
+        function openModal(content) {
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Auto-advance cards every 5 seconds
+        setInterval(() => {
+            const nextCard = (currentCard + 1) % totalCards;
+            goToCard(nextCard);
+        }, 5000);
+    </script>
+</body>
+</html>
