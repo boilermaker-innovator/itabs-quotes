@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Swipeable Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+        
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            background: #1a1a1a;
+            border-radius: 0;
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        @media (min-width: 431px) {
+            .widget-container {
+                min-height: 80vh;
+                border-radius: 20px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            }
+        }
+        
+        .cards-wrapper {
+            display: flex;
+            transition: transform 0.3s ease-out;
+            height: 100%;
+        }
+        
+        .card {
+            min-width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+        }
+        
+        .hero-section {
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+        }
+        
+        .hero-section.gradient-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .hero-section.gradient-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .hero-section.gradient-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .body-section {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .summary {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #cccccc;
+            margin-bottom: 2rem;
+        }
+        
+        .i-button {
+            background: #f59e0b;
+            color: #000000;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 8px 8px 8px 0;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .i-button:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .navigation {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+        
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background: #f59e0b;
+            transform: scale(1.2);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: #2a2a2a;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            transform: translateX(-50%) translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            display: block;
+        }
+        
+        .modal-overlay.active .bottom-sheet {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-content {
+            color: #cccccc;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="cards-wrapper" id="cardsWrapper">
+            <div class="card">
+                <div class="hero-section gradient-1">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Explore</h1>
+                        <p class="hero-subtitle">Discover new possibilities</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary">
+                        Embark on a journey of discovery with our comprehensive exploration tools. Navigate through endless possibilities and unlock new opportunities that await your attention.
+                    </p>
+                    <div class="buttons">
+                        <button class="i-button" onclick="openModal('Features')">Features</button>
+                        <button class="i-button" onclick="openModal('Benefits')">Benefits</button>
+                        <button class="i-button" onclick="openModal('Getting Started')">Get Started</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="hero-section gradient-2">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Create</h1>
+                        <p class="hero-subtitle">Build something amazing</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary">
+                        Transform your ideas into reality with our powerful creation suite. Whether you're building for personal use or professional projects, we provide all the tools you need.
+                    </p>
+                    <div class="buttons">
+                        <button class="i-button" onclick="openModal('Templates')">Templates</button>
+                        <button class="i-button" onclick="openModal('Tools')">Tools</button>
+                        <button class="i-button" onclick="openModal('Examples')">Examples</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="hero-section gradient-3">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Connect</h1>
+                        <p class="hero-subtitle">Join our community</p>
+                    </div>
+                </div>
+                <div class="body-section">
+                    <p class="summary">
+                        Connect with like-minded individuals and grow your network. Share experiences, collaborate on projects, and build lasting relationships within our vibrant community.
+                    </p>
+                    <div class="buttons">
+                        <button class="i-button" onclick="openModal('Community')">Community</button>
+                        <button class="i-button" onclick="openModal('Events')">Events</button>
+                        <button class="i-button" onclick="openModal('Support')">Support</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <div class="nav-dot active" onclick="goToCard(0)"></div>
+            <div class="nav-dot" onclick="goToCard(1)"></div>
+            <div class="nav-dot" onclick="goToCard(2)"></div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()">
+        <div class="bottom-sheet" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Modal Title</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content" id="modalContent">
+                Modal content goes here...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 3;
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        
+        const cardsWrapper = document.getElementById('cardsWrapper');
+        const navDots = document.querySelectorAll('.nav-dot');
+        
+        // Touch events
+        cardsWrapper.addEventListener('touchstart', handleStart, { passive: true });
+        cardsWrapper.addEventListener('touchmove', handleMove, { passive: true });
+        cardsWrapper.addEventListener('touchend', handleEnd, { passive: true });
+        
+        // Mouse events
+        cardsWrapper.addEventListener('mousedown', handleStart);
+        cardsWrapper.addEventListener('mousemove', handleMove);
+        cardsWrapper.addEventListener('mouseup', handleEnd);
+        cardsWrapper.addEventListener('mouseleave', handleEnd);
+        
+        function handleStart(e) {
+            isDragging = true;
+            startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+            cardsWrapper.style.transition = 'none';
+        }
+        
+        function handleMove(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            currentX = (e.type.includes('mouse') ? e.clientX : e.touches[0].clientX) - startX;
+            const translateX = -currentCard * 100 + (currentX / cardsWrapper.offsetWidth) * 100;
+            cardsWrapper.style.transform = `translateX(${translateX}%)`;
+        }
+        
+        function handleEnd() {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            cardsWrapper.style.transition = 'transform 0.3s ease-out';
+            
+            const threshold = cardsWrapper.offsetWidth * 0.2;
+            
+            if (currentX > threshold && currentCard > 0) {
+                currentCard--;
+            } else if (currentX < -threshold && currentCard < totalCards - 1) {
+                currentCard++;
+            }
+            
+            updateCardPosition();
+            updateNavigation();
+            currentX = 0;
+        }
+        
+        function goToCard(index) {
+            currentCard = index;
+            updateCardPosition();
+            updateNavigation();
+        }
+        
+        function updateCardPosition() {
+            const translateX = -currentCard * 100;
+            cardsWrapper.style.transform = `translateX(${translateX}%)`;
+        }
+        
+        function updateNavigation() {
+            navDots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentCard);
+            });
+        }
+        
+        // Modal functionality
+        const modalContents = {
+            'Features': 'Discover powerful features designed to enhance your experience. From intuitive interfaces to advanced customization options, every feature is crafted with precision.',
+            'Benefits': 'Experience the advantages of our platform including increased productivity, seamless integration, and comprehensive support for all your needs.',
+            'Getting Started': 'Begin your journey with our step-by-step guide. We\'ll walk you through the setup process and help you get up and running in minutes.',
+            'Templates': 'Choose from our collection of professionally designed templates. Each template is fully customizable and optimized for various use cases.',
+            'Tools': 'Access a comprehensive suite of tools designed to streamline your workflow. From basic utilities to advanced features, everything you need is at your fingertips.',
+            'Examples': 'Browse through real-world examples and case studies. See how others have successfully implemented our solutions in their projects.',
+            'Community': 'Join thousands of users in our vibrant community. Share ideas, get help, and collaborate with peers from around the world.',
+            'Events': 'Stay updated with our latest events, webinars, and workshops. Learn from experts and network with fellow community members.',
+            'Support': 'Get help when you need it with our comprehensive support system. Access documentation, tutorials, and direct support from our team.'
+        };
+        
+        function openModal(title) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = modalContents[title] || 'Content for ' + title;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
