@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iTabs Card Widget</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .widget-container {
+            max-width: 430px;
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .card-container {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #1e1e1e;
+            border-radius: 20px;
+            margin: 16px;
+            width: calc(100% - 32px);
+            height: calc(100% - 32px);
+            transition: transform 0.3s ease-out;
+            cursor: grab;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card-hero {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:nth-child(2) .card-hero {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) .card-hero {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card-hero h2 {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-body {
+            padding: 24px;
+            color: #e0e0e0;
+        }
+
+        .card-summary {
+            font-size: 16px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+            color: #b0b0b0;
+        }
+
+        .i-button {
+            background: #ffa726;
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+
+        .i-button:hover {
+            background: #ff9800;
+            transform: translateY(-1px);
+        }
+
+        .i-button:active {
+            transform: translateY(0);
+        }
+
+        .indicators {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .indicator.active {
+            background: #ffa726;
+            transform: scale(1.2);
+        }
+
+        .modal {
+            position: fixed;
+            bottom: -100%;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            transition: bottom 0.3s ease;
+            z-index: 1000;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal.show {
+            bottom: 0;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            color: #e0e0e0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #b0b0b0;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .modal-content {
+            color: #b0b0b0;
+            line-height: 1.6;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="card-container" id="cardContainer">
+            <div class="card">
+                <div class="card-hero">
+                    <h2>Premium Service</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-summary">Experience our top-tier premium service with advanced features, priority support, and exclusive benefits designed for professionals.</p>
+                    <button class="i-button" onclick="openModal('Features', 'Advanced analytics, priority support, custom integrations, and exclusive access to new features.')">Features</button>
+                    <button class="i-button" onclick="openModal('Pricing', 'Starting at $99/month with flexible billing options and enterprise discounts available.')">Pricing</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-hero">
+                    <h2>Standard Plan</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-summary">Perfect for small to medium businesses looking for reliable performance with essential features and good value for money.</p>
+                    <button class="i-button" onclick="openModal('What\'s Included', 'Core features, email support, basic analytics, and standard integrations for everyday business needs.')">What's Included</button>
+                    <button class="i-button" onclick="openModal('Get Started', 'Sign up today with a 14-day free trial. No credit card required to start your journey.')">Get Started</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-hero">
+                    <h2>Basic Package</h2>
+                </div>
+                <div class="card-body">
+                    <p class="card-summary">Ideal for startups and individual users who need essential functionality at an affordable price point with room to grow.</p>
+                    <button class="i-button" onclick="openModal('Benefits', 'Essential tools, community support, basic reporting, and seamless onboarding process.')">Benefits</button>
+                    <button class="i-button" onclick="openModal('Upgrade Path', 'Easy migration to higher tiers as your needs grow, with no data loss and seamless transition.')">Upgrade Path</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="indicators">
+            <div class="indicator active"></div>
+            <div class="indicator"></div>
+            <div class="indicator"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle"></h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        let startX = 0;
+        let isDragging = false;
+        const cards = document.querySelectorAll('.card');
+        const indicators = document.querySelectorAll('.indicator');
+        const cardContainer = document.getElementById('cardContainer');
+
+        function updateCards() {
+            cards.forEach((card, index) => {
+                let offset = (index - currentCard) * 100;
+                card.style.transform = `translateX(${offset}%)`;
+            });
+            
+            indicators.forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === currentCard);
+            });
+        }
+
+        function nextCard() {
+            if (currentCard < cards.length - 1) {
+                currentCard++;
+                updateCards();
+            }
+        }
+
+        function prevCard() {
+            if (currentCard > 0) {
+                currentCard--;
+                updateCards();
+            }
+        }
+
+        // Touch events
+        cardContainer.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
+
+        cardContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        cardContainer.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        // Mouse events for desktop
+        cardContainer.addEventListener('mousedown', (e) => {
+            startX = e.clientX;
+            isDragging = true;
+        });
+
+        cardContainer.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+        });
+
+        cardContainer.addEventListener('mouseup', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const endX = e.clientX;
+            const diff = startX - endX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextCard();
+                } else {
+                    prevCard();
+                }
+            }
+        });
+
+        cardContainer.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        function openModal(title, content) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalContent').textContent = content;
+            document.getElementById('modal').classList.add('show');
+            document.getElementById('overlay').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+            document.getElementById('overlay').classList.remove('show');
+        }
+
+        // Initialize
+        updateCards();
+    </script>
+</body>
+</html>
