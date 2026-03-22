@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sparky's Electrical</title>
+<style>
+  :root {
+    --accent: #ea580c;
+    --accent-light: #fb923c;
+    --accent-dark: #c2410c;
+    --accent-glow: rgba(234,88,12,0.3);
+    --bg: #0a0a0f;
+    --card-bg: #12121a;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --border: rgba(255,255,255,0.08);
+    --amber: #f59e0b;
+    --amber-light: #fcd34d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 8px;
+    background: var(--bg);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .progress-segment {
+    height: 3px;
+    flex: 1;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+
+  .progress-segment.active {
+    background: var(--accent);
+  }
+
+  .progress-segment.done {
+    background: var(--accent-dark);
+  }
+
+  /* Card Deck */
+  .deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0 0 16px;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .card::-webkit-scrollbar { display: none; }
+
+  .card.active { transform: translateX(0); }
+  .card.prev { transform: translateX(-100%); }
+
+  /* Welcome Card */
+  .card-hero {
+    background: linear-gradient(160deg, var(--accent-dark) 0%, var(--accent) 50%, var(--accent-light) 100%);
+    padding: 40px 24px 32px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .card-hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .card-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -20px;
+    width: 160px; height: 160px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 50%;
+  }
+
+  .hero-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .hero-trade {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 6px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-tagline {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 4px;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-body {
+    padding: 20px 20px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .welcome-info {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .info-icon {
+    width: 36px; height: 36px;
+    background: var(--accent-glow);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .info-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .info-value { font-size: 16px; font-weight: 600; color: var(--text); }
+
+  .phone-link {
+    color: var(--accent-light);
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .welcome-badge {
+    background: linear-gradient(135deg, var(--accent-glow), rgba(234,88,12,0.1));
+    border: 1px solid rgba(234,88,12,0.3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .welcome-badge p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .welcome-badge strong { color: var(--accent-light); }
+
+  .swipe-hint {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* Service Cards */
+  .service-header {
+    background: var(--card-bg);
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .service-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(234,88,12,0.3);
+    color: var(--accent-light);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .service-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  .price-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(234,88,12,0.15);
+    border: 1px solid rgba(234,88,12,0.4);
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+
+  .price-from { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .price-range { font-size: 20px; font-weight: 800; color: var(--accent-light); }
+
+  .service-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .ibuttons-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .ibuttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ibutton {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--amber-light);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: fit-content;
+  }
+
+  .ibutton:hover, .ibutton:active {
+    background: rgba(245,158,11,0.2);
+    border-color: rgba(245,158,11,0.6);
+  }
+
+  .ibutton-dot {
+    width: 18px; height: 18px;
+    background: var(--amber);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+    color: #000;
+    flex-shrink: 0;
+  }
+
+  /* Lead Capture */
+  .lead-header {
+    background: linear-gradient(160deg, #1a0a00 0%, #2d1200 100%);
+    border-bottom: 1px solid rgba(234,88,12,0.3);
+    padding: 28px 20px 20px;
+    flex-shrink: 0;
+  }
+
+  .lead-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .lead-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .lead-sub span { color: var(--accent-light); font-weight: 600; }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+  }
+
+  .form-group input,
+  .form-group textarea {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+    width: 100%;
+    -webkit-appearance: none;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(234,88,12,0.05);
+  }
+
+  .form-group textarea {
+    resize: none;
+    height: 90px;
+    line-height: 1.5;
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: rgba(148,163,184,0.5);
+  }
+
+  .submit-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-light));
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 20px var(--accent-glow);
+    letter-spacing: 0.3px;
+  }
+
+  .submit-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .submit-btn:active { transform: translateY(0); opacity: 1; }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .success-msg {
+    background: rgba(5,150,105,0.12);
+    border: 1px solid rgba(5,150,105,0.4);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+    color: #34d399;
+    font-weight: 600;
+    font-size: 14px;
+    display: none;
+  }
+
+  /* Navigation */
+  .nav-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .nav-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .nav-btn:hover { background: rgba(255,255,255,0.1); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .nav-center {
+    text-align: center;
+    flex: 1;
+    padding: 0 8px;
+  }
+
+  .nav-counter { font-size: 12px; color: var(--text-muted); }
+  .nav-label { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; margin: 0 auto; }
+
+  /* Footer */
+  .card-footer {
+    text-align: center;
+    padding: 8px 0 0;
+    font-size: 11px;
+    color: rgba(100,116,139,0.6);
+  }
+
+  .card-footer a { color: rgba(100,116,139,0.6); text-decoration: none; }
+  .card-footer a:hover { color: var(--text-muted); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open {
+    display: flex;
+    animation: fadeIn 0.2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-sheet {
+    background: #1a1a26;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 24px 36px;
+    width: 100%;
+    max-width: 430px;
+    border-top: 1px solid rgba(245,158,11,0.3);
+    animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1);
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-term-type {
+    display: inline-block;
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    color: var(--amber);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .modal-term {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .modal-body {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .modal-close {
+    margin-top: 20px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 11px;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.1); }
+</style>
+</head>
+<body>
+
+<div class="widget">
+  <!-- Progress Bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Card Deck -->
+  <div class="deck" id="deck">
+
+    <!-- Card 0: Welcome -->
+    <div class="card active" data-index="0">
+      <div class="card-hero">
+        <div class="hero-icon">⚡</div>
+        <div class="hero-title">Sparky's Electrical</div>
+        <div class="hero-trade">Electrician · Scarborough, Perth WA</div>
+        <div class="hero-tagline">"Bright ideas, quality work."</div>
+      </div>
+      <div class="card-body">
+        <div class="welcome-info">
+          <div class="info-row">
+            <div class="info-icon">📞</div>
+            <div>
+              <div class="info-label">Call Us</div>
+              <a class="phone-link" href="tel:0423111222">0423 111 222</a>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">📍</div>
+            <div>
+              <div class="info-label">Area</div>
+              <div class="info-value">All Perth Northern Suburbs</div>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">✅</div>
+            <div>
+              <div class="info-label">Licence</div>
+              <div class="info-value">Fully Licensed Electricians</div>
+            </div>
+          </div>
+        </div>
+        <div class="welcome-badge">
+          <p>🎉 <strong>Free Quotes</strong> on all jobs — no call-out fee to find out what your electrical work costs. Swipe to explore our services!</p>
+        </div>
+        <div class="swipe-hint">
+          <span>👉</span>
+          <span>Swipe to explore our services</span>
+          <span>👈</span>
+        </div>
+        <div class="card-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+      </div>
+    </div>
+
+    <!-- Card 1: Power Points and Switches -->
+    <div class="card" data-index="1">
+      <div class="service-header">
+        <div class="service-tag">⚡ Service</div>
+        <div class="service-title">Power Points &amp; Switches</div>
+        <div class="price-badge">
+          <div>
+            <div class="price-from">Typical Range</div>
+            <div class="price-range">$120 – $350</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="service-desc">
+          Whether you need a new power point in the kitchen, an extra USB outlet in the study, or old switches swapped out for modern rocker styles, we've got you covered. Our licensed electricians install all types of power points and switches quickly and safely. We leave the job neat, tidy, and fully tested before we go.
+        </div>
+        <div>
+          <div class="ibuttons-label">💡 Helpful Info</div>
+          <div class="ibuttons">
+            <button class="ibutton" data-term="Double vs Single Power Points" data-type="Tip" data-content="A double power point (GPO) gives you two outlets in the same wall space as a single. Upgrading from single to double is a cost-effective way to add capacity without extra wiring runs — great for areas like home offices, kitchens, and living rooms where demand is high.">
+              <span class="ibutton-dot">i</span> Double vs Single Power Points
+            </button>
+            <button class="ibutton" data-term="USB Power Points" data-type="Feature" data-content="Modern USB power points include built-in USB-A or USB-C charging ports alongside the standard plug socket. They eliminate the need for bulky adapters and deliver optimised charge speeds. They're ideal for bedrooms, kitchens, and home offices — a small upgrade with a big everyday impact.">
+              <span class="ibutton-dot">i</span> USB Power Points Explained
+            </button>
+          </div>
+        </div>
+        <div class="card-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+      </div>
+    </div>
+
+    <!-- Card 2: Safety Switch Installation -->
+    <div class="card" data-index="2">
+      <div class="service-header">
+        <div class="service-tag">⚡ Service</div>
+        <div class="service-title">Safety Switch Installation</div>
+        <div class="price-badge">
+          <div>
+            <div class="price-from">Typical Range</div>
+            <div class="price-range">$180 – $400</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="service-desc">
+          Safety switches (RCDs) are your family's first line of defence against electric shock and electrical fires. We install safety switches on your power, lighting, and hot water circuits to meet current WA regulations. Fast, affordable, and potentially life-saving — this is one upgrade you don't want to skip.
+        </div>
+        <div>
+          <div class="ibuttons-label">💡 Helpful Info</div>
+          <div class="ibuttons">
+            <button class="ibutton" data-term="What is a Safety Switch (RCD)?" data-type="Explainer" data-content="A Residual Current Device (RCD), commonly called a safety switch, monitors the flow of electricity through a circuit. If it detects even a tiny leakage — like current passing through a person — it cuts power in as little as 0.03 seconds. This rapid response can prevent electrocution and save lives.">
+              <span class="ibutton-dot">i</span> What is a Safety Switch (RCD)?
+            </button>
+            <button class="ibutton" data-term="WA Safety Switch Laws" data-type="Regulation" data-content="In Western Australia, safety switches are mandatory on all power and lighting circuits in new homes and renovations. Older homes may not be compliant. WA regulations require safety switches when rental properties change tenants. Having them installed proactively protects your household and ensures legal compliance.">
+              <span class="ibutton-dot">i</span> WA Safety Switch Laws
+            </button>
+          </div>
+        </div>
+        <div class="card-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+      </div>
+    </div>
+
+    <!-- Card 3: Smoke Alarm Installation -->
+    <div class="card" data-index="3">
+      <div class="service-header">
+        <div class="service-tag">⚡ Service</div>
+        <div class="service-title">Smoke Alarm Installation</div>
+        <div class="price-badge">
+          <div>
+            <div class="price-from">Typical Range</div>
+            <div class="price-range">$150 – $450</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="service-desc">
+          Smoke alarms save lives — and WA law requires them to be correctly placed and operational in every home. We install hardwired and interconnected smoke alarms that meet the latest Australian Standards. Whether you're a homeowner or landlord, we'll make sure your property is compliant and protected.
+        </div>
+        <div>
+          <div class="ibuttons-label">💡 Helpful Info</div>
+          <div class="ibuttons">
+            <button class="ibutton" data-term="Hardwired vs Battery Smoke Alarms" data-type="Comparison" data-content="Hardwired smoke alarms are connected to your home's electrical system and include a battery backup, so they keep working even in a power outage. Battery-only alarms rely solely on their battery and can fail if the battery goes flat. Hardwired alarms are generally considered more reliable and are required in new builds and major renovations.">
+              <span class="ibutton-dot">i</span> Hardwired vs Battery Alarms
+            </button>
+            <button class="ibutton" data-term="Interconnected Smoke Alarms" data-type="Feature" data-content="Interconnected smoke alarms communicate with each other so that when one detects smoke, all alarms in the home sound simultaneously. This is especially important in larger homes or for people who sleep with bedroom doors closed. WA regulations now require interconnection in new builds, making this a smart upgrade for existing homes too.">
+              <span class="ibutton-dot">i</span> Interconnected Alarms Explained
+            </button>
+          </div>
+        </div>
+        <div class="card-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+      </div>
+    </div>
+
+    <!-- Card 4: LED Downlight Upgrades -->
+    <div class="card" data-index="4">
+      <div class="service-header">
+        <div class="service-tag">⚡ Service</div>
+        <div class="service-title">LED Downlight Upgrades</div>
+        <div class="price-badge">
+          <div>
+            <div class="price-from">Typical Range</div>
+            <div class="price-range">$300 – $900</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="service-desc">
+          Swap out old halogen downlights for energy-efficient LEDs and watch your power bill drop. LED downlights use up to 75% less energy, run cooler, and last much longer than halogens. We supply and install quality LED fittings throughout your home — perfect lighting, done properly.
+        </div>
+        <div>
+          <div class="ibuttons-label">💡 Helpful Info</div>
+          <div class="ibuttons">
+            <button class="ibutton" data-term="LED vs Halogen Downlights" data-type="Comparison" data-content="Halogen downlights use 35–50 watts each and generate significant heat, increasing both power bills and fire risk. LED equivalents use just 8–12 watts, produce very little heat, and last 25,000–50,000 hours compared to halogens' 2,000 hours. A home with 20 halogens can save $200–$400 per year by switching to LED.">
+              <span class="ibutton-dot">i</span> LED vs Halogen Downlights
+            </button>
+            <button class="ibutton" data-term="Colour Temperature Explained" data-type="Tip" data-content="Colour temperature is measured in Kelvins (K) and affects the mood of a space. Warm white (2700–3000K) feels cosy and relaxed — great for bedrooms and living areas. Cool white (4000K) is crisp and energising — ideal for kitchens and bathrooms. Daylight (5000–6500K) mimics natural light and suits garages and workshops.">
+              <span class="ibutton-dot">i</span> Colour Temperature Explained
+            </button>
+          </div>
+        </div>
+        <div class="card-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+      </div>
+    </div>
+
+    <!-- Card 5: Switchboard Upgrades -->
+    <div class="card" data-index="5">
+      <div class="service-header">
+        <div class="service-tag">⚡ Service</div>
+        <div class="service-title">Switchboard Upgrades</div>
+        <div class="price-badge">
+          <div
