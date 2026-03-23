@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Southern Fencing Co — Quote Estimator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg-primary:#0a0a0f;
+--bg-secondary:#12121a;
+--bg-tertiary:#1e1e2e;
+--text-primary:#ffffff;
+--text-secondary:#9090b0;
+--accent:#7c3aed;
+--i-button:#f59e0b;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:430px;min-height:100vh;position:relative;overflow-x:hidden}
+/* SLIDER */
+.slider-wrap{position:relative;overflow:hidden;touch-action:pan-y}
+.slider-track{display:flex;transition:transform .38s cubic-bezier(.4,0,.2,1)}
+.card{min-width:100vw;max-width:430px;background:var(--bg-secondary);display:flex;flex-direction:column}
+.card-hero{position:relative;height:230px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:16px}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,15,.92) 0%,rgba(10,10,15,.4) 60%,transparent 100%)}
+.card-tag{position:relative;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:20px;width:fit-content;margin-bottom:8px}
+.card-headline{position:relative;font-size:22px;font-weight:800;line-height:1.2}
+.card-headline em{font-style:normal}
+/* hero themes */
+.hero-default .hero-overlay{background:linear-gradient(to top,rgba(10,10,15,.95) 0%,rgba(30,30,50,.5) 60%,transparent 100%)}
+.hero-default .card-tag{background:rgba(144,144,176,.18);color:#9090b0}
+.hero-default em{color:#9090b0}
+.hero-purple .card-tag{background:rgba(124,58,237,.25);color:#a78bfa}
+.hero-purple em{color:#a78bfa}
+.hero-cyan .card-tag{background:rgba(6,182,212,.2);color:#22d3ee}
+.hero-cyan em{color:#22d3ee}
+.hero-amber .card-tag{background:rgba(245,158,11,.2);color:#fbbf24}
+.hero-amber em{color:#fbbf24}
+.hero-green .card-tag{background:rgba(16,185,129,.2);color:#34d399}
+.hero-green em{color:#34d399}
+.card-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+.card-summary{font-size:13.5px;color:var(--text-secondary);line-height:1.6}
+.analogy-box{background:var(--bg-tertiary);border-radius:12px;padding:12px 14px}
+.analogy-box strong{font-size:12px;color:var(--i-button);display:block;margin-bottom:4px}
+.analogy-box p{font-size:12.5px;color:var(--text-secondary);line-height:1.5}
+.ibtns{display:flex;gap:8px;flex-wrap:wrap}
+.ibtn{background:var(--i-button);color:#000;font-size:12px;font-weight:700;border:none;border-radius:20px;padding:7px 14px;cursor:pointer;transition:opacity .2s}
+.ibtn:hover{opacity:.85}
+/* dots */
+.dots{display:flex;justify-content:center;gap:6px;padding:10px 0 6px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--bg-tertiary);transition:background .3s,transform .3s}
+.dot.active{background:var(--i-button);transform:scale(1.3)}
+/* FLOAT BUTTON */
+.float-btn{position:fixed;bottom:76px;right:14px;z-index:150;background:linear-gradient(135deg,#f59e0b,#d97706);color:#000;font-weight:800;font-size:14px;border:none;border-radius:28px;padding:13px 20px;cursor:pointer;box-shadow:0 4px 24px rgba(245,158,11,.5);animation:pulse 2.4s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 4px 24px rgba(245,158,11,.5)}50%{box-shadow:0 4px 36px rgba(245,158,11,.8)}}
+/* ESTIMATOR PANEL */
+.panel{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;background:var(--bg-primary);transform:translateY(100%);transition:transform .42s cubic-bezier(.4,0,.2,1)}
+.panel.open{transform:translateY(0)}
+.panel-header{background:var(--bg-secondary);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
+.panel-header h3{font-size:16px;font-weight:700}
+.close-btn{background:var(--bg-tertiary);border:none;color:var(--text-secondary);width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* live price strip */
+.price-strip{background:var(--bg-tertiary);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07)}
+.price-strip span{font-size:12px;color:var(--text-secondary)}
+.price-strip strong{font-size:18px;font-weight:800;color:var(--i-button)}
+/* steps */
+.steps-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.step{display:none}
+.step.active{display:flex;flex-direction:column;gap:12px}
+.step-label{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.08em}
+/* option grid */
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt-card{background:var(--bg-tertiary);border:2px solid transparent;border-radius:14px;padding:14px 10px;cursor:pointer;text-align:center;transition:border-color .2s,background .2s}
+.opt-card.selected{border-color:var(--i-button);background:rgba(245,158,11,.08)}
+.opt-card .oc-icon{font-size:26px;margin-bottom:6px}
+.opt-card .oc-label{font-size:13px;font-weight:700}
+.opt-card .oc-sub{font-size:11px;color:var(--text-secondary);margin-top:2px}
+/* qty */
+.qty-row{display:flex;align-items:center;gap:10px}
+.qty-input{flex:1;background:var(--bg-tertiary);border:2px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:18px;font-weight:700;padding:12px;text-align:center;outline:none;font-family:inherit}
+.qty-input:focus{border-color:var(--i-button)}
+.presets{display:flex;gap:8px;flex-wrap:wrap}
+.preset{background:var(--bg-tertiary);border:2px solid transparent;border-radius:20px;color:var(--text-secondary);font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer;transition:all .2s}
+.preset.selected{border-color:var(--i-button);color:var(--i-button)}
+/* scale list */
+.scale-list{display:flex;flex-direction:column;gap:8px}
+.scale-item{background:var(--bg-tertiary);border:2px solid transparent;border-radius:14px;padding:13px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .2s}
+.scale-item.selected{border-color:var(--i-button)}
+.scale-item .si-label{font-size:14px;font-weight:600}
+.scale-item .si-desc{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.scale-item .si-right{display:flex;align-items:center;gap:8px}
+.badge{background:var(--i-button);color:#000;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px}
+.scale-item .si-mult{font-size:12px;color:var(--text-secondary)}
+/* toggles */
+.toggle-list{display:flex;flex-direction:column;gap:8px}
+.toggle-item{background:var(--bg-tertiary);border:2px solid transparent;border-radius:14px;padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all .2s}
+.toggle-item.selected{border-color:var(--i-button);background:rgba(245,158,11,.06)}
+.toggle-item .ti-left .ti-label{font-size:13.5px;font-weight:600}
+.toggle-item .ti-left .ti-price{font-size:11px;color:var(--text-secondary);margin-top:2px}
+.toggle-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .2s}
+.toggle-item.selected .toggle-check{background:var(--i-button);border-color:var(--i-button);color:#000}
+/* estimate reveal */
+.est-card{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(217,119,6,.08));border:2px solid var(--i-button);border-radius:18px;padding:20px;text-align:center}
+.est-card .est-label{font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.est-card .est-price{font-size:36px;font-weight:800;color:var(--i-button);margin-bottom:4px}
+.est-card .est-note{font-size:11px;color:var(--text-secondary)}
+.est-summary{background:var(--bg-tertiary);border-radius:12px;padding:14px;font-size:12.5px;color:var(--text-secondary);line-height:1.7;white-space:pre-line}
+/* contact form */
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-field label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.07em}
+.form-field input{background:var(--bg-tertiary);border:2px solid rgba(255,255,255,.1);border-radius:12px;color:#fff;font-size:15px;padding:12px 14px;outline:none;font-family:inherit;transition:border-color .2s}
+.form-field input:focus{border-color:var(--i-button)}
+/* nav buttons */
+.step-nav{display:flex;gap:10px;padding:14px 16px;border-top:1px solid rgba(255,255,255,.07);background:var(--bg-secondary)}
+.btn-back{background:var(--bg-tertiary);border:none;color:var(--text-secondary);font-size:14px;font-weight:600;padding:13px 18px;border-radius:12px;cursor:pointer;font-family:inherit}
+.btn-next{flex:1;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:#000;font-size:15px;font-weight:800;padding:13px;border-radius:12px;cursor:pointer;font-family:inherit;transition:opacity .2s}
+.btn-next:hover{opacity:.9}
+/* success */
+.success-state{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:40px 24px;text-align:center;flex:1}
+.success-icon{font-size:64px}
+.success-state h2{font-size:22px;font-weight:800}
+.success-state p{font-size:14px;color:var(--text-secondary);line-height:1.6}
+/* progress bar */
+.prog-bar{height:3px;background:var(--bg-tertiary)}
+.prog-fill{height:100%;background:var(--i-button);transition:width .3s}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- SLIDER -->
+  <div class="slider-wrap" id="sliderWrap">
+    <div class="slider-track" id="sliderTrack">
+
+      <!-- CARD 1: INTRO -->
+      <div class="card">
+        <div class="card-hero hero-default">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="" loading="lazy">
+          <div class="hero-overlay"></div>
+          <div class="card-tag">🏡 01 / INTRO</div>
+          <h2 class="card-headline">Perth's southern suburbs deserve <em>quality fencing</em></h2>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">A solid fence is more than a boundary — it's security, privacy, and street appeal all in one. In Cockburn and across Perth's southern suburbs, the harsh sun, coastal winds, and sandy soils make choosing the right fence material absolutely critical. Southern Fencing Co has been solving exactly that for local homeowners.</p>
+          <div class="analogy-box">
+            <strong>💡 Think of it like...</strong>
+            <p>Your fence is the frame around a painting. Even the most beautiful home looks unfinished without the right fence framing it — and the right frame protects everything inside.</p>
+          </div>
+          <div class="ibtns">
+            <button class="ibtn" data-content="Why%20does%20fencing%20matter%20in%20Perth%E2%80%99s%20southern%20suburbs%3F">Why southern suburbs?</button>
+            <button class="ibtn" data-content="What%20makes%20Southern%20Fencing%20Co%20different%20from%20other%20fence%20contractors%3F">Why Southern Fencing Co?</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: TYPES -->
+      <div class="card">
+        <div class="card-hero hero-purple">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1590402494682-cd3fb53b1f70?w=860&q=80&auto=format&fit=crop" alt="" loading="lazy">
+          <div class="hero-overlay"></div>
+          <div class="card-tag">🔩 02 / TYPES</div>
+          <h2 class="card-headline">Colorbond, timber, or <em>pool fencing</em> — we do it all</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Colorbond steel is the classic Perth choice — low maintenance, wind-resistant, and available in 22 colours. Timber brings natural warmth and privacy. Pool fencing is a legal requirement and we ensure full compliance with WA safety standards so your pool area is both safe and stunning.</p>
+          <div class="analogy-box">
+            <strong>💡 Think of it like...</strong>
+            <p>Colorbond is your set-and-forget option. Timber is your character piece. Pool fencing is your non-negotiable — and we make all three look exceptional.</p>
+          </div>
+          <div class="ibtns">
+            <button class="ibtn" data-content="What%20are%20the%20pros%20and%20cons%20of%20Colorbond%20vs%20timber%20fencing%20in%20Perth%3F">Colorbond vs Timber?</button>
+            <button class="ibtn" data-content="What%20are%20WA%20pool%20fencing%20regulations%20I%20need%20to%20know%20about%3F">Pool fence rules in WA?</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: PRICING -->
+      <div class="card">
+        <div class="card-hero hero-cyan">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=860&q=80&auto=format&fit=crop" alt="" loading="lazy">
+          <div class="hero-overlay"></div>
+          <div class="card-tag">💰 03 / PRICING</div>
+          <h2 class="card-headline">Transparent costs — no <em>surprise quotes</em></h2>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Fencing costs in Perth vary based on material, run length, terrain, and post style. Colorbond starts from around $87/m, treated pine timber from $72/m, and glass or aluminium pool fencing from $115–$185/m. Your block's slope and existing posts can all shift the final number — our estimator handles it all upfront.</p>
+          <div class="analogy-box">
+            <strong>💡 Think of it like...</strong>
+            <p>Like buying carpet — the room size matters, but so does the underlay, the doorways, and the prep. Our estimator accounts for all of it so you're never blindsided.</p>
+          </div>
+          <div class="ibtns">
+            <button class="ibtn" data-content="What%20factors%20affect%20the%20cost%20of%20fencing%20in%20Perth%E2%80%99s%20southern%20suburbs%3F">What drives fencing cost?</button>
+            <button class="ibtn" data-content="Is%20Colorbond%20fencing%20cheaper%20than%20timber%20long-term%20in%20Perth%3F">Colorbond vs Timber cost?</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: PROCESS -->
+      <div class="card">
+        <div class="card-hero hero-amber">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=860&q=80&auto=format&fit=crop" alt="" loading="lazy">
+          <div class="hero-overlay"></div>
+          <div class="card-tag">📋 04 / PROCESS</div>
+          <h2 class="card-headline">From quote to <em>finished fence</em> — smooth every step</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Step one: you get an instant estimate right here. Step two: one of our Cockburn-based crew calls to confirm your measurements and site conditions. Step three: we schedule and install — usually within 5–10 business days. No mess left behind, no neighbour disputes, just a clean finish you'll be proud of.</p>
+          <div class="analogy-box">
+            <strong>💡 Think of it like...</strong>
+            <p>Think of us like a good tradie should be — straight quote, no drama, show up when we say we will, and clean up after ourselves. Southern suburbs simple.</p>
+          </div>
+          <div class="ibtns">
+            <button class="ibtn" data-content="How%20long%20does%20fencing%20installation%20take%20in%20Perth%3F">How long does install take?</button>
+            <button class="ibtn" data-content="Do%20I%20need%20council%20approval%20for%20a%20new%20fence%20in%20Perth%3F">Do I need council approval?</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: GET STARTED -->
+      <div class="card">
+        <div class="card-hero hero-green">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1523217582562-09d0def993a6?w=860&q=80&auto=format&fit=crop" alt="" loading="lazy">
+          <div class="hero-overlay"></div>
+          <div class="card-tag">🚀 05 / GET STARTED</div>
+          <h2 class="card-headline">Get your <em>instant fence quote</em> in 60 seconds</h2>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">No phone tag, no waiting for a rep to drive out. Use our estimator below to get a real price range in under a minute, then submit your details and a Southern Fencing Co expert will confirm everything within one business day. Serving Cockburn, Fremantle, Rockingham, Mandurah and all southern Perth suburbs.</p>
+          <div class="analogy-box">
+            <strong>💡 Think of it like...</strong>
+            <p>It's like a test drive before you commit — get the numbers, see what fits your budget, then we'll make it happen. Tap the button below to start.</p>
+          </div>
+          <div class="ibtns">
+            <button class="ibtn" data-content="What%20areas%20does%20Southern%20Fencing%20Co%20service%20in%20Perth%3F">What suburbs do you cover?</button>
+            <button class="ibtn" data-content="What%20is%20the%20best%20fence%20type%20for%20a%20beachside%20suburb%20in%20Perth%3F">Best fence near the coast?</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /slider-track -->
+    <div class="dots" id="dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- FLOAT BUTTON -->
+  <button class="float-btn" id="floatBtn">🏗️ Get a Quote</button>
+
+  <!-- ESTIMATOR PANEL -->
+  <div class="panel" id="panel">
+    <div class="panel-header">
+      <h3>🏗️ Fence Quote Estimator</h3>
+      <button class="close-btn" id="closeBtn">✕</button>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:14%"></div></div>
+    <div class="price-strip">
+      <span>Estimated range</span>
+      <strong id="livePrice">Select options below</strong>
+    </div>
+
+    <div class="steps-body" id="stepsBody">
+
+      <!-- STEP 1: TYPE -->
+      <div class="step active" id="step1">
+        <div class="step-label">Step 1 of 7 — Fence Type</div>
+        <div class="opt-grid">
+          <div class="opt-card" data-step="type" data-val="colorbond" data-base="87">
+            <div class="oc-icon">🟦</div>
+            <div class="oc-label">Colorbond</div>
+            <div class="oc-sub">From $87/lin.m</div>
+          </div>
+          <div class="opt-card" data-step="type" data-val="timber" data-base="72">
+            <div class="oc-icon">🪵</div>
+            <div class="oc-label">Timber</div>
+            <div class="oc-sub">From $72/lin.m</div>
+          </div>
+          <div class="opt-card" data-step="type" data-val="aluminium" data-base="115">
+            <div class="oc-icon">🏊</div>
+            <div class="oc-label">Aluminium Pool</div>
+            <div class="oc-sub">From $115/lin.m</div>
+          </div>
+          <div class="opt-card" data-step="type" data-val="glass" data-base="185">
+            <div class="oc-icon">✨</div>
+            <div class="oc-label">Glass Pool</div>
+            <div class="oc-sub">From $185/lin.m</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: QUANTITY -->
+      <div class="step" id="step2">
+        <div class="step-label">Step 2 of 7 — Run Length (linear metres)</div>
+        <div class="qty-row">
+          <input class="qty-input" type="number" id="qtyInput" min="1" value="20" placeholder="e.g. 30">
+        </div>
+        <div class="presets">
+          <button class="preset" data-qty="10">10m</button>
+          <button class="preset" data-qty="20">20m</button>
+          <button class="preset" data-qty="30">30m</button>
+          <button class="preset" data-qty="50">50m</button>
+          <button class="preset" data-qty="80">80m</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: SCALE -->
+      <div class="step" id="step3">
+        <div class="step-label">Step 3 of 7 — Fence Height / Grade</div>
+        <div class="scale-list">
+          <div class="scale-item" data-step="scale" data-val="standard" data-mult="1.0">
+            <div>
+              <div class="si-label">Standard (1.5m–1.8m)</div>
+              <div class="si-desc">Most common residential height</div>
+            </div>
+            <div class="si-right">
+              <span class="badge">Popular</span>
+            </div>
+          </div>
+          <div class="scale-item" data-step="scale" data-val="medium" data-mult="1.15">
+            <div>
+              <div class="si-label">High (2.0m–2.1m)</div>
+              <div class="si-desc">Extra privacy or security</div>
+            </div>
+            <div class="si-right"><span class="si-mult">+15%</span></div>
+          </div>
+          <div class="scale-item" data-step="scale" data-val="premium" data-mult="1.3">
+            <div>
+              <div class="si-label">Premium (2.4m+)</div>
+              <div class="si-desc">Commercial or high-security</div>
+            </div>
+            <div class="si-right"><span class="si-mult">+30%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4: ADD-ONS -->
+      <div class="step" id="step4">
+        <div class="step-label">Step 4 of 7 — Post Style</div>
+        <div class="opt-grid">
+          <div class="opt-card" data-step="post" data-val="standard" data-extra="0">
+            <div class="oc-icon">🪧</div>
+            <div class="oc-label">Standard Posts</div>
+            <div class="oc-sub">Included</div>
+          </div>
+          <div class="opt-card" data-step="post" data-val="concrete" data-extra="8">
+            <div class="oc-icon">🏗️</div>
+            <div class="oc-label">Concrete Infill</div>
+            <div class="oc-sub">+$8/m</div>
+          </div>
+          <div class="opt-card" data-step="post" data-val="steel" data-extra="12">
+            <div class="oc-icon">⚙️</div>
+            <div class="oc-label">Steel Posts</div>
+            <div class="oc-sub">+$12/m</div>
+          </div>
+          <div class="opt-card" data-step="post" data-val="hardwood" data-extra="18">
+            <div class="oc-icon">🌳</div>
+            <div class="oc-label">Hardwood Posts</div>
+            <div class="oc-sub">+$18/m</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5: EXTRAS (TOGGLES) -->
+      <div class="step" id="step5">
+        <div class="step-label">Step 5 of 7 — Optional Extras</div>
+        <div class="toggle-list">
+          <div class="toggle-item" data-extra="demolish" data-flat="350">
+            <div class="ti-left">
+              <div class="ti-label">🔨 Remove old fence</div>
+              <div class="ti-price">+$350 flat</div>
+            </div>
+            <div class="toggle-check">✓</div>
+          </div>
+          <div class="toggle-item" data-extra="gate-single" data-flat="480">
+            <div class="ti-left">
+              <div class="ti-label">🚪 Single gate supply & install</div>
+              <div class="ti-price">+$480 flat</div>
+            </div>
+            <div class="toggle-check">✓</div>
+          </div>
+          <div class="toggle-item" data-extra="gate-double" data-flat="780">
+            <div class="ti-left">
+              <div class="ti-label">🏠 Double driveway gate</div>
+              <div class="ti-price">+$780 flat</div>
+            </div>
+            <div class="toggle-check">✓</div>
+          </div>
+          <div class="toggle-item" data-extra="sloped" data-flat="420">
+            <div class="ti-left">
+              <div class="ti-label">⛰️ Sloped/uneven terrain</div>
+              <div class="ti-price">+$420 allowance</div>
+            </div>
+            <div class="toggle-check">✓</div>
+          </div>
+          <div class="toggle-item" data-extra="paint" data-flat="290">
+            <div class="ti-left">
+              <div class="ti-label">🎨 Timber stain / paint finish</div>
+              <div class="ti-price">+$290 flat</div>
+            </div>
+            <div class="toggle-check">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: ESTIMATE REVEAL -->
+      <div class="step" id="step6">
+        <div class="step-label">Step 6 of 7 — Your Estimate</div>
+        <div class="est-card">
+          <div class="est-label">Estimated project range</div>
+          <div class="est-price" id="revealPrice">$0 – $0</div>
+          <div class="est-note">Includes supply, delivery & installation · GST applicable</div>
+        </div>
+        <div class="est-summary" id="estSummary">Summary will appear here</div>
+      </div>
+
+      <!-- STEP 7: CONTACT FORM -->
+      <div class="step" id="step7">
+        <div class="step-label">Step 7 of 7 — Your Details</div>
+        <form id="quoteForm" style="display:flex;flex-direction:column;gap:12px">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" id="formSubject">
+          <input type="hidden" name="message" id="formMessage">
+          <div class="form-field">
+            <label>Full Name</label>
+            <input type="text" name="name" id="fname" placeholder="e.g. John Smith" required>
+          </div>
+          <div class="form-field">
+            <label>Phone</label>
+            <input type="tel" name="phone" id="fphone" placeholder="04XX XXX XXX" required>
+          </div>
+          <div class="form-field">
+            <label>Email</label>
+            <input type="email" name="email" id="femail" placeholder="you@email.com" required>
+          </div>
+          <div class="form-field">
+            <label>Suburb</label>
+            <input type="text" name="suburb" id="fsuburb" placeholder="e.g. Cockburn, Fremantle" required>
+          </div>
+        </form>
+      </div>
+
+    </div><!-- /steps-body -->
+
+    <div class="step-nav" id="stepNav">
+      <button class="btn-back" id="btnBack">Back</button>
+      <button class="btn-next" id="btnNext">Next →</button>
+    </div>
+  </div><!-- /panel -->
+
+</div><!-- /app -->
+
+<script>
+// ─── SLIDER ───
+const track = document.getElementById('sliderTrack');
+const dots = document.querySelectorAll('.dot');
+let cur = 0, startX = 0, dragging = false;
+const total = 5;
+
+function goTo(n) {
+  cur = Math.max(0, Math.min(total - 1, n));
+  track.style.transform = `translateX(-${cur * 100}%)`;
+  dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+}
+
+const wrap = document.getElementById('sliderWrap');
+wrap.addEventListener('touchstart', e => { startX = e.touches[0].clientX; dragging = true; }, {passive:true});
+wrap.addEventListener('touchend', e => {
+  if (!dragging) return;
+  const dx = e.changedTouches[0].clientX - startX;
+  if (Math.abs(dx) > 40) goTo(cur + (dx < 0 ? 1 : -1));
+  dragging = false;
+});
+
+// i-buttons
+document.querySelectorAll('.ibtn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const q = btn.getAttribute('data-content');
+    window.open(`https://www.google.com/search?q=${q}`, '_blank');
+  });
+});
+
+// ─── ESTIMATOR STATE ───
+const state = {
+  type: null, typeLabel: '', baseRate: 0,
+  qty: 20,
+  scale: null, scaleLabel: '', scaleMult: 1.0,
+  post: null, postLabel: '', postExtra: 0,
+  extras: {},
+  currentStep: 1
+};
+
+const STEPS = 7;
+function prog(s) { document.getElementById('progFill').style.width = `${(s/STEPS)*100}%`; }
+
+// price calc
+function calcPrice() {
+  if (!state.type || !state.scale) return null;
+  const perM = (state.baseRate + state.postExtra) * state.scaleMult;
+  let base = perM * state.qty;
+  let flats = 0;
+  Object.values(state.extras).forEach(v => flats += v);
+  const low = Math.round(base + flats);
+  const high = Math.round(low * 1.15);
+  return { low, high };
+}
+
+function fmt(n) { return '$' + n.toLocaleString('en-AU'); }
+
+function updatePriceStrip() {
+  const p = calcPrice();
+  const el = document.getElementById('livePrice');
+  el.textContent = p ? `${fmt(p.low)} – ${fmt(p.high)}` : 'Select options below';
+}
+
+// ─── PANEL ───
+const panel = document.getElementById('panel');
+document.getElementById('floatBtn').addEventListener('click', () => panel.classList.add('open'));
+document.getElementById('closeBtn').addEventListener('click', () => panel.classList.remove('open'));
+
+// show step
+function showStep(n) {
+  document.querySelectorAll('.step').forEach((s,i) => s.classList.toggle('active', i === n-1));
+  prog(n);
+  const back = document.getElementById('btnBack');
+  const next = document.getElementById('btnNext');
+  back.style.display = n === 1 ? 'none' : '';
+  if (n === 6) { buildSummary(); next.textContent = 'Continue →'; }
+  else if (n === 7) { next.textContent = 'Submit Quote Request'; }
+  else { next.textContent = 'Next →'; }
+  state.currentStep = n;
+  document.getElementById('stepsBody').scrollTop = 0;
+}
+
+// option cards
+document.querySelectorAll('.opt-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const step = card.dataset.step;
+    document.querySelectorAll(`.opt-card[data-step="${step}"]`).forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    if (step === 'type') {
+      state.type = card.dataset.val;
+      state.typeLabel = card.querySelector('.oc-label').textContent;
+      state.baseRate = parseFloat(card.dataset.base);
+    } else if (step === 'post') {
+      state.post = card.dataset.val;
+      state.postLabel = card.querySelector('.oc-label').textContent;
+      state.postExtra = parseFloat(card.dataset.extra);
+    }
+    updatePriceStrip();
+  });
+});
+
+// scale items
+document.querySelectorAll('.scale-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.scale-item').forEach(s => s.classList.remove('selected'));
+    item.classList.add('selected');
+    state.scale = item.dataset.val;
+    state.scaleLabel = item.querySelector('.si-label').textContent;
+    state.scaleMult = parseFloat(item.dataset.mult);
+    updatePriceStrip();
+  });
+});
+
+// qty
+const qtyInput = document.getElementById('qtyInput');
+qtyInput.addEventListener('input', () => {
+  state.qty = parseFloat(qtyInput.value) || 1;
+  updatePriceStrip();
+});
+document.querySelectorAll('.preset').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.preset').forEach(x => x.classList.remove('selected'));
+    p.classList.add('selected');
+    state.qty = parseFloat(p.dataset.qty);
+    qtyInput.value = state.qty;
+    updatePriceStrip();
+  });
+});
+
+// toggles
+document.querySelectorAll('.toggle-item').forEach(item => {
+  item.addEventListener('click', () => {
+    item.classList.toggle('selected');
+    const key = item.dataset.extra;
+    const flat = parseFloat(item.dataset.flat);
+    if (item.classList.contains('selected')) { state.extras[key] = flat; }
+    else { delete state.extras[key]; }
+    updatePriceStrip();
+  });
+});
+
+// build summary
+function buildSummary() {
+  const p = calcPrice();
+  if (!p) return;
+  document.getElementById('revealPrice').textContent = `${fmt(p.low)} – ${fmt(p.high)}`;
+  let extrasText = Object.keys(state.extras).length
+    ? Object.entries(state.extras).map(([k,v]) => `  • ${k} (+${fmt(v)})`).join('\n')
+    : '  • None selected';
+  let summary = `Fence Type: ${state.typeLabel}\nLength: ${state.qty} linear metres\nHeight/Grade: ${state.scaleLabel}\nPost Style: ${state.postLabel || 'Standard'}\n\nOptional Extras:\n${extrasText}\n\nEstimate Range: ${fmt(p.low)} – ${fmt(p.high)}\n(Includes supply, delivery & installation · GST applicable)`;
+  document.getElementById('estSummary').textContent = summary;
+}
+
+// nav
+document.getElementById('btnNext').addEventListener('click', () => {
+  const s = state.currentStep;
+  if (s === 1 && !state.type) { alert('Please select a fence type.'); return; }
+  if (s === 2) { state.qty = parseFloat(qtyInput.value) || 20; updatePriceStrip(); }
+  if (s === 3 && !state.scale) { alert('Please select a height/grade.'); return; }
+  if (s === 4 && !state.post) { alert('Please select a post style.'); return; }
+  if (s === 7) { submitForm(); return; }
+  showStep(s + 1);
+});
+
+document.getElementById('btnBack').addEventListener('click', () => {
+  if (state.currentStep > 1) showStep(state.currentStep - 1);
+});
+
+// submit
+async function submitForm() {
+  const name = document.getElementById('fname').value.trim();
+  const phone = document.getElementById('fphone').value.trim();
+  const email = document.getElementById('femail').value.trim();
+  const suburb = document.getElementById('fsuburb').value.trim();
+  if (!name || !phone || !email || !suburb) { alert('Please fill in all fields.'); return; }
+  const p = calcPrice();
+  const extrasText = Object.keys(state.extras).length
+    ? Object.keys(state.extras).map(k => `${k} (+$${state.extras[k]})`).join(', ')
+    : 'None';
+  document.getElementById('formSubject').value = `Fencing Quote — ${name} · ${suburb}`;
+  document.getElementById('formMessage').value = `Name: ${name}\nPhone: ${phone}\nEmail: ${email}\nSuburb: ${suburb}\n\nFence Type: ${state.typeLabel}\nLength: ${state.qty}m\nHeight: ${state.scaleLabel}\nPost Style: ${state.postLabel || 'Standard'}\nExtras: ${extrasText}\nEstimate: ${fmt(p.low)} – ${fmt(p.high)}`;
+  const btn = document.getElementById('btnNext');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  try {
+    const fd = new FormData(document.getElementById('quoteForm'));
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body: fd });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('stepsBody').innerHTML = `<div class="success-state"><div class="success-icon">🎉</div><h2>Quote Request Sent!</h2><p>A licensed Perth fencing expert from <strong>Southern Fencing Co</strong> will be in touch within 1 business day to confirm your ${state.typeLabel} fence quote for ${suburb}.</p></div>`;
+      document.getElementById('stepNav').style.display = 'none';
+      document.getElementById('progFill').style.width = '100%';
+    } else { throw new Error('Failed'); }
+  } catch {
+    btn.textContent = 'Submit Quote Request';
+    btn.disabled = false;
+    alert('Something went wrong. Please try again.');
+  }
+}
+
+// init
+showStep(1);
+</script>
+</body>
+</html>
