@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perth Decking Pros</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0a0f;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .widget{width:100%;max-width:430px;height:100vh;max-height:100vh;position:relative;overflow:hidden;display:flex;flex-direction:column}
+  .progress-bar{display:flex;gap:4px;padding:12px 16px 8px;flex-shrink:0}
+  .seg{height:3px;flex:1;border-radius:2px;background:#2a2a3a;transition:background 0.3s}
+  .seg.active{background:#475569}
+  .seg.done{background:#94a3b8}
+  .cards-wrapper{flex:1;overflow:hidden;position:relative}
+  .card{position:absolute;top:0;left:0;width:100%;height:100%;overflow-y:auto;display:none;flex-direction:column;background:#0a0a0f}
+  .card.visible{display:flex}
+  .hero-gradient{background:linear-gradient(135deg,#1a1f2e 0%,#2d3748 60%,#475569 100%);padding:40px 24px 32px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;overflow:hidden;border-radius:0 0 24px 24px}
+  .hero-gradient::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:rgba(148,163,184,0.1);border-radius:50%}
+  .hero-emoji{font-size:72px;margin-bottom:16px;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4))}
+  .business-name{font-size:28px;font-weight:800;color:#fff;letter-spacing:-0.5px;text-shadow:0 2px 8px rgba(0,0,0,0.4);margin-bottom:10px}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+  .badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#e2e8f0;font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px;backdrop-filter:blur(4px)}
+  .tagline{font-style:italic;color:rgba(255,255,255,0.75);font-size:15px;margin-bottom:20px}
+  .phone-btn{background:linear-gradient(135deg,#2d3748,#475569);color:#fff;border:none;padding:14px 32px;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.2)}
+  .phone-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.5)}
+  .swipe-hint{color:rgba(255,255,255,0.45);font-size:12px;margin-top:16px;letter-spacing:0.5px}
+  .card-content{padding:20px 16px 100px;display:flex;flex-direction:column;gap:16px}
+  .svc-card{background:#12121a;border-radius:16px;overflow:hidden;border:1px solid #1e1e2e}
+  .svc-header{background:linear-gradient(135deg,#1a1f2e 0%,#2d3748 100%);padding:20px 20px 16px;position:relative}
+  .svc-icon{font-size:36px;margin-bottom:8px}
+  .svc-name{font-size:21px;font-weight:800;color:#fff;letter-spacing:-0.3px}
+  .svc-body{padding:16px 20px 20px}
+  .price-pill{display:inline-block;border:1.5px solid #475569;color:#94a3b8;font-size:13px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px;background:rgba(71,85,105,0.1)}
+  .svc-desc{color:#94a3b8;font-size:14px;line-height:1.6;margin-bottom:14px}
+  .info-pill{background:rgba(71,85,105,0.2);border:1.5px solid #475569;color:#94a3b8;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s}
+  .info-pill:hover{background:rgba(71,85,105,0.4)}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:flex-end;justify-content:center;z-index:1000;backdrop-filter:blur(2px)}
+  .modal-overlay.open{display:flex}
+  .modal-sheet{background:#12121a;border-radius:24px 24px 0 0;padding:24px 24px 40px;width:100%;max-width:430px;border-top:1px solid #2a2a3a;animation:slideUp 0.3s ease}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .modal-handle{width:40px;height:4px;background:#2a2a3a;border-radius:2px;margin:0 auto 20px}
+  .modal-title{font-size:17px;font-weight:700;color:#e2e8f0;margin-bottom:12px}
+  .modal-text{color:#94a3b8;font-size:14px;line-height:1.65}
+  .modal-close{margin-top:20px;background:linear-gradient(135deg,#2d3748,#475569);color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;width:100%}
+  .form-card{background:#12121a;border-radius:16px;overflow:hidden;border:1px solid #1e1e2e;margin-bottom:8px}
+  .form-header{background:linear-gradient(135deg,#1a1f2e 0%,#2d3748 100%);padding:24px 20px 20px;text-align:center}
+  .form-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:6px}
+  .form-sub{color:rgba(255,255,255,0.6);font-size:13px}
+  .form-body{padding:20px}
+  .field{margin-bottom:14px}
+  .field label{display:block;color:#94a3b8;font-size:12px;font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+  .field input,.field textarea{width:100%;background:#0a0a0f;border:1.5px solid #2a2a3a;border-radius:10px;padding:12px 14px;color:#e2e8f0;font-size:14px;outline:none;transition:border-color 0.2s;font-family:inherit}
+  .field input:focus,.field textarea:focus{border-color:#475569}
+  .field textarea{resize:vertical;min-height:90px}
+  .submit-btn{width:100%;background:linear-gradient(135deg,#2d3748,#475569);color:#fff;border:none;padding:15px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:transform 0.2s}
+  .submit-btn:hover{transform:translateY(-1px)}
+  .success-msg{display:none;text-align:center;padding:24px 16px;color:#e2e8f0}
+  .success-icon{font-size:48px;margin-bottom:12px}
+  .success-title{font-size:20px;font-weight:700;margin-bottom:8px}
+  .success-sub{color:#94a3b8;font-size:14px;line-height:1.5}
+  .nav-area{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 20px;background:linear-gradient(transparent,#0a0a0f 60%);pointer-events:none;z-index:100}
+  .nav-btn{pointer-events:all;background:#12121a;border:1.5px solid #2a2a3a;color:#e2e8f0;width:48px;height:48px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s,border-color 0.2s}
+  .nav-btn:hover{background:#1e1e2e;border-color:#475569}
+  .nav-btn:disabled{opacity:0.3;cursor:not-allowed}
+  .dots{pointer-events:all;display:flex;gap:6px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:#2a2a3a;transition:all 0.3s;cursor:pointer}
+  .dot.active{background:#94a3b8;width:20px;border-radius:4px}
+  .footer{text-align:center;padding:8px 0 4px;color:rgba(255,255,255,0.3);font-size:11px}
+  .footer a{color:rgba(255,255,255,0.4);text-decoration:none}
+  .footer a:hover{color:rgba(255,255,255,0.6)}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="progress-bar" id="progressBar"></div>
+  <div class="cards-wrapper" id="cardsWrapper">
+
+    <!-- CARD 1: WELCOME -->
+    <div class="card visible" data-index="0">
+      <div class="hero-gradient">
+        <div class="hero-emoji">🪵</div>
+        <div class="business-name">Perth Decking Pros</div>
+        <div class="badges">
+          <span class="badge">🔨 Carpenter</span>
+          <span class="badge">📍 Wanneroo, Perth WA</span>
+        </div>
+        <div class="tagline">"Extend your living outdoors."</div>
+        <a class="phone-btn" href="tel:0444123456">📞 0444 123 456</a>
+        <div class="swipe-hint">Swipe to explore services →</div>
+      </div>
+      <div class="card-content">
+        <div style="background:#12121a;border-radius:16px;padding:20px;border:1px solid #1e1e2e">
+          <div style="color:#e2e8f0;font-size:15px;font-weight:700;margin-bottom:8px">🏆 Why Perth Decking Pros?</div>
+          <div style="color:#94a3b8;font-size:13px;line-height:1.65">Specialists in outdoor timber structures with years of experience crafting beautiful decks, pergolas and carports across Perth. We use only quality treated pine and premium hardwoods, built to last in the Australian climate.</div>
+        </div>
+        <div style="background:#12121a;border-radius:16px;padding:16px 20px;border:1px solid #1e1e2e;display:flex;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:100px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#e2e8f0">FREE</div>
+            <div style="color:#94a3b8;font-size:12px">Design Consult</div>
+          </div>
+          <div style="flex:1;min-width:100px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#e2e8f0">5⭐</div>
+            <div style="color:#94a3b8;font-size:12px">Quality Rated</div>
+          </div>
+          <div style="flex:1;min-width:100px;text-align:center">
+            <div style="font-size:24px;font-weight:800;color:#e2e8f0">WA</div>
+            <div style="color:#94a3b8;font-size:12px">Licensed Trades</div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+    <!-- CARD 2: TIMBER DECKING -->
+    <div class="card" data-index="1">
+      <div class="card-content" style="padding-top:16px">
+        <div class="svc-card">
+          <div class="svc-header">
+            <div class="svc-icon">🪵</div>
+            <div class="svc-name">Timber Decking</div>
+          </div>
+          <div class="svc-body">
+            <div class="price-pill">$180 – $320 per m²</div>
+            <div class="svc-desc">Beautifully crafted timber decks using premium treated pine or hardwood species. Perfect for outdoor entertaining, pool surrounds and alfresco areas. All timber is treated to withstand Perth's harsh UV and weather conditions.</div>
+            <button class="info-pill" data-title="About Timber Decking" data-content="Treated pine is the most popular and cost-effective option for decks in Perth. Hardwoods like Merbau and Spotted Gum offer greater durability and a premium aesthetic, lasting 25+ years with proper maintenance. We supply all treated pine and hardwood options and can advise the best species for your budget and use case. Council permits may be required for larger structures — we can assist with this process.">ℹ️ Good to know</button>
+          </div>
+        </div>
+        <div style="background:#12121a;border-radius:16px;padding:16px 20px;border:1px solid #1e1e2e">
+          <div style="color:#e2e8f0;font-size:13px;font-weight:700;margin-bottom:10px">TIMBER OPTIONS</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🌲</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Treated Pine</div><div style="color:#94a3b8;font-size:12px">Affordable & durable, great value choice</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🏅</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Merbau Hardwood</div><div style="color:#94a3b8;font-size:12px">Rich reddish-brown, premium & long-lasting</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">⭐</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Spotted Gum</div><div style="color:#94a3b8;font-size:12px">Classic Australian hardwood, stunning grain</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+    <!-- CARD 3: COMPOSITE DECKING -->
+    <div class="card" data-index="2">
+      <div class="card-content" style="padding-top:16px">
+        <div class="svc-card">
+          <div class="svc-header">
+            <div class="svc-icon">🔲</div>
+            <div class="svc-name">Composite Decking</div>
+          </div>
+          <div class="svc-body">
+            <div class="price-pill">$250 – $420 per m²</div>
+            <div class="svc-desc">Low-maintenance composite boards that look like real timber without the upkeep. Resistant to fading, staining and splinters — ideal for families and busy lifestyles. Available in a wide range of colours and finishes to match any home.</div>
+            <button class="info-pill" data-title="About Composite Decking" data-content="Composite decking is made from a blend of wood fibre and recycled plastic, making it an eco-friendly choice. It requires no sanding, staining or sealing unlike natural timber. Most composite products carry a 25-year structural warranty. While the upfront cost is higher than timber, the reduced maintenance costs over the life of the deck make it excellent value. Perfect for Perth's hot summers as many composite boards are designed to stay cooler underfoot.">ℹ️ Good to know</button>
+          </div>
+        </div>
+        <div style="background:#12121a;border-radius:16px;padding:16px 20px;border:1px solid #1e1e2e">
+          <div style="color:#e2e8f0;font-size:13px;font-weight:700;margin-bottom:10px">KEY BENEFITS</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🛠️</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Zero Maintenance</div><div style="color:#94a3b8;font-size:12px">No sanding, staining or sealing ever needed</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🎨</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Colour Fast</div><div style="color:#94a3b8;font-size:12px">UV-stable, won't fade in Perth's harsh sun</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">♻️</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Eco Friendly</div><div style="color:#94a3b8;font-size:12px">Made from recycled materials</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+    <!-- CARD 4: DECK REPAIRS -->
+    <div class="card" data-index="3">
+      <div class="card-content" style="padding-top:16px">
+        <div class="svc-card">
+          <div class="svc-header">
+            <div class="svc-icon">🔧</div>
+            <div class="svc-name">Deck Repairs</div>
+          </div>
+          <div class="svc-body">
+            <div class="price-pill">$80 – $200 per hour</div>
+            <div class="svc-desc">Restore your tired or damaged deck to its former glory. We replace rotted boards, fix structural issues, resecure loose fixings and refinish weathered timber. Fast, reliable repair service across Wanneroo and greater Perth.</div>
+            <button class="info-pill" data-title="About Deck Repairs" data-content="Common deck repair issues in Perth include timber rot from moisture, loose or popped nails, faded or peeling finishes, and structural issues with stumps and bearers. We recommend a full inspection every 2-3 years. Early repairs are far more cost-effective than full replacement. We can provide a written quote after a free onsite assessment and advise whether repair or replacement is the better investment for your situation.">ℹ️ Good to know</button>
+          </div>
+        </div>
+        <div style="background:#12121a;border-radius:16px;padding:16px 20px;border:1px solid #1e1e2e">
+          <div style="color:#e2e8f0;font-size:13px;font-weight:700;margin-bottom:10px">COMMON REPAIRS</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🪵</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Board Replacement</div><div style="color:#94a3b8;font-size:12px">Swap out rotted or cracked boards</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🏗️</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Structural Repairs</div><div style="color:#94a3b8;font-size:12px">Bearers, joists and stumps</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">✨</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Sand & Refinish</div><div style="color:#94a3b8;font-size:12px">Restore weathered timber to like-new</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+    <!-- CARD 5: PERGOLAS -->
+    <div class="card" data-index="4">
+      <div class="card-content" style="padding-top:16px">
+        <div class="svc-card">
+          <div class="svc-header">
+            <div class="svc-icon">🏛️</div>
+            <div class="svc-name">Pergolas</div>
+          </div>
+          <div class="svc-body">
+            <div class="price-pill">$4,500 – $15,000+</div>
+            <div class="svc-desc">Custom-designed timber pergolas that transform your outdoor space into a shaded retreat. From simple flat-top designs to ornate gabled structures, we build to your vision using quality treated pine or hardwood framing.</div>
+            <button class="info-pill" data-title="About Pergolas" data-content="Pergolas in WA typically require a building permit if they exceed 10m² in area or 2.4m in height — we can guide you through the council approval process. Common additions include shade sails, polycarbonate roofing or corrugated iron for full weather protection. Combining a new deck with a pergola is a popular package and we offer discounted bundle pricing. Freestanding and house-attached designs both available.">ℹ️ Good to know</button>
+          </div>
+        </div>
+        <div style="background:#12121a;border-radius:16px;padding:16px 20px;border:1px solid #1e1e2e">
+          <div style="color:#e2e8f0;font-size:13px;font-weight:700;margin-bottom:10px">PERGOLA STYLES</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">⬜</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Flat Top Pergola</div><div style="color:#94a3b8;font-size:12px">Clean modern look, great for shade sails</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🏠</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Gabled Pergola</div><div style="color:#94a3b8;font-size:12px">Classic pitched roof, maximum coverage</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🌿</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Arbour Style</div><div style="color:#94a3b8;font-size:12px">Open lattice design for climbing plants</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+    <!-- CARD 6: CARPORTS -->
+    <div class="card" data-index="5">
+      <div class="card-content" style="padding-top:16px">
+        <div class="svc-card">
+          <div class="svc-header">
+            <div class="svc-icon">🚗</div>
+            <div class="svc-name">Carports</div>
+          </div>
+          <div class="svc-body">
+            <div class="price-pill">$6,000 – $18,000+</div>
+            <div class="svc-desc">Sturdy, stylish timber carports built to complement your home. We design and construct single and double carports using treated structural framing, with roofing options to suit your budget and aesthetic preferences.</div>
+            <button class="info-pill" data-title="About Carports" data-content="Timber carports require a building permit in WA — this is included in our full-service offering and we manage the submission on your behalf. Roof options include Colorbond steel, polycarbonate sheeting or flat roofs with box gutters. We can also incorporate storage areas, side walls or integrated pergola sections. Engineer-certified designs are available if required. Average build time is 2–4 weeks once permits are approved.">ℹ️ Good to know</button>
+          </div>
+        </div>
+        <div style="background:#12121a;border-radius:16px;padding:16px 20px;border:1px solid #1e1e2e">
+          <div style="color:#e2e8f0;font-size:13px;font-weight:700;margin-bottom:10px">WHAT'S INCLUDED</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">📋</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Permit Management</div><div style="color:#94a3b8;font-size:12px">We handle council approvals for you</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🔩</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Full Construction</div><div style="color:#94a3b8;font-size:12px">Posts, beams, rafters & roofing</div></div></div>
+            <div style="display:flex;align-items:center;gap:10px"><span style="font-size:16px">🎨</span><div><div style="color:#e2e8f0;font-size:13px;font-weight:600">Custom Finishes</div><div style="color:#94a3b8;font-size:12px">Stained, painted or natural timber look</div></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+    <!-- CARD 7: LEAD FORM -->
+    <div class="card" data-index="6">
+      <div class="card-content" style="padding-top:16px">
+        <div class="form-card">
+          <div class="form-header">
+            <div style="font-size:36px;margin-bottom:8px">📐</div>
+            <div class="form-title">Get a Free Quote</div>
+            <div class="form-sub">Free design consultation included — we'll contact you within 24 hours</div>
+          </div>
+          <div class="form-body">
+            <div id="formContent">
+              <form id="quoteForm">
+                <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+                <input type="hidden" name="to" value="responses@itabs.ai">
+                <input type="hidden" name="subject" value="New Quote Request — Perth Decking Pros">
+                <input type="hidden" name="from_name" value="Perth Decking Pros iTabs Widget">
+                <div class="field">
+                  <label>Your Name</label>
+                  <input type="text" name="name" placeholder="e.g. Sarah Jones" required>
+                </div>
+                <div class="field">
+                  <label>Phone Number</label>
+                  <input type="tel" name="phone" placeholder="e.g. 0400 123 456" required>
+                </div>
+                <div class="field">
+                  <label>Email Address</label>
+                  <input type="email" name="email" placeholder="e.g. sarah@email.com" required>
+                </div>
+                <div class="field">
+                  <label>Job Description</label>
+                  <textarea name="message" placeholder="Describe your project — e.g. 4x5m timber deck at rear, looking for Merbau hardwood, need quotes and advice..." required></textarea>
+                </div>
+                <button type="submit" class="submit-btn">🪵 Request Free Quote</button>
+              </form>
+            </div>
+            <div class="success-msg" id="successMsg">
+              <div class="success-icon">✅</div>
+              <div class="success-title">Quote Request Sent!</div>
+              <div class="success-sub">Thanks! The team at Perth Decking Pros will be in touch within 24 hours to discuss your project and arrange your free design consultation.</div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align:center;padding:4px 0 8px">
+          <a class="phone-btn" href="tel:0444123456" style="display:inline-flex;text-decoration:none;font-size:15px;padding:12px 24px">📞 Call 0444 123 456</a>
+        </div>
+      </div>
+      <div class="footer"><a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a></div>
+    </div>
+
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="nav-area">
+    <button class="nav-btn" id="prevBtn" disabled>←</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn">→</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-text" id="modalText"></div>
+    <button class="modal-close" id="modalClose">Got it</button>
+  </div>
+</div>
+
+<script>
+  const totalCards = 7;
+  let current = 0;
+
+  const cards = document.querySelectorAll('.card');
+  const dots = document.getElementById('dots');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const progressBar = document.getElementById('progressBar');
+  const overlay = document.getElementById('modalOverlay');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalText = document.getElementById('modalText');
+
+  // Build progress segments
+  for(let i=0;i<totalCards;i++){
+    const seg = document.createElement('div');
+    seg.className='seg';
+    progressBar.appendChild(seg);
+  }
+
+  // Build dots
+  for(let i=0;i<totalCards;i++){
+    const dot = document.createElement('div');
+    dot.className='dot';
+    dot.addEventListener('click',()=>goTo(i));
+    dots.appendChild(dot);
+  }
+
+  function updateUI(){
+    cards.forEach((c,i)=>{
+      c.classList.toggle('visible', i===current);
+    });
+    document.querySelectorAll('.dot').forEach((d,i)=>{
+      d.classList.toggle('active', i===current);
+    });
+    document.querySelectorAll('.seg').forEach((s,i)=>{
+      s.classList.remove('active','done');
+      if(i===current) s.classList.add('active');
+      else if(i<current) s.classList.add('done');
+    });
+    prevBtn.disabled = current===0;
+    nextBtn.disabled = current===totalCards-1;
+  }
+
+  function goTo(n){
+    current = Math.max(0, Math.min(totalCards-1, n));
+    updateUI();
+  }
+
+  prevBtn.addEventListener('click',()=>goTo(current-1));
+  nextBtn.addEventListener('click',()=>goTo(current+1));
+
+  document.addEventListener('keydown',(e)=>{
+    if(e.key==='ArrowLeft') goTo(current-1);
+    if(e.key==='ArrowRight') goTo(current+1);
+  });
+
+  // Touch swipe
+  let touchStartX=0;
+  document.getElementById('cardsWrapper').addEventListener('touchstart',(e)=>{
+    touchStartX=e.touches[0].clientX;
+  },{passive:true});
+  document.getElementById('cardsWrapper').addEventListener('touchend',(e)=>{
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if(Math.abs(diff)>50){
+      if(diff>0) goTo(current+1);
+      else goTo(current-1);
+    }
+  },{passive:true});
+
+  // Info pills — modal
+  document.querySelectorAll('.info-pill').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const title = btn.getAttribute('data-title');
+      const content = decodeURIComponent(encodeURIComponent(btn.getAttribute('data-content')));
+      modalTitle.textContent = title;
+      modalText.textContent = content;
+      overlay.classList.add('open');
+    });
+  });
+
+  document.getElementById('modalClose').addEventListener('click',()=>{
+    overlay.classList.remove('open');
+  });
+  overlay.addEventListener('click',(e)=>{
+    if(e.target===overlay) overlay.classList.remove('open');
+  });
+
+  // Form submit
+  document.getElementById('quoteForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent='Sending...';
+    btn.disabled=true;
+    const data = new FormData(form);
+    try{
+      const res = await fetch('https://api.web3forms.com/submit',{method:'POST',body:data});
+      const json = await res.json();
+      if(json.success){
+        document.getElementById('formContent').style.display='none';
+        document.getElementById('successMsg').style.display='block';
+      } else {
+        btn.textContent='Try Again';
+        btn.disabled=false;
+      }
+    } catch(err){
+      btn.textContent='Try Again';
+      btn.disabled=false;
+    }
+  });
+
+  updateUI();
+</script>
+</body>
+</html>
