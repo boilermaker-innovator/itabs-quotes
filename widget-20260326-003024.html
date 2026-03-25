@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Trim & Brick — Joondalup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+  }
+  .widget-shell {
+    max-width: 430px;
+    width: 100%;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .prog-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #2a2a3e;
+    transition: background 0.3s;
+  }
+  .prog-seg.viewed { background: rgba(255,255,255,0.45); }
+  .prog-seg.active { background: var(--accent); }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(60px);
+    transition: opacity 0.38s ease, transform 0.38s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* CARD HERO */
+  .card-hero {
+    position: relative;
+    height: 240px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .card-hero .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .card-hero .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px 18px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--i-button);
+    margin-bottom: 8px;
+  }
+  .card-headline {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #a78bfa;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    background: var(--bg-secondary);
+    padding: 20px 18px 24px;
+    flex: 1;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 8px;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn .i-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--i-button);
+    color: #000;
+    font-weight: 900;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* TOOLTIP */
+  .tooltip-box {
+    display: none;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-top: 10px;
+  }
+  .tooltip-box.open { display: block; }
+
+  /* LEAD CAPTURE CARD */
+  .lead-card .card-body {
+    background: linear-gradient(135deg, #14532d, #052e16);
+  }
+  .lead-form { display: flex; flex-direction: column; gap: 10px; }
+  .lead-form input, .lead-form textarea {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .lead-form input::placeholder, .lead-form textarea::placeholder { color: rgba(255,255,255,0.35); }
+  .lead-form input:focus, .lead-form textarea:focus { border-color: rgba(124,58,237,0.6); }
+  .lead-form textarea { resize: none; height: 80px; }
+  .lead-submit {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .lead-submit:hover { background: #6d28d9; }
+  .lead-submit:active { transform: scale(0.98); }
+  .lead-success {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .lead-success .success-icon { font-size: 40px; margin-bottom: 10px; }
+  .lead-success h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .lead-success p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .lead-success a { color: var(--i-button); text-decoration: none; font-weight: 600; }
+
+  /* NAV ARROWS */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 14px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .nav-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg-tertiary);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: rgba(124,58,237,0.3); }
+  .nav-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* POWERED BY */
+  .powered-by {
+    text-align: center;
+    font-size: 10px;
+    color: #3a3a5a;
+    padding: 4px 0 6px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .powered-by a { color: #5a5a8a; text-decoration: none; }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-quote-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 28px;
+    padding: 13px 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.5);
+    animation: pulse-amber 2.4s infinite;
+    display: flex; align-items: center; gap: 6px;
+    max-width: 430px;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 4px 20px rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 4px 32px rgba(245,158,11,0.85), 0 0 0 8px rgba(245,158,11,0.12); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .quote-sheet {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+    max-width: 430px;
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 24px;
+  }
+  .quote-panel.open {
+    pointer-events: all;
+  }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-panel.open .quote-sheet { transform: translateY(0); }
+
+  .quote-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 18px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 2;
+  }
+  .quote-header h2 { font-size: 16px; font-weight: 700; }
+  .quote-close {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PRICE STRIP */
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    border: 1px solid rgba(96,165,250,0.25);
+    margin: 14px 16px;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-strip .ps-label { font-size: 11px; color: #93c5fd; font-weight: 600; letter-spacing: 0.5px; }
+  .price-strip .ps-range { font-size: 20px; font-weight: 800; color: #fff; }
+  .price-strip .ps-note { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+  /* QUOTE STEPS */
+  .quote-step { display: none; padding: 0 16px; }
+  .quote-step.active { display: block; }
+  .step-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  /* SERVICE GRID */
+  .svc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .svc-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .svc-tile:hover { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.08); }
+  .svc-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.15); }
+  .svc-tile .svc-emoji { font-size: 26px; margin-bottom: 6px; }
+  .svc-tile .svc-name { font-size: 12px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .svc-tile .svc-price { font-size: 10px; color: var(--text-secondary); }
+
+  /* COMPLEXITY */
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .comp-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .comp-tile:hover { border-color: rgba(124,58,237,0.5); }
+  .comp-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .comp-tile .comp-label { font-size: 14px; font-weight: 600; }
+  .comp-tile .comp-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .comp-tile .comp-mult { font-size: 12px; color: var(--i-button); font-weight: 700; }
+
+  /* QUOTE CONTACT FORM */
+  .q-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .q-form input, .q-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .q-form input::placeholder, .q-form textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .q-form input:focus, .q-form textarea:focus { border-color: rgba(124,58,237,0.55); }
+  .q-form textarea { resize: none; height: 70px; }
+
+  /* STEP BUTTONS */
+  .step-next-btn, .step-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 13px 20px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    border: none;
+    width: 100%;
+  }
+  .step-next-btn { background: var(--accent); color: #fff; }
+  .step-next-btn:hover { background: #6d28d9; }
+  .step-next-btn:active { transform: scale(0.98); }
+  .step-back-btn {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 8px;
+  }
+  .step-back-btn:hover { background: rgba(255,255,255,0.05); }
+
+  /* STEP INDICATORS */
+  .step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: 10px 0 14px;
+  }
+  .step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2a2a3e;
+    transition: background 0.2s;
+  }
+  .step-dot.active { background: var(--accent); }
+
+  /* QUOTE SUCCESS */
+  .quote-success {
+    display: none;
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .quote-success .qs-icon { font-size: 48px; margin-bottom: 14px; }
+  .quote-success h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .quote-success p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 16px; }
+  .quote-success a { color: var(--i-button); text-decoration: none; font-weight: 700; }
+
+  /* HERO THEME FALLBACKS */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green { background: linear-gradient(135deg, #14532d, #052e16); }
+</style>
+</head>
+<body>
+<div class="widget-shell">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar">
+    <!-- segments injected by JS -->
+  </div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck"
+    data-startx=""
+    data-dx="0">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="card-hero hero-default">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Landscaping in Joondalup">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / Rick's Trim & Brick</div>
+          <h1 class="card-headline">Rick's Trim &amp; Brick — <em>Joondalup's trusted bricklaying &amp; landscaping crew</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Rick's Trim &amp; Brick has been shaping yards across Joondalup and the northern suburbs for years — from solid retaining walls that handle Perth's sandy soils, to crisp brick edging and custom garden beds that actually last. Rick and his team are local, licenced, and don't cut corners on materials or craft.</p>
+        <button class="i-btn" onclick="toggleTooltip('tt-about')">
+          <span class="i-dot">i</span> About Rick's Trim &amp; Brick
+        </button>
+        <div class="tooltip-box" id="tt-about">
+          Based in Joondalup, Rick's Trim &amp; Brick specialises in landscaping and bricklaying work that's built to suit Perth's unique conditions — sandy substrate, hot summers, and coastal winds. Rick handles every quote personally and uses quality materials sourced locally. Whether you need a retaining wall to stop soil creep or a full garden redesign with paving and brick edging, Rick's team delivers tidy work with a no-fuss attitude.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: RETAINING WALLS -->
+    <div class="card" data-index="1">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Retaining walls Joondalup">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / Service</div>
+          <h2 class="card-headline"><em>Retaining Walls</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth's sandy soils shift and erode, especially on sloped blocks — a well-built retaining wall is essential for anyone in the Joondalup hills or lakeside estates. Rick builds brick and limestone retaining walls engineered to stay level and true through summers and wet winters alike. All walls over 500mm comply with WA building regulations, and Rick handles the paperwork.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: PAVING -->
+    <div class="card" data-index="2">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?w=860&q=80&auto=format&fit=crop" alt="Paving Joondalup Perth">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / Service</div>
+          <h2 class="card-headline"><em>Paving</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">From driveways and alfresco areas to pool surrounds and pathways, Rick's Trim &amp; Brick lays clay brick, concrete, and limestone pavers across Joondalup and the City of Wanneroo. Perth's hot summers demand proper base prep and jointing compound that won't crack or wash away — that's exactly how Rick's team does it every time.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: BRICK EDGING -->
+    <div class="card" data-index="3">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Brick edging garden Perth">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / Service</div>
+          <h2 class="card-headline"><em>Brick Edging</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Brick edging is the finishing touch that makes a Joondalup garden look sharp and professional — it keeps lawns, mulch beds and gravel zones neatly defined even after a good downpour. Rick uses soldier-course brick and half-brick edging styles set on a solid mortar bed so they stay crisp season after season. Perfect for new builds across the northern corridor.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: GARDEN BEDS -->
+    <div class="card" data-index="4">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Garden beds Joondalup landscaping">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">05 / Service</div>
+          <h2 class="card-headline"><em>Garden Beds</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Raised brick garden beds add structure, drainage and style to any Joondalup yard — especially useful in Perth's sandy soil where water runs straight through without a proper build-up of mix and organic material. Rick designs and constructs custom garden beds in brick, limestone or block, filled with premium soil blends so your plants actually thrive from day one.</p>
+      </div>
+    </div>
+
+    <!-- CARD 5: LEAD CAPTURE -->
+    <div class="card lead-card" data-index="5">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Get a quote Joondalup landscaping">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">Get a Quote</div>
+          <h2 class="card-headline">Get your free <em>quote</em> today</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary" style="margin-bottom:16px;">Tell Rick what you need and he'll be in touch with a no-obligation quote — usually within a few hours on business days.</p>
+        <div id="leadFormWrap">
+          <form class="lead-form" id="leadForm" onsubmit="submitLeadForm(event)">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New enquiry — Rick's Trim & Brick (iTabs Widget)">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Rick's Trim & Brick">
+            <input type="hidden" name="trade" value="Landscaping & Bricklaying">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="tel" name="phone" placeholder="Your phone number" required>
+            <input type="email" name="email" placeholder="Your email address" required>
+            <textarea name="message" placeholder="Brief job description — e.g. retaining wall approx 12m, Joondalup"></textarea>
+            <button type="submit" class="lead-submit">Send my enquiry →</button>
+          </form>
+        </div>
+        <div class="lead-success" id="leadSuccess">
+          <div class="success-icon">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks — Rick will be in touch shortly. Need to speak now? Call Rick directly on <a href="tel:0412000000">0412 000 000</a>.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- NAV ROW -->
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="nav-counter" id="navCounter">1 / 6</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+</div><!-- /widget-shell -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-quote-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <h2>💰 Rick's Trim &amp; Brick — Quote</h2>
+      <button class="quote-close" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="ps-label">ESTIMATED RANGE</div>
+        <div class="ps-range" id="priceRange">Select a service</div>
+        <div class="ps-note">Perth pricing guide — final quote may vary</div>
+      </div>
+      <div style="font-size:28px;">🧱</div>
+    </div>
+
+    <!-- STEP DOTS -->
+    <div class="step-dots">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
+
+    <!-- STEP 1: SERVICE -->
+    <div class="quote-step active" id="qStep1">
+      <div class="step-label">Step 1 — What do you need?</div>
+      <div class="svc-grid">
+        <div class="svc-tile" onclick="selectService(this, 'Retaining Wall', 280, 450, '/m')" >
+          <div class="svc-emoji">🧱</div>
+          <div class="svc-name">Retaining Wall</div>
+          <div class="svc-price">$280–$450/m</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Paving', 65, 110, '/m²')">
+          <div class="svc-emoji">🪨</div>
+          <div class="svc-name">Paving</div>
+          <div class="svc-price">$65–$110/m²</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Brick Edging', 28, 55, '/m')">
+          <div class="svc-emoji">📐</div>
+          <div class="svc-name">Brick Edging</div>
+          <div class="svc-price">$28–$55/m</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Garden Beds', 600, 1800, '')">
+          <div class="svc-emoji">🌿</div>
+          <div class="svc-name">Garden Beds</div>
+          <div class="svc-price">$600–$1,800</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Driveway Paving', 75, 120, '/m²')">
+          <div class="svc-emoji">🚗</div>
+          <div class="svc-name">Driveway Paving</div>
+          <div class="svc-price">$75–$120/m²</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Full Garden Design', 800, 2200, '')">
+          <div class="svc-emoji">🏡</div>
+          <div class="svc-name">Full Garden Design</div>
+          <div class="svc-price">$800–$2,200</div>
+        </div>
+      </div>
+      <button class="step-next-btn" id="step1Next" onclick="goStep(2)" disabled>Next: Job size →</button>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="quote-step" id="qStep2">
+      <div class="step-label">Step 2 — Job complexity</div>
+      <div class="complexity-list">
+        <div class="comp-tile" onclick="selectComplexity(this, 0.85, 'Basic')">
+          <div>
+            <div class="comp-label">Basic</div>
+            <div class="comp-desc">Straightforward job, flat site, easy access</div>
+          </div>
+          <div class="comp-mult">-15%</div>
+        </div>
+        <div class="comp-tile" onclick="selectComplexity(this, 1.0, 'Standard')">
+          <div>
+            <div class="comp-label">Standard</div>
+            <div class="comp-desc">Typical residential job, some prep required</div>
+          </div>
+          <div class="comp-mult">Base rate</div>
+        </div>
+        <div class="comp-tile" onclick="selectComplexity(this, 1.35, 'Complex')">
+          <div>
+            <div class="comp-label">Complex</div>
+            <div class="comp-desc">Sloped site, difficult access, structural work</div>
+          </div>
+          <div class="comp-mult">+35%</div>
+        </div>
+      </div>
+      <button class="step-back-btn" onclick="goStep(1)">← Back</button>
+      <button class="step-next-btn" id="step2Next" onclick="goStep(3)" disabled>Next: Your details →</button>
+    </div>
+
+    <!-- STEP 3: CONTACT -->
+    <div class="quote-step" id="qStep3">
+      <div class="step-label">Step 3 — Your details</div>
+      <div id="qFormWrap">
+        <form class="q-form" id="quoteForm" onsubmit="submitQuoteForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="Quote request — Rick's Trim & Brick (iTabs Widget)">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Rick's Trim & Brick">
+          <input type="hidden" name="trade" value="Landscaping & Bricklaying">
+          <input type="hidden" name="selected_service" id="qServiceField" value="">
+          <input type="hidden" name="job_complexity" id="qComplexityField" value="">
+          <input type="hidden" name="estimated_range" id="qRangeField" value="">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Your phone number" required>
+          <input type="email" name="email" placeholder="Your email" required>
+          <textarea name="message" placeholder="Any extra details — location, size, timing..."></textarea>
+          <button class="step-back-btn" type="button" onclick="goStep(2)">← Back</button>
+          <button type="submit" class="step-next-btn">Send quote request →</button>
+        </form>
+      </div>
+      <div class="quote-success" id="quoteSuccess">
+        <div class="qs-icon">🎉</div>
+        <h3>Quote request sent!</h3>
+        <p>Rick will be in touch shortly with your personalised quote. Need to chat sooner? Call Rick now on <a href="tel:0412000000">0412 000 000</a>.</p>
+        <button class="step-next-btn" style="margin-top:8px;" onclick="closeQuotePanel()">Close ✕</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─── STATE ───────────────────────────────────────────
+  const TOTAL_CARDS = 6;
+  let currentCard = 0;
+  let viewedCards = new Set([0]);
+
+  // Quote state
+  let qServiceName = '';
+  let qPriceLow = 0;
+  let qPriceHigh = 0;
+  let qPriceUnit = '';
+  let qMultiplier = 1.0;
+  let qComplexityLabel = '';
+
+  // ─── PROGRESS BAR ────────────────────────────────────
+  function buildProgressBar() {
+    const pb = document.getElementById('progressBar');
+    pb.innerHTML = '';
+    for (let i = 0; i < TOTAL_CARDS; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'prog-seg';
+      if (i === currentCard) seg.classList.add('active');
+      else if (viewedCards.has(i)) seg.classList.add('viewed');
+      pb.appendChild(seg);
+    }
+  }
+
+  // ─── NAVIGATION ──────────────────────────────────────
+  function navigate(dir) {
+    const next = currentCard + dir;
+    if (next < 0 || next >= TOTAL_CARDS) return;
+    const cards = document.querySelectorAll('.card');
+    cards[currentCard].classList.remove('active');
+    cards[currentCard].classList.add('prev');
+    setTimeout(() => cards[currentCard].classList.remove('prev'), 380);
+    currentCard = next;
+    viewedCards.add(currentCard);
+    cards[currentCard].classList.add('active');
+    updateNav();
+    buildProgressBar();
+  }
+
+  function updateNav() {
+    document.getElementById('prevBtn').disabled = currentCard === 0;
+    document.getElementById('nextBtn').disabled = currentCard === TOTAL_CARDS - 1;
+    document.getElementById('navCounter').textContent = (currentCard + 1) + ' / ' + TOTAL_CARDS;
+  }
+
+  // ─── KEYBOARD ────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  });
+
+  // ─── TOUCH SWIPE ─────────────────────────────────────
+  let touchStartX = 0;
+  const deck = document.getElementById('cardDeck');
+  deck.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  deck.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 45) navigate(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  // ─── TOOLTIP ─────────────────────────────────────────
+  function toggleTooltip(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  // ─── QUOTE PANEL ─────────────────────────────────────
+  function openQuotePanel() {
+    document.getElementById('quotePanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeQuotePanel() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  // ─── STEP NAVIGATION ─────────────────────────────────
+  function goStep(n) {
+    document.querySelectorAll('.quote-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('qStep' + n).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === n - 1);
+    });
+  }
+
+  // ─── SERVICE SELECTION ───────────────────────────────
+  function selectService(tile, name, low, high, unit) {
+    document.querySelectorAll('.svc-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    qServiceName = name;
+    qPriceLow = low;
+    qPriceHigh = high;
+    qPriceUnit = unit;
+    updatePriceStrip();
+    document.getElementById('step1Next').disabled = false;
+    document.getElementById('qServiceField').value = name;
+  }
+
+  // ─── COMPLEXITY SELECTION ────────────────────────────
+  function selectComplexity(tile, mult, label) {
+    document.querySelectorAll('.comp-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    qMultiplier = mult;
+    qComplexityLabel = label;
+    updatePriceStrip();
+    document.getElementById('step2Next').disabled = false;
+    document.getElementById('qComplexityField').value = label;
+  }
+
+  // ─── PRICE STRIP UPDATE ──────────────────────────────
+  function updatePriceStrip() {
+    if (!qServiceName) return;
+    const low = Math.round(qPriceLow * qMultiplier);
+    const high = Math.round(qPriceHigh * qMultiplier);
+    const fmt = n => n >= 1000 ? '$' + (n/1000).toFixed(1).replace(/\.0$/,'') + 'k' : '$' + n;
+    const rangeText = fmt(low) + '–' + fmt(high) + qPriceUnit;
+    document.getElementById('priceRange').textContent = rangeText;
+    document.getElementById('qRangeField').value = rangeText + ' (' + qServiceName + ', ' + qComplexityLabel + ')';
+  }
+
+  // ─── LEAD FORM SUBMIT ────────────────────────────────
+  async function submitLeadForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('leadForm');
+    const btn = form.querySelector('.lead-submit');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const data = new FormData(form);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        document.getElementById('leadFormWrap').style.display = 'none';
+        document.getElementById('leadSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  }
+
+  // ─── QUOTE FORM SUBMIT ───────────────────────────────
+  async function submitQuoteForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('quoteForm');
+    const btn = form.querySelector('[type="submit"]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const data = new FormData(form);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        document.getElementById('qFormWrap').style.display = 'none';
+        document.getElementById('quoteSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  }
+
+  // ─── INIT ─────────────────────────────────────────────
+  buildProgressBar();
+  updateNav();
+</script>
+</body>
+</html>
