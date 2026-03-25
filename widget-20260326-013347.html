@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sparky's Electrical — Quote Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #f97316;
+    --accent-dark: #ea580c;
+    --i-button: #f59e0b;
+    --radius: 16px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  /* ── WIDGET SHELL ── */
+  .widget {
+    position: relative;
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px 6px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .prog-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .prog-seg.viewed { background: rgba(255,255,255,0.45); }
+  .prog-seg.active { background: var(--accent); }
+
+  /* ── CARD DECK ── */
+  .deck-wrapper {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  .deck {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  }
+  .card {
+    position: relative;
+    min-width: 100%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── CARD HERO ── */
+  .card-hero {
+    position: relative;
+    flex-shrink: 0;
+    height: 210px;
+    overflow: hidden;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.22) 100%);
+    z-index: 1;
+  }
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 18px 16px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    opacity: 0.95;
+  }
+  .card-headline {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.18;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .card-headline em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  /* ── CARD BODY ── */
+  .card-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 18px 90px;
+    background: var(--bg-secondary);
+    scrollbar-width: none;
+  }
+  .card-body::-webkit-scrollbar { display: none; }
+
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #c0c0d8;
+    margin-bottom: 16px;
+  }
+
+  /* ── I-BUTTON ── */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(249,115,22,0.12);
+    border: 1px solid rgba(249,115,22,0.35);
+    border-radius: 30px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+  }
+  .i-btn:hover { background: rgba(249,115,22,0.22); }
+  .i-badge {
+    width: 18px; height: 18px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; color: #fff;
+  }
+
+  /* ── I-PANEL ── */
+  .i-panel {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(249,115,22,0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c8c8e0;
+    display: none;
+    margin-top: 4px;
+  }
+  .i-panel.open { display: block; }
+
+  /* ── NAV ARROWS ── */
+  .nav-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px 10px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .nav-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: var(--bg-tertiary);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-btn:hover { background: rgba(249,115,22,0.18); border-color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .nav-counter {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FLOATING QUOTE BUTTON ── */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 30px;
+    padding: 12px 18px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.5);
+    animation: pulse-amber 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse-amber {
+    0%,100% { box-shadow: 0 4px 20px rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 4px 32px rgba(245,158,11,0.85), 0 0 0 6px rgba(245,158,11,0.15); }
+  }
+
+  /* ── QUOTE PANEL ── */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .panel-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .panel-sheet {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    max-width: 430px;
+    margin: 0 auto;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  .quote-panel.open { pointer-events: all; }
+  .quote-panel.open .panel-backdrop { opacity: 1; }
+  .quote-panel.open .panel-sheet { transform: translateY(0); }
+
+  .panel-handle {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 2px;
+    margin: 10px auto 0;
+    flex-shrink: 0;
+  }
+  .panel-header {
+    padding: 14px 18px 12px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .panel-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .price-strip {
+    background: linear-gradient(135deg, #1a3a5c, #0f2540);
+    border: 1px solid rgba(99,179,237,0.25);
+    border-radius: 10px;
+    margin-top: 10px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-label { font-size: 11px; color: #7ab8e8; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .price-value { font-size: 20px; font-weight: 900; color: #fff; }
+
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    scrollbar-width: none;
+  }
+  .panel-body::-webkit-scrollbar { display: none; }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+  .step-title {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+
+  /* ── SERVICE GRID ── */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .svc-card {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .svc-card:hover, .svc-card.selected {
+    border-color: var(--accent);
+    background: rgba(249,115,22,0.1);
+  }
+  .svc-emoji { font-size: 24px; margin-bottom: 6px; }
+  .svc-name { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .svc-range { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── COMPLEXITY ── */
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; }
+  .cx-card {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cx-card:hover, .cx-card.selected {
+    border-color: var(--accent);
+    background: rgba(249,115,22,0.1);
+  }
+  .cx-left { display: flex; flex-direction: column; gap: 2px; }
+  .cx-name { font-size: 14px; font-weight: 700; color: #fff; }
+  .cx-desc { font-size: 12px; color: var(--text-secondary); }
+  .cx-mult { font-size: 12px; font-weight: 600; color: var(--accent); }
+
+  /* ── PANEL FORM ── */
+  .pform { display: flex; flex-direction: column; gap: 12px; }
+  .pform input, .pform textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .pform input::placeholder, .pform textarea::placeholder { color: #505070; }
+  .pform input:focus, .pform textarea:focus { border-color: var(--accent); }
+  .pform textarea { resize: none; height: 80px; }
+
+  /* ── LEAD FORM (last card) ── */
+  .lead-form { display: flex; flex-direction: column; gap: 12px; }
+  .lead-form input, .lead-form textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .lead-form input::placeholder, .lead-form textarea::placeholder { color: #505070; }
+  .lead-form input:focus, .lead-form textarea:focus { border-color: var(--accent); }
+  .lead-form textarea { resize: none; height: 90px; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 4px;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+
+  .btn-back {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-back:hover { color: #fff; }
+
+  /* ── SUCCESS ── */
+  .success-box {
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .success-icon { font-size: 48px; margin-bottom: 14px; }
+  .success-title { font-size: 20px; font-weight: 800; margin-bottom: 8px; color: #fff; }
+  .success-msg { font-size: 14px; color: #c0c0d8; line-height: 1.6; margin-bottom: 18px; }
+  .success-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(249,115,22,0.15);
+    border: 1.5px solid rgba(249,115,22,0.4);
+    border-radius: 30px;
+    padding: 10px 20px;
+    color: var(--accent);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  /* ── LEAD CARD HERO (green) ── */
+  .hero-green { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  /* ── POWERED BY FOOTER ── */
+  .powered-by {
+    text-align: center;
+    padding: 6px 0 8px;
+    font-size: 10px;
+    color: #404060;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+    letter-spacing: 0.04em;
+  }
+  .powered-by a { color: #505080; text-decoration: none; }
+  .powered-by a:hover { color: #9090c0; }
+
+  /* ── PANEL CLOSE ── */
+  .panel-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── LEAD CARD SUCCESS ── */
+  .lead-success { display: none; }
+  .lead-success.show { display: block; }
+  .lead-form-wrap.hide { display: none; }
+</style>
+</head>
+<body>
+
+<div class="widget">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="deck-wrapper" id="deckWrapper">
+    <div class="deck" id="deck">
+
+      <!-- ── CARD 0: INTRO ── -->
+      <div class="card">
+        <div class="card-hero">
+          <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop" alt="Electrical work">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="card-tag">01 / Sparky's Electrical</div>
+            <div class="card-headline">Bright ideas,<br><em>quality work.</em></div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Scarborough's trusted local electricians, servicing all northern Perth suburbs. Sparky's Electrical brings fast, friendly service and licensed know-how to everything from a single power point to a full switchboard upgrade — with free quotes every time.</p>
+          <button class="i-btn" onclick="togglePanel('about-panel')">
+            <span class="i-badge">i</span> About Sparky's Electrical
+          </button>
+          <div class="i-panel" id="about-panel">
+            Sparky's Electrical is a licensed electrical contracting business based in Scarborough, proudly serving Perth's northern suburbs. Whether you're in Scarborough, Doubleview, Karrinyup, Gwelup or beyond, the team delivers friendly, reliable work with no hidden call-out surprises. Every job is backed by a free quote and a commitment to getting it right the first time.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CARD 1: POWER POINTS & SWITCHES ── -->
+      <div class="card">
+        <div class="card-hero">
+          <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop" alt="Power points">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="card-tag">02 / Service</div>
+            <div class="card-headline"><em>Power Points</em><br>& Switches</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Running out of power points is one of Perth's most common household headaches — especially as home offices and EV chargers become the norm in northern suburbs like Scarborough and Karrinyup. Sparky's installs single, double and USB power points quickly and cleanly, with zero mess left behind.</p>
+        </div>
+      </div>
+
+      <!-- ── CARD 2: SAFETY SWITCHES ── -->
+      <div class="card">
+        <div class="card-hero">
+          <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop" alt="Safety switch">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="card-tag">03 / Service</div>
+            <div class="card-headline"><em>Safety Switch</em><br>Installation</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">WA regulations require safety switches (RCDs) on all power and lighting circuits in homes — and many older Scarborough and Doubleview properties are still not fully compliant. Sparky's Electrical will assess your switchboard, install the correct safety switches, and bring your home up to current AS/NZS standards, keeping your family protected.</p>
+        </div>
+      </div>
+
+      <!-- ── CARD 3: SMOKE ALARMS ── -->
+      <div class="card">
+        <div class="card-hero">
+          <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop" alt="Smoke alarms">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="card-tag">04 / Service</div>
+            <div class="card-headline"><em>Smoke Alarm</em><br>Installation</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">WA's updated smoke alarm laws now require photoelectric, interconnected alarms in all Perth homes — particularly important for properties being sold or rented in Scarborough. Sparky's Electrical installs hardwired photoelectric smoke alarms that meet the latest regulations, ensuring your property is safe, compliant, and insurable.</p>
+        </div>
+      </div>
+
+      <!-- ── CARD 4: LED DOWNLIGHTS ── -->
+      <div class="card">
+        <div class="card-hero">
+          <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop" alt="LED downlights">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="card-tag">05 / Service</div>
+            <div class="card-headline"><em>LED Downlight</em><br>Upgrades</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Switching from old halogen downlights to modern LED fittings can cut your lighting energy costs by up to 75% — a real win with Perth's summer heat and cooling bills. Sparky's upgrades your halogens to quality LED downlights in a single tidy visit, with consistent colour temperature and proper fire-rated fittings throughout your home.</p>
+        </div>
+      </div>
+
+      <!-- ── CARD 5: SWITCHBOARD UPGRADES ── -->
+      <div class="card">
+        <div class="card-hero">
+          <img src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop" alt="Switchboard upgrade">
+          <div class="hero-overlay"></div>
+          <div class="hero-content">
+            <div class="card-tag">06 / Service</div>
+            <div class="card-headline"><em>Switchboard</em><br>Upgrades</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <p class="card-summary">Many older homes in Scarborough and surrounding northern suburbs still run ageing ceramic fuse boards that can't safely handle modern appliances, air conditioning or solar systems. Sparky's Electrical upgrades your switchboard to a modern safety-switch-equipped consumer mains unit — essential if you're adding solar, a home battery, or an EV charger.</p>
+        </div>
+      </div>
+
+      <!-- ── CARD 6: LEAD CAPTURE ── -->
+      <div class="card">
+        <div class="card-hero hero-green">
+          <div class="hero-overlay" style="background:linear-gradient(to top,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.2) 100%);"></div>
+          <div class="hero-content">
+            <div class="card-tag">Get a Quote</div>
+            <div class="card-headline">Get your free <em>quote</em> today</div>
+          </div>
+        </div>
+        <div class="card-body">
+
+          <div class="lead-form-wrap" id="leadFormWrap">
+            <p class="card-summary">Fill in your details below and the team at Sparky's Electrical will get back to you fast with a free, no-obligation quote.</p>
+            <form class="lead-form" id="leadForm">
+              <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+              <input type="hidden" name="subject" value="New Lead — Sparky's Electrical (Scarborough)">
+              <input type="hidden" name="from_name" value="Sparky's Electrical Widget">
+              <input type="hidden" name="to" value="responses@itabs.ai">
+              <input type="text" name="name" placeholder="Your name" required>
+              <input type="tel" name="phone" placeholder="Phone number" required>
+              <input type="email" name="email" placeholder="Email address" required>
+              <textarea name="message" placeholder="Brief job description — e.g. need 3 extra power points in lounge and home office" required></textarea>
+              <button type="submit" class="btn-primary">Send my enquiry →</button>
+            </form>
+          </div>
+
+          <div class="lead-success" id="leadSuccess">
+            <div class="success-box">
+              <div class="success-icon">⚡</div>
+              <div class="success-title">Enquiry sent!</div>
+              <div class="success-msg">Thanks for reaching out. The team at Sparky's Electrical will be in touch shortly with your free quote.<br><br>Need to talk right now?</div>
+              <a href="tel:0423111222" class="success-phone">📞 0423 111 222</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /deck -->
+  </div><!-- /deck-wrapper -->
+
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="nav-counter" id="navCounter">1 / 7</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- POWERED BY -->
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="panel-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="panel-sheet">
+    <div class="panel-handle"></div>
+    <button class="panel-close" onclick="closeQuotePanel()">✕</button>
+    <div class="panel-header">
+      <div class="panel-title">💰 Sparky's Electrical — Quote</div>
+      <div class="price-strip">
+        <span class="price-label">Estimated Range</span>
+        <span class="price-value" id="priceDisplay">Select a service</span>
+      </div>
+    </div>
+    <div class="panel-body">
+
+      <!-- STEP 1: SERVICE -->
+      <div class="step active" id="step1">
+        <div class="step-label">Step 1 of 3</div>
+        <div class="step-title">What do you need done?</div>
+        <div class="service-grid">
+          <div class="svc-card" onclick="selectService(this,'Power Points & Switches',120,200)">
+            <div class="svc-emoji">🔌</div>
+            <div class="svc-name">Power Points & Switches</div>
+            <div class="svc-range">$120–$200/point</div>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Safety Switch Installation',280,480)">
+            <div class="svc-emoji">🛡️</div>
+            <div class="svc-name">Safety Switch Install</div>
+            <div class="svc-range">$280–$480</div>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Smoke Alarm Installation',180,380)">
+            <div class="svc-emoji">🚨</div>
+            <div class="svc-name">Smoke Alarms</div>
+            <div class="svc-range">$180–$380</div>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'LED Downlight Upgrades',120,180)">
+            <div class="svc-emoji">💡</div>
+            <div class="svc-name">LED Downlights</div>
+            <div class="svc-range">$120–$180/light</div>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Switchboard Upgrade',800,1500)">
+            <div class="svc-emoji">⚡</div>
+            <div class="svc-name">Switchboard Upgrade</div>
+            <div class="svc-range">$800–$1,500</div>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'General Electrical',180,450)">
+            <div class="svc-emoji">🔧</div>
+            <div class="svc-name">General Electrical</div>
+            <div class="svc-range">$180–$450</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: COMPLEXITY -->
+      <div class="step" id="step2">
+        <div class="step-label">Step 2 of 3</div>
+        <div class="step-title">How complex is the job?</div>
+        <div class="complexity-list">
+          <div class="cx-card" onclick="selectComplexity(this,'Basic',0.85)">
+            <div class="cx-left">
+              <div class="cx-name">Basic</div>
+              <div class="cx-desc">Straightforward, easy access, single item</div>
+            </div>
+            <div class="cx-mult">– 15%</div>
+          </div>
+          <div class="cx-card" onclick="selectComplexity(this,'Standard',1.0)">
+            <div class="cx-left">
+              <div class="cx-name">Standard</div>
+              <div class="cx-desc">Typical job, average access, minor prep needed</div>
+            </div>
+            <div class="cx-mult">Base rate</div>
+          </div>
+          <div class="cx-card" onclick="selectComplexity(this,'Complex',1.35)">
+            <div class="cx-left">
+              <div class="cx-name">Complex</div>
+              <div class="cx-desc">Multiple items, difficult access, older wiring or large scope</div>
+            </div>
+            <div class="cx-mult">+ 35%</div>
+          </div>
+        </div>
+        <button class="btn-back" onclick="goStep(1)">← Back</button>
+      </div>
+
+      <!-- STEP 3: CONTACT -->
+      <div class="step" id="step3">
+        <div class="step-label">Step 3 of 3</div>
+        <div class="step-title">Your contact details</div>
+        <form class="pform" id="quoteForm">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Quote Request — Sparky's Electrical (Scarborough)">
+          <input type="hidden" name="from_name" value="Sparky's Electrical Widget">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Sparky's Electrical">
+          <input type="hidden" name="trade" value="Electrician">
+          <input type="hidden" id="qServiceField" name="service" value="">
+          <input type="hidden" id="qComplexityField" name="complexity" value="">
+          <input type="hidden" id="qEstimateField" name="estimate" value="">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Any extra details about your job…"></textarea>
+          <button type="submit" class="btn-primary">Send my quote request →</button>
+        </form>
+        <div id="quoteSuccess" style="display:none;">
+          <div class="success-box">
+            <div class="success-icon">⚡</div>
+            <div class="success-title">Quote request sent!</div>
+            <div class="success-msg">Sparky's Electrical will get back to you soon with your free quote. Want to talk now?</div>
+            <a href="tel:0423111222" class="success-phone">📞 0423 111 222</a>
+          </div>
+        </div>
+        <button class="btn-back" onclick="goStep(2)" id="backToStep2">← Back</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  const TOTAL = 7;
+  let current = 0;
+  let viewed = new Set([0]);
+
+  // Quote state
+  let qServiceName = '';
+  let qLow = 0, qHigh = 0;
+  let qMultiplier = 1.0;
+
+  // ── PROGRESS BAR ──
+  function buildProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'prog-seg' +
+        (i === current ? ' active' : (viewed.has(i) ? ' viewed' : ''));
+      bar.appendChild(seg);
+    }
+  }
+
+  // ── NAVIGATION ──
+  function navigate(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= TOTAL) return;
+    current = next;
+    viewed.add(current);
+    document.getElementById('deck').style.transform = `translateX(-${current * 100}%)`;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+    document.getElementById('navCounter').textContent = `${current + 1} / ${TOTAL}`;
+    buildProgress();
+  }
+
+  // Init
+  buildProgress();
+  document.getElementById('prevBtn').disabled = true;
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  });
+
+  // Touch swipe
+  let touchStartX = 0;
+  const dw = document.getElementById('deckWrapper');
+  dw.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+  dw.addEventListener('touchend', e => {
+    const dx = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(dx) > 45) navigate(dx > 0 ? 1 : -1);
+  }, {passive:true});
+
+  // ── I-BUTTON TOGGLE ──
+  function togglePanel(id) {
+    const p = document.getElementById(id);
+    p.classList.toggle('open');
+  }
+
+  // ── QUOTE PANEL ──
+  function openQuotePanel() {
+    document.getElementById('quotePanel').classList.add('open');
+  }
+  function closeQuotePanel() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  // ── STEP NAVIGATION ──
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach((s,i) => {
+      s.classList.toggle('active', i === n - 1);
+    });
+  }
+
+  // ── SERVICE SELECTION ──
+  function selectService(el, name, low, high) {
+    document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    qServiceName = name;
+    qLow = low;
+    qHigh = high;
+    updatePrice();
+    document.getElementById('qServiceField').value = name;
+    setTimeout(() => goStep(2), 300);
+  }
+
+  // ── COMPLEXITY SELECTION ──
+  function selectComplexity(el, label, mult) {
+    document.querySelectorAll('.cx-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    qMultiplier = mult;
+    qComplexityField.value = label;
+    updatePrice();
+    setTimeout(() => goStep(3), 300);
+  }
+
+  function updatePrice() {
+    const lo = Math.round(qLow * qMultiplier);
+    const hi = Math.round(qHigh * qMultiplier);
+    const disp = qServiceName ? `$${lo.toLocaleString()} – $${hi.toLocaleString()}` : 'Select a service';
+    document.getElementById('priceDisplay').textContent = disp;
+    document.getElementById('qEstimateField').value = `$${lo} – $${hi}`;
+  }
+
+  // ── QUOTE FORM SUBMIT ──
+  document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type=submit]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: new FormData(this)
+      });
+      const data = await res.json();
+      if (data.success) {
+        this.style.display = 'none';
+        document.getElementById('backToStep2').style.display = 'none';
+        document.getElementById('quoteSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  });
+
+  // ── LEAD FORM SUBMIT ──
+  document.getElementById('leadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('button[type=submit]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: new FormData(this)
+      });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('leadFormWrap').classList.add('hide');
+        document.getElementById('leadSuccess').classList.add('show');
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  });
+</script>
+
+</body>
+</html>
