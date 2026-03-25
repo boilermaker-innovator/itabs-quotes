@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bright Coat Painting — Joondalup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+  }
+
+  .widget-shell {
+    width: 100%; max-width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #333350;
+    transition: background 0.3s;
+  }
+  .progress-seg.active { background: var(--accent); }
+  .progress-seg.viewed { background: #ffffff; }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.38s;
+    will-change: transform;
+  }
+  .card.prev { transform: translateX(-100%); opacity: 0; }
+  .card.active { transform: translateX(0); opacity: 1; }
+  .card.next { transform: translateX(100%); opacity: 0; }
+  .card.far { transform: translateX(110%); opacity: 0; }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    height: 52%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .hero-gradient-base {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 18px 16px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--i-button);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .card-headline {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+    margin-bottom: 0;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #fbbf24;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 16px 18px 80px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #c0c0d8;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(245,158,11,0.13);
+    border: 1.5px solid rgba(245,158,11,0.4);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--i-button);
+    cursor: pointer;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn-icon {
+    width: 18px; height: 18px;
+    background: var(--i-button);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; color: #000;
+    flex-shrink: 0;
+  }
+
+  /* POPOVER */
+  .popover-backdrop {
+    position: fixed; inset: 0; z-index: 180;
+    background: rgba(0,0,0,0.6);
+    display: none; align-items: flex-end;
+  }
+  .popover-backdrop.open { display: flex; }
+  .popover-box {
+    width: 100%; max-width: 430px; margin: 0 auto;
+    background: var(--bg-tertiary);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 36px;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+  }
+  .popover-backdrop.open .popover-box { transform: translateY(0); }
+  .popover-handle {
+    width: 36px; height: 4px;
+    background: #444466;
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .popover-title {
+    font-size: 15px; font-weight: 700; color: #fff;
+    margin-bottom: 10px;
+  }
+  .popover-text {
+    font-size: 13px; line-height: 1.65; color: #b0b0cc;
+  }
+  .popover-close {
+    margin-top: 18px;
+    background: var(--accent);
+    border: none; border-radius: 10px;
+    color: #fff; font-size: 13px; font-weight: 600;
+    padding: 10px 22px; cursor: pointer;
+  }
+
+  /* NAV ARROWS */
+  .nav-arrows {
+    position: absolute;
+    bottom: 14px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    z-index: 20;
+    pointer-events: none;
+  }
+  .nav-btn {
+    pointer-events: all;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(124,58,237,0.5);
+    background: rgba(124,58,237,0.18);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: rgba(124,58,237,0.38); }
+  .nav-btn:disabled { opacity: 0.28; cursor: default; }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-btn {
+    position: fixed;
+    bottom: 76px; right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    border: none;
+    border-radius: 28px;
+    padding: 13px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    box-shadow: 0 0 0 0 rgba(245,158,11,0.5);
+    animation: pulse 2.2s infinite;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.55); }
+    70%  { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+    100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--bg-primary);
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+    display: flex;
+    flex-direction: column;
+    max-width: 430px;
+    margin: 0 auto;
+    left: 0; right: 0;
+  }
+  .quote-panel.open { transform: translateY(0); }
+
+  .qp-header {
+    background: var(--bg-secondary);
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+  .qp-title { font-size: 15px; font-weight: 700; }
+  .qp-close {
+    background: rgba(255,255,255,0.08);
+    border: none; border-radius: 50%;
+    width: 32px; height: 32px;
+    color: #fff; font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PRICE STRIP */
+  .price-strip {
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .ps-label { font-size: 11px; color: #93c5fd; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+  .ps-range { font-size: 20px; font-weight: 800; color: #fff; }
+  .ps-note  { font-size: 10px; color: #93c5fd; }
+
+  /* QUOTE STEPS */
+  .qp-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+  }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .step-title {
+    font-size: 18px; font-weight: 800; color: #fff;
+    margin-bottom: 18px; line-height: 1.25;
+  }
+
+  /* SERVICE GRID */
+  .svc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .svc-card {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+  }
+  .svc-card:hover  { border-color: rgba(124,58,237,0.5); }
+  .svc-card.chosen { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .svc-emoji { font-size: 24px; margin-bottom: 6px; display: block; }
+  .svc-name  { font-size: 12px; font-weight: 700; color: #fff; display: block; margin-bottom: 3px; }
+  .svc-price { font-size: 10px; color: var(--text-secondary); display: block; }
+
+  /* COMPLEXITY */
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .cx-card {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cx-card:hover  { border-color: rgba(124,58,237,0.5); }
+  .cx-card.chosen { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .cx-left  { display: flex; flex-direction: column; gap: 3px; }
+  .cx-name  { font-size: 14px; font-weight: 700; color: #fff; }
+  .cx-desc  { font-size: 11px; color: var(--text-secondary); }
+  .cx-mult  { font-size: 12px; font-weight: 700; color: var(--i-button); }
+
+  /* FORM */
+  .qp-form { display: flex; flex-direction: column; gap: 12px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field label { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.07em; }
+  .form-field input, .form-field textarea {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
+  .form-field textarea { resize: vertical; min-height: 80px; }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--accent);
+    border: none; border-radius: 12px;
+    color: #fff; font-size: 14px; font-weight: 700;
+    padding: 14px 20px; cursor: pointer;
+    width: 100%; margin-top: 4px;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-back {
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    color: var(--text-secondary); font-size: 13px; font-weight: 600;
+    padding: 10px 20px; cursor: pointer;
+    width: 100%; margin-top: 4px;
+  }
+
+  /* LEAD CAPTURE CARD FORM */
+  .lc-form { display: flex; flex-direction: column; gap: 11px; }
+  .lc-form input, .lc-form textarea {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .lc-form input:focus, .lc-form textarea:focus { border-color: var(--i-button); }
+  .lc-form textarea { resize: vertical; min-height: 72px; }
+  .lc-submit {
+    background: var(--i-button);
+    border: none; border-radius: 12px;
+    color: #000; font-size: 14px; font-weight: 800;
+    padding: 14px 20px; cursor: pointer;
+    width: 100%; margin-top: 2px;
+    transition: opacity 0.2s;
+  }
+  .lc-submit:hover { opacity: 0.88; }
+  .lc-success { display: none; text-align: center; padding: 20px 0; }
+  .lc-success .tick { font-size: 44px; margin-bottom: 12px; }
+  .lc-success h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .lc-success p { font-size: 13px; color: #9ff5a2; line-height: 1.6; }
+  .lc-success a { color: #6ee7b7; font-weight: 700; }
+
+  /* FOOTER */
+  .footer-bar {
+    background: var(--bg-primary);
+    text-align: center;
+    padding: 7px 14px;
+    font-size: 10px;
+    color: #44445a;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .footer-bar a { color: #6060a0; text-decoration: none; }
+
+  /* QUOTE SUCCESS */
+  .qp-success { display: none; text-align: center; padding: 40px 20px; }
+  .qp-success .tick { font-size: 52px; margin-bottom: 16px; }
+  .qp-success h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .qp-success p { font-size: 14px; color: #9090b0; line-height: 1.65; }
+  .qp-success a { color: var(--i-button); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="widget-shell">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="hero hero-purple">
+        <div class="hero-gradient-base hero-purple"></div>
+        <img class="hero-img" src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop" alt="Painting" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / Bright Coat Painting</div>
+          <h1 class="card-headline">Joondalup's <em>trusted painters</em> — done right, first time</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Bright Coat Painting has been refreshing homes across Joondalup and Perth's northern suburbs for years. Whether it's a fresh interior, a weather-beaten exterior, or a faded roof crying out for new life, we deliver clean, lasting finishes that handle everything Perth's hot summers and coastal air can throw at them. No shortcuts, no mess left behind — just quality results you'll be proud to show off.</p>
+        <button class="i-btn" onclick="openPopover('about')">
+          <span class="i-btn-icon">i</span>
+          About Bright Coat Painting
+        </button>
+      </div>
+    </div>
+
+    <!-- CARD 1: INTERIOR PAINTING -->
+    <div class="card next" data-index="1">
+      <div class="hero hero-cyan">
+        <div class="hero-gradient-base hero-cyan"></div>
+        <img class="hero-img" src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop" alt="Interior Painting" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / Service</div>
+          <h1 class="card-headline"><em>Interior Painting</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">From feature walls in Joondalup living rooms to full house repaints across the northern suburbs, Bright Coat Painting delivers flawless interior finishes. We use premium low-VOC paints built for Perth's dry summers and mild winters — no cracking, peeling or fading. Every job includes thorough prep, full furniture protection and a spotless clean-up so your home is picture-perfect from day one.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: EXTERIOR PAINTING -->
+    <div class="card far" data-index="2">
+      <div class="hero hero-amber">
+        <div class="hero-gradient-base hero-amber"></div>
+        <img class="hero-img" src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop" alt="Exterior Painting" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / Service</div>
+          <h1 class="card-headline"><em>Exterior Painting</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth's harsh UV, salt air and scorching summer temps are brutal on exterior paint — especially in coastal northern suburbs like Joondalup. We use UV-resistant, weather-rated coatings specifically chosen for Western Australian conditions, properly primed and applied for maximum adhesion. The result is a bold, even finish that stays looking sharp for years, not months.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: ROOF PAINTING -->
+    <div class="card far" data-index="3">
+      <div class="hero hero-default">
+        <div class="hero-gradient-base hero-default"></div>
+        <img class="hero-img" src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop" alt="Roof Painting" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / Service</div>
+          <h1 class="card-headline"><em>Roof Painting</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">A freshly painted roof can slash your energy bills and dramatically boost your home's street appeal — big wins in Joondalup's competitive property market. Bright Coat Painting starts with a high-pressure clean and thorough moss/lichen treatment, then applies a specialist roof membrane coating rated for Australian conditions. Far more affordable than a full re-roof, and it adds real value to your home.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: LEAD CAPTURE -->
+    <div class="card far" data-index="4">
+      <div class="hero hero-green" style="height:38%;">
+        <div class="hero-gradient-base hero-green"></div>
+        <img class="hero-img" src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop" alt="Get a Quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">Get a Quote</div>
+          <h1 class="card-headline">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="lc-form-wrap">
+          <form class="lc-form" id="lcForm">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Quote Enquiry — Bright Coat Painting (Joondalup)">
+            <input type="hidden" name="from_name" value="Bright Coat Painting Widget">
+            <input type="hidden" name="to_email" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Bright Coat Painting">
+            <input type="hidden" name="trade" value="Painting">
+            <input type="text"  name="name"  placeholder="Your name" required>
+            <input type="tel"   name="phone" placeholder="Phone number" required>
+            <input type="email" name="email" placeholder="Email address" required>
+            <textarea name="message" placeholder="Brief job description — e.g. exterior repaint on double storey in Joondalup, about 350m²" required></textarea>
+            <button class="lc-submit" type="submit">Send my enquiry →</button>
+          </form>
+        </div>
+        <div class="lc-success" id="lcSuccess">
+          <div class="tick">🎉</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks for reaching out to Bright Coat Painting. We'll be in touch shortly with your free quote.<br><br>Rather talk now? Give us a call.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- NAV ARROWS -->
+  <div class="nav-arrows">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-bar">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-shell -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- ABOUT POPOVER -->
+<div class="popover-backdrop" id="popover-about" onclick="closePopover('about')">
+  <div class="popover-box" onclick="event.stopPropagation()">
+    <div class="popover-handle"></div>
+    <div class="popover-title">About Bright Coat Painting</div>
+    <p class="popover-text">Bright Coat Painting is a locally owned painting business based in Joondalup, serving Perth's northern suburbs with professional interior, exterior and roof painting. We're committed to using premium Australian-rated paints and coatings that stand up to Perth's intense UV and coastal conditions — so your finish looks great and lasts the distance. Every job is personally overseen to ensure clean preparation, careful application and a tidy finish you'll be genuinely proud of.</p>
+    <button class="popover-close" onclick="closePopover('about')">Got it</button>
+  </div>
+</div>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="qp-header">
+    <span class="qp-title">💰 Bright Coat Painting — Quote</span>
+    <button class="qp-close" onclick="closeQuotePanel()">✕</button>
+  </div>
+
+  <div class="price-strip">
+    <div>
+      <div class="ps-label">Estimated range</div>
+      <div class="ps-range" id="priceRange">$0 — select a service</div>
+    </div>
+    <div class="ps-note" id="priceNote">Perth pricing, GST incl.</div>
+  </div>
+
+  <div class="qp-body">
+
+    <!-- STEP 1 -->
+    <div class="step active" id="qStep1">
+      <div class="step-label">Step 1 of 3</div>
+      <div class="step-title">What painting service do you need?</div>
+      <div class="svc-grid">
+        <div class="svc-card" onclick="selectService(this,'Interior Painting',1800,5000)">
+          <span class="svc-emoji">🏠</span>
+          <span class="svc-name">Interior Painting</span>
+          <span class="svc-price">$18–28 per m²</span>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Exterior Painting',2500,7000)">
+          <span class="svc-emoji">🏡</span>
+          <span class="svc-name">Exterior Painting</span>
+          <span class="svc-price">$22–35 per m²</span>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Roof Painting',1800,3500)">
+          <span class="svc-emoji">🔴</span>
+          <span class="svc-name">Roof Painting</span>
+          <span class="svc-price">$1,800–$3,500</span>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Feature Wall',280,500)">
+          <span class="svc-emoji">🎨</span>
+          <span class="svc-name">Feature Wall</span>
+          <span class="svc-price">$280–$500</span>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Full House Repaint',4500,9000)">
+          <span class="svc-emoji">🏘️</span>
+          <span class="svc-name">Full House Repaint</span>
+          <span class="svc-price">$4,500–$9,000</span>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Pressure Clean + Paint',900,2200)">
+          <span class="svc-emoji">💦</span>
+          <span class="svc-name">Clean + Paint</span>
+          <span class="svc-price">$900–$2,200</span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="goStep(2)" id="step1Next" disabled>Next: Job complexity →</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" id="qStep2">
+      <div class="step-label">Step 2 of 3</div>
+      <div class="step-title">How would you describe the job?</div>
+      <div class="complexity-list">
+        <div class="cx-card" onclick="selectComplexity(this,0.85,'Basic')">
+          <div class="cx-left">
+            <span class="cx-name">Basic</span>
+            <span class="cx-desc">Single room, simple prep, good existing surface</span>
+          </div>
+          <span class="cx-mult">Lower end</span>
+        </div>
+        <div class="cx-card" onclick="selectComplexity(this,1.0,'Standard')">
+          <div class="cx-left">
+            <span class="cx-name">Standard</span>
+            <span class="cx-desc">Typical residential job, normal prep required</span>
+          </div>
+          <span class="cx-mult">Mid range</span>
+        </div>
+        <div class="cx-card" onclick="selectComplexity(this,1.35,'Complex')">
+          <div class="cx-left">
+            <span class="cx-name">Complex</span>
+            <span class="cx-desc">High ceilings, multi-storey, heavy prep, heritage colours</span>
+          </div>
+          <span class="cx-mult">Upper end</span>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="goStep(3)" id="step2Next" disabled>Next: Your details →</button>
+      <button class="btn-back" onclick="goStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" id="qStep3">
+      <div class="step-label">Step 3 of 3</div>
+      <div class="step-title">Almost done — where do we send your quote?</div>
+      <div id="qpFormWrap">
+        <form class="qp-form" id="qpForm">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="Quote Request — Bright Coat Painting (Joondalup)">
+          <input type="hidden" name="from_name" value="Bright Coat Painting Quote Widget">
+          <input type="hidden" name="to_email" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Bright Coat Painting">
+          <input type="hidden" name="trade" value="Painting">
+          <input type="hidden" name="service_selected" id="qServiceHidden" value="">
+          <input type="hidden" name="complexity" id="qComplexityHidden" value="">
+          <input type="hidden" name="estimate_range" id="qEstimateHidden" value="">
+          <div class="form-field">
+            <label>Your name</label>
+            <input type="text" name="name" placeholder="e.g. Sarah Thompson" required>
+          </div>
+          <div class="form-field">
+            <label>Phone number</label>
+            <input type="tel" name="phone" placeholder="04xx xxx xxx" required>
+          </div>
+          <div class="form-field">
+            <label>Email address</label>
+            <input type="email" name="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-field">
+            <label>Job details</label>
+            <textarea name="message" placeholder="Tell us about your property — suburb, approximate size, any special requirements"></textarea>
+          </div>
+          <button class="btn-primary" type="submit">Send quote request →</button>
+          <button class="btn-back" type="button" onclick="goStep(2)">← Back</button>
+        </form>
+      </div>
+      <div class="qp-success" id="qpSuccess">
+        <div class="tick">✅</div>
+        <h3>Quote request sent!</h3>
+        <p>Thanks! Bright Coat Painting will be in touch shortly with a detailed quote for your painting job in Joondalup.</p>
+      </div>
+    </div>
+
+  </div><!-- /qp-body -->
+</div><!-- /quote-panel -->
+
+<script>
+  /* ── STATE ── */
+  const TOTAL = 5;
+  let current = 0;
+  const viewed = new Set([0]);
+
+  /* ── PROGRESS BAR ── */
+  function buildProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++) {
+      const s = document.createElement('div');
+      s.className = 'progress-seg' + (i === current ? ' active' : (viewed.has(i) ? ' viewed' : ''));
+      bar.appendChild(s);
+    }
+  }
+
+  /* ── NAVIGATE ── */
+  function navigate(dir) {
+    const cards = document.querySelectorAll('.card');
+    const newIdx = current + dir;
+    if (newIdx < 0 || newIdx >= TOTAL) return;
+
+    cards[current].className = 'card ' + (dir > 0 ? 'prev' : 'next');
+    current = newIdx;
+    viewed.add(current);
+    cards[current].className = 'card active';
+
+    // set remaining cards position
+    cards.forEach((c, i) => {
+      if (i === current) return;
+      if (i < current) c.className = 'card prev';
+      else c.className = 'card far';
+    });
+
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+    buildProgress();
+  }
+
+  /* ── KEYBOARD ── */
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('quotePanel').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+
+  /* ── TOUCH SWIPE ── */
+  let touchStartX = 0;
+  const deck = document.getElementById('cardDeck');
+  deck.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+  deck.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 45) navigate(dx < 0 ? 1 : -1);
+  }, {passive:true});
+
+  /* ── POPOVER ── */
+  function openPopover(id) { document.getElementById('popover-'+id).classList.add('open'); }
+  function closePopover(id) { document.getElementById('popover-'+id).classList.remove('open'); }
+
+  /* ── QUOTE PANEL ── */
+  function openQuotePanel()  { document.getElementById('quotePanel').classList.add('open'); }
+  function closeQuotePanel() { document.getElementById('quotePanel').classList.remove('open'); }
+
+  /* ── QUOTE LOGIC ── */
+  let qLow = 0, qHigh = 0, qMult = 1.0;
+
+  function formatMoney(n) {
+    return '$' + Math.round(n).toLocaleString('en-AU');
+  }
+
+  function updatePriceStrip() {
+    if (qLow === 0) {
+      document.getElementById('priceRange').textContent = '$0 — select a service';
+      document.getElementById('priceNote').textContent = 'Perth pricing, GST incl.';
+      return;
+    }
+    const lo = formatMoney(qLow * qMult);
+    const hi = formatMoney(qHigh * qMult);
+    document.getElementById('priceRange').textContent = lo + ' – ' + hi;
+    document.getElementById('priceNote').textContent = 'Estimate only — free detailed quote provided';
+    document.getElementById('qEstimateHidden').value = lo + ' – ' + hi;
+  }
+
+  function selectService(el, name, low, high) {
+    document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('chosen'));
+    el.classList.add('chosen');
+    qLow = low; qHigh = high;
+    document.getElementById('qServiceHidden').value = name;
+    updatePriceStrip();
+    document.getElementById('step1Next').disabled = false;
+  }
+
+  function selectComplexity(el, mult, label) {
+    document.querySelectorAll('.cx-card').forEach(c => c.classList.remove('chosen'));
+    el.classList.add('chosen');
+    qMult = mult;
+    document.getElementById('qComplexityHidden').value = label;
+    updatePriceStrip();
+    document.getElementById('step2Next').disabled = false;
+  }
+
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('qStep'+n).classList.add('active');
+  }
+
+  /* ── QUOTE FORM SUBMIT ── */
+  document.getElementById('qpForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn-primary');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    try {
+      const fd = new FormData(this);
+      const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('qpFormWrap').style.display = 'none';
+        document.getElementById('qpSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Error — try again'; btn.disabled = false;
+      }
+    } catch(err) {
+      btn.textContent = 'Error — try again'; btn.disabled = false;
+    }
+  });
+
+  /* ── LEAD CAPTURE FORM SUBMIT ── */
+  document.getElementById('lcForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.lc-submit');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    try {
+      const fd = new FormData(this);
+      const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body: fd });
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('lc-form-wrap').style.display = 'none';
+        document.getElementById('lcSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Error — try again'; btn.disabled = false;
+      }
+    } catch(err) {
+      btn.textContent = 'Error — try again'; btn.disabled = false;
+    }
+  });
+
+  /* ── INIT ── */
+  buildProgress();
+</script>
+
+</body>
+</html>
