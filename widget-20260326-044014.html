@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Perth Fencing Co — Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #16a34a;
+    --accent-dark: #14532d;
+    --i-button: #f59e0b;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+  }
+
+  /* ── WIDGET WRAPPER ── */
+  .widget-root {
+    max-width: 430px;
+    width: 100%;
+    height: 100dvh;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    overflow: hidden;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .progress-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .progress-seg.viewed { background: rgba(255,255,255,0.45); }
+  .progress-seg.active { background: var(--accent); }
+
+  /* ── CARD DECK ── */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1), opacity 0.38s;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .card::-webkit-scrollbar { display: none; }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  /* ── HERO ── */
+  .card-hero {
+    position: relative;
+    min-height: 210px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px 18px 16px;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .hero-content { position: relative; z-index: 2; }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+    display: inline-block;
+    background: rgba(22,163,74,0.15);
+    border: 1px solid rgba(22,163,74,0.35);
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .card-title {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .card-title em {
+    font-style: italic;
+    color: #86efac;
+  }
+
+  /* ── CARD BODY ── */
+  .card-body {
+    background: var(--bg-secondary);
+    flex: 1;
+    padding: 18px 18px 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #c8c8e0;
+  }
+
+  /* ── I-BUTTON ── */
+  .i-btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.4);
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn-icon {
+    width: 16px; height: 16px;
+    background: var(--i-button);
+    color: #000;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  /* ── I-PANEL (tooltip popup) ── */
+  .i-panel-backdrop {
+    position: fixed; inset: 0; z-index: 180;
+    background: rgba(0,0,0,0.6);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .i-panel-backdrop.open { display: flex; }
+  .i-panel {
+    background: var(--bg-tertiary);
+    border-radius: 18px 18px 0 0;
+    padding: 24px 20px 36px;
+    max-width: 430px;
+    width: 100%;
+    border-top: 2px solid rgba(22,163,74,0.4);
+  }
+  .i-panel-title {
+    font-size: 16px; font-weight: 700; margin-bottom: 12px;
+    color: #86efac;
+  }
+  .i-panel-body {
+    font-size: 14px; line-height: 1.7; color: #c8c8e0;
+  }
+  .i-panel-close {
+    float: right; background: none; border: none;
+    color: var(--text-secondary); font-size: 22px; cursor: pointer;
+    line-height: 1; margin-top: -4px;
+  }
+
+  /* ── NAV ── */
+  .card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    border-top: 1px solid #1e1e2e;
+  }
+  .nav-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a3a;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 24px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: #2a2a3a; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-dots {
+    display: flex; gap: 5px;
+  }
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #2a2a3a;
+    transition: background 0.2s, transform 0.2s;
+    cursor: pointer;
+  }
+  .nav-dot.active { background: var(--accent); transform: scale(1.4); }
+
+  /* ── LEAD CAPTURE CARD ── */
+  .lead-form { display: flex; flex-direction: column; gap: 11px; }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .form-field label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
+  .form-field input,
+  .form-field textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a3a;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    padding: 11px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-field input:focus,
+  .form-field textarea:focus { border-color: var(--accent); }
+  .form-field textarea { resize: none; height: 80px; }
+  .submit-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+    margin-top: 4px;
+  }
+  .submit-btn:hover { opacity: 0.88; }
+  .form-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    padding: 20px 0;
+  }
+  .form-success.show { display: flex; }
+  .success-icon {
+    font-size: 48px;
+  }
+  .success-title { font-size: 20px; font-weight: 800; color: #86efac; }
+  .success-body { font-size: 14px; color: #c8c8e0; line-height: 1.6; }
+  .success-phone a {
+    color: var(--i-button);
+    font-weight: 700;
+    font-size: 16px;
+    text-decoration: none;
+  }
+
+  /* ── FLOATING QUOTE BUTTON ── */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 28px;
+    padding: 13px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.4s infinite;
+    white-space: nowrap;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50% { box-shadow: 0 4px 36px rgba(245,158,11,0.75), 0 0 0 6px rgba(245,158,11,0.12); }
+  }
+
+  /* ── QUOTE PANEL ── */
+  .quote-backdrop {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .quote-backdrop.open { display: flex; }
+  .quote-panel {
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-width: 430px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1);
+    border-top: 2px solid rgba(22,163,74,0.35);
+  }
+  .quote-panel::-webkit-scrollbar { display: none; }
+  .quote-backdrop.open .quote-panel { transform: translateY(0); }
+
+  .qp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 18px 12px;
+    border-bottom: 1px solid #1e1e2e;
+    position: sticky; top: 0;
+    background: var(--bg-secondary);
+    z-index: 2;
+  }
+  .qp-title {
+    font-size: 15px; font-weight: 800;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .qp-close {
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a3a;
+    color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .price-strip {
+    background: linear-gradient(135deg, #14532d, #052e16);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-strip-label { font-size: 11px; color: #86efac; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .price-strip-value { font-size: 22px; font-weight: 900; color: #fff; }
+
+  .qp-body { padding: 18px; }
+  .qp-step { display: none; }
+  .qp-step.active { display: block; }
+  .step-title {
+    font-size: 13px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 14px;
+  }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .service-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid #2a2a3a;
+    border-radius: 14px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+  }
+  .service-tile:hover, .service-tile.selected {
+    border-color: var(--accent);
+    background: rgba(22,163,74,0.1);
+  }
+  .tile-emoji { font-size: 24px; margin-bottom: 6px; }
+  .tile-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .tile-range { font-size: 11px; color: var(--text-secondary); }
+
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .complexity-item {
+    background: var(--bg-tertiary);
+    border: 1.5px solid #2a2a3a;
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-item:hover, .complexity-item.selected {
+    border-color: var(--accent);
+    background: rgba(22,163,74,0.1);
+  }
+  .complexity-icon { font-size: 22px; flex-shrink: 0; }
+  .complexity-name { font-size: 14px; font-weight: 700; }
+  .complexity-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .complexity-mult { margin-left: auto; font-size: 12px; color: #86efac; font-weight: 700; flex-shrink: 0; }
+
+  .qp-next-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+    margin-top: 4px;
+  }
+  .qp-next-btn:disabled { opacity: 0.4; cursor: default; }
+  .qp-next-btn:hover:not(:disabled) { opacity: 0.88; }
+  .qp-back-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .qp-form { display: flex; flex-direction: column; gap: 11px; }
+  .qp-success { display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 24px 0; }
+  .qp-success.show { display: flex; }
+
+  /* ── POWERED BY ── */
+  .powered-by {
+    text-align: center;
+    font-size: 10px;
+    color: #3a3a5a;
+    padding: 6px 0 4px;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+  }
+  .powered-by a { color: #5a5a8a; text-decoration: none; }
+
+  /* ── HERO THEMES ── */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-green { background: linear-gradient(135deg, #14532d, #052e16); }
+  .hero-purple { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber { background: linear-gradient(135deg, #78350f, #431407); }
+
+  /* Stats row */
+  .stats-row {
+    display: flex;
+    gap: 10px;
+  }
+  .stat-box {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a3a;
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat-num { font-size: 20px; font-weight: 900; color: #86efac; }
+  .stat-lbl { font-size: 10px; color: var(--text-secondary); margin-top: 2px; font-weight: 600; }
+
+  /* Highlight badge */
+  .highlight-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(22,163,74,0.12);
+    border: 1px solid rgba(22,163,74,0.3);
+    color: #86efac;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 20px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="widget-root" id="widgetRoot">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Fencing" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">01 / Perth Fencing Co</span>
+          <h1 class="card-title">Perth Fencing Co —<br><em>Built to Last.</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Osborne Park's most trusted fencing specialists, serving Perth homeowners and businesses for over 15 years. From Colorbond boundary fences to bespoke pool fencing, Perth Fencing Co delivers quality workmanship that stands the test of time and the harsh WA climate.</p>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-num">15+</div>
+            <div class="stat-lbl">Years Experience</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">100%</div>
+            <div class="stat-lbl">Guaranteed Work</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num">Free</div>
+            <div class="stat-lbl">Measure & Quote</div>
+          </div>
+        </div>
+        <div class="i-btn-row">
+          <button class="i-btn" onclick="openIPanel('about')">
+            <span class="i-btn-icon">i</span> About Perth Fencing Co
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: COLORBOND FENCING -->
+    <div class="card" data-index="1">
+      <div class="card-hero hero-default">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Colorbond Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">02 / Service</span>
+          <h1 class="card-title"><em>Colorbond Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Colorbond is the go-to fencing choice for Perth homes — and for good reason. It handles our blazing summers, coastal winds and sandy soils with ease. Perth Fencing Co installs Colorbond in all standard colours, from Surfmist to Woodland Grey, with full-height and slat styles to suit your property and council requirements.</p>
+        <div class="highlight-badge">🏗️ From $85–$120 per metre installed</div>
+      </div>
+    </div>
+
+    <!-- CARD 2: TIMBER FENCING -->
+    <div class="card" data-index="2">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Timber Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">03 / Service</span>
+          <h1 class="card-title"><em>Timber Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Timber fencing adds warmth and natural character to any Perth property. We use quality treated pine and hardwood options that are treated to resist termites, rot and the dry Perth heat. Whether you're after a classic picket fence for a Subiaco cottage or a solid privacy screen for your Osborne Park home, we build it to last.</p>
+        <div class="highlight-badge">🌲 From $70–$100 per metre installed</div>
+      </div>
+    </div>
+
+    <!-- CARD 3: ALUMINIUM FENCING -->
+    <div class="card" data-index="3">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Aluminium Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">04 / Service</span>
+          <h1 class="card-title"><em>Aluminium Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Aluminium slat fencing is increasingly popular across Perth's northern suburbs for its sleek, modern look and virtually zero maintenance. It won't rust, warp or peel — perfect for Perth's salt-laden coastal air in nearby suburbs like Scarborough and Trigg. Available in a full range of powder-coat colours to match your home's façade.</p>
+        <div class="highlight-badge">✨ Sleek, modern & low-maintenance</div>
+      </div>
+    </div>
+
+    <!-- CARD 4: POOL FENCING -->
+    <div class="card" data-index="4">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Pool Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">05 / Service</span>
+          <h1 class="card-title"><em>Pool Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Pool fencing in WA must comply with strict Building Code of Australia and Council of Australian Governments (COAG) safety standards — and Perth Fencing Co knows every requirement inside out. We supply and install frameless glass, semi-frameless and aluminium pool fencing that's fully compliant, beautifully finished and inspected to pass first time.</p>
+        <div class="highlight-badge">🏊 From $120–$180 per metre installed</div>
+      </div>
+    </div>
+
+    <!-- CARD 5: GATE INSTALLATION -->
+    <div class="card" data-index="5">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Gate Installation" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">06 / Service</span>
+          <h1 class="card-title"><em>Gate Installation</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">A quality gate completes your fence and secures your property. Perth Fencing Co installs pedestrian gates, driveway gates and automated sliding gates across Osborne Park and the wider Perth metro area. All gates are custom fabricated to fit your opening precisely, with matching finishes to your existing or new fencing.</p>
+        <div class="highlight-badge">🚪 From $450–$900 supplied & installed</div>
+      </div>
+    </div>
+
+    <!-- CARD 6: LEAD CAPTURE -->
+    <div class="card" data-index="6">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Get a Quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">Get a Quote</span>
+          <h1 class="card-title">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="leadFormWrap">
+          <p class="card-summary" style="margin-bottom:4px;">Fill in your details below and the Perth Fencing Co team will be in touch with a free measure and quote — usually within 24 hours.</p>
+          <form class="lead-form" id="leadForm">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Enquiry — Perth Fencing Co (iTabs Widget)">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business_name" value="Perth Fencing Co">
+            <input type="hidden" name="trade" value="Fencer">
+            <div class="form-field">
+              <label>Your Name</label>
+              <input type="text" name="name" placeholder="e.g. Sarah Mitchell" required>
+            </div>
+            <div class="form-field">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" placeholder="e.g. 0412 345 678" required>
+            </div>
+            <div class="form-field">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="e.g. sarah@email.com" required>
+            </div>
+            <div class="form-field">
+              <label>Brief Job Description</label>
+              <textarea name="message" placeholder="e.g. Need 30m of Colorbond fencing along back boundary in Osborne Park, plus a driveway gate." required></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Send my enquiry →</button>
+          </form>
+        </div>
+        <div class="form-success" id="leadSuccess">
+          <div class="success-icon">✅</div>
+          <div class="success-title">Enquiry received!</div>
+          <div class="success-body">Thanks — the Perth Fencing Co team will be in touch shortly with your free measure and quote. For urgent jobs, call us directly:</div>
+          <div class="success-phone"><a href="tel:0411777888">📞 0411 777 888</a></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- CARD NAV -->
+  <div class="card-nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Back</button>
+    <div class="nav-dots" id="navDots"></div>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+
+  <!-- POWERED BY -->
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- I-PANEL BACKDROP -->
+<div class="i-panel-backdrop" id="iPanelBackdrop" onclick="closeIPanel(event)">
+  <div class="i-panel" id="iPanel">
+    <button class="i-panel-close" onclick="closeIPanelDirect()">×</button>
+    <div class="i-panel-title" id="iPanelTitle"></div>
+    <div class="i-panel-body" id="iPanelBody"></div>
+  </div>
+</div>
+
+<!-- QUOTE PANEL -->
+<div class="quote-backdrop" id="quoteBackdrop" onclick="closeQuotePanel(event)">
+  <div class="quote-panel" id="quotePanel">
+    <div class="qp-header">
+      <div class="qp-title">💰 Perth Fencing Co — Quote</div>
+      <button class="qp-close" onclick="closeQuotePanelDirect()">×</button>
+    </div>
+    <div class="price-strip">
+      <div>
+        <div class="price-strip-label">Estimated Range</div>
+        <div class="price-strip-value" id="priceDisplay">Select a service</div>
+      </div>
+      <div style="font-size:28px;">🏗️</div>
+    </div>
+    <div class="qp-body">
+
+      <!-- STEP 1: SERVICE -->
+      <div class="qp-step active" id="qpStep1">
+        <div class="step-title">Step 1 of 3 — What do you need?</div>
+        <div class="service-grid">
+          <div class="service-tile" onclick="selectService(this, 'Colorbond Fencing', 85, 120, '/m')" >
+            <div class="tile-emoji">🏗️</div>
+            <div class="tile-label">Colorbond</div>
+            <div class="tile-range">$85–$120/m</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 'Timber Fencing', 70, 100, '/m')">
+            <div class="tile-emoji">🌲</div>
+            <div class="tile-label">Timber</div>
+            <div class="tile-range">$70–$100/m</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 'Aluminium Fencing', 90, 140, '/m')">
+            <div class="tile-emoji">✨</div>
+            <div class="tile-label">Aluminium</div>
+            <div class="tile-range">$90–$140/m</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 'Pool Fencing', 120, 180, '/m')">
+            <div class="tile-emoji">🏊</div>
+            <div class="tile-label">Pool Fencing</div>
+            <div class="tile-range">$120–$180/m</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 'Gate Installation', 450, 900, '')">
+            <div class="tile-emoji">🚪</div>
+            <div class="tile-label">Gate Install</div>
+            <div class="tile-range">$450–$900</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 'Fence Repairs', 180, 480, '')">
+            <div class="tile-emoji">🔧</div>
+            <div class="tile-label">Fence Repairs</div>
+            <div class="tile-range">$180–$480</div>
+          </div>
+        </div>
+        <button class="qp-next-btn" id="step1Next" disabled onclick="goStep(2)">Next: Job Size →</button>
+      </div>
+
+      <!-- STEP 2: COMPLEXITY -->
+      <div class="qp-step" id="qpStep2">
+        <button class="qp-back-btn" onclick="goStep(1)">← Back</button>
+        <div class="step-title">Step 2 of 3 — Job complexity?</div>
+        <div class="complexity-list">
+          <div class="complexity-item" onclick="selectComplexity(this, 0.85)">
+            <div class="complexity-icon">🟢</div>
+            <div>
+              <div class="complexity-name">Basic</div>
+              <div class="complexity-desc">Straightforward job, flat ground, easy access</div>
+            </div>
+            <div class="complexity-mult">−15%</div>
+          </div>
+          <div class="complexity-item" onclick="selectComplexity(this, 1.0)">
+            <div class="complexity-icon">🟡</div>
+            <div>
+              <div class="complexity-name">Standard</div>
+              <div class="complexity-desc">Typical Perth residential fencing job</div>
+            </div>
+            <div class="complexity-mult">Standard</div>
+          </div>
+          <div class="complexity-item" onclick="selectComplexity(this, 1.35)">
+            <div class="complexity-icon">🔴</div>
+            <div>
+              <div class="complexity-name">Complex</div>
+              <div class="complexity-desc">Sloped ground, difficult access, retaining required</div>
+            </div>
+            <div class="complexity-mult">+35%</div>
+          </div>
+        </div>
+        <button class="qp-next-btn" id="step2Next" disabled onclick="goStep(3)">Next: Your Details →</button>
+      </div>
+
+      <!-- STEP 3: CONTACT -->
+      <div class="qp-step" id="qpStep3">
+        <button class="qp-back-btn" onclick="goStep(2)">← Back</button>
+        <div class="step-title">Step 3 of 3 — Your contact details</div>
+        <div id="qpFormWrap">
+          <form class="qp-form" id="quoteForm">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="Quote Request — Perth Fencing Co (iTabs Quote Panel)">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business_name" value="Perth Fencing Co">
+            <input type="hidden" name="trade" value="Fencer">
+            <input type="hidden" name="selected_service" id="qpServiceField" value="">
+            <input type="hidden" name="estimated_price" id="qpPriceField" value="">
+            <div class="form-field">
+              <label>Full Name</label>
+              <input type="text" name="name" placeholder="e.g. John Smith" required>
+            </div>
+            <div class="form-field">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" placeholder="e.g. 0412 345 678" required>
+            </div>
+            <div class="form-field">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="e.g. john@email.com" required>
+            </div>
+            <div class="form-field">
+              <label>Job Details</label>
+              <textarea name="message" placeholder="e.g. 25m Colorbond side fence, rear of property in Osborne Park." required></textarea>
+            </div>
+            <button type="submit" class="qp-next-btn" style="margin-top:4px;">Send Quote Request →</button>
+          </form>
+        </div>
+        <div class="qp-success" id="qpSuccess">
+          <div class="success-icon">✅</div>
+          <div class="success-title">Quote request sent!</div>
+          <div class="success-body">We'll be in touch with your free measure and quote shortly. Or call us now:</div>
+          <div class="success-phone"><a href="tel:0411777888">📞 0411 777 888</a></div>
+        </div>
+      </div>
+
+    </div><!-- /qp-body -->
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let currentCard = 0;
+const totalCards = 7;
+let viewed = new Set([0]);
+
+// Quote state
+let selectedServiceLabel = '';
+let selectedBaseMin = 0;
+let selectedBaseMax = 0;
+let selectedUnit = '';
+let selectedMultiplier = 1.0;
+
+// ── PROGRESS BAR ──
+function buildProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < totalCards; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'progress-seg';
+    if (i === currentCard) seg.classList.add('active');
+    else if (viewed.has(i)) seg.classList.add('viewed');
+    bar.appendChild(seg);
+  }
+}
+
+function buildDots() {
+  const dots = document.getElementById('navDots');
+  dots.innerHTML = '';
+  for (let i = 0; i < totalCards; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === currentCard ? ' active' : '');
+    dot.onclick = () => goTo(i);
+    dots.appendChild(dot);
+  }
+}
+
+function updateNav() {
+  document.getElementById('prevBtn').disabled = currentCard === 0;
+  document.getElementById('nextBtn').disabled = currentCard === totalCards - 1;
+  document.getElementById('nextBtn').textContent = currentCard === totalCards - 2 ? 'Get Quote →' : 'Next →';
+  buildProgress();
+  buildDots();
+}
+
+function goTo(index) {
+  if (index < 0 || index >= totalCards) return;
+  const cards = document.querySelectorAll('.card');
+  cards[currentCard].classList.remove('active');
+  cards[currentCard].classList.add(index > currentCard ? 'prev' : '');
+  if (index < currentCard) cards[currentCard].classList.remove('prev');
+
+  // Direction
+  cards.forEach((c, i) => {
+    c.classList.remove('active', 'prev');
+    if (i < index) c.classList.add('prev');
+  });
+
+  currentCard = index;
+  viewed.add(currentCard);
+  cards[currentCard].classList.add('active');
+  updateNav();
+}
+
+function navigate(dir) {
+  goTo(currentCard + dir);
+}
+
+// ── SWIPE ──
+let touchStartX = 0;
+let touchStartY = 0;
+const deck = document.getElementById('cardDeck');
+deck.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+deck.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    navigate(dx < 0 ? 1 : -1);
+  }
+}, { passive: true });
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft') navigate(-1);
+});
+
+// ── I-PANEL ──
+const iPanels = {
+  about: {
+    title: 'About Perth Fencing Co',
+    body: 'Perth Fencing Co has been serving Osborne Park and the wider Perth metro area for over 15 years. Founded by experienced tradespeople who take pride in every post they set and every panel they hang, the business is built on honest advice, quality materials and workmanship that truly lasts. Every job comes with a free measure and quote, and all work is fully guaranteed — because when you choose Perth Fencing Co, you\'re choosing a fence that\'s built to last.'
+  }
+};
+
+function openIPanel(key) {
+  const data = iPanels[key];
+  if (!data) return;
+  document.getElementById('iPanelTitle').textContent = data.title;
+  document.getElementById('iPanelBody').textContent = data.body;
+  document.getElementById('iPanelBackdrop').classList.add('open');
+}
+function closeIPanel(e) {
+  if (e.target === document.getElementById('iPanelBackdrop')) closeIPanelDirect();
+}
+function closeIPanelDirect() {
+  document.getElementById('iPanelBackdrop').classList.remove('open');
+}
+
+// ── QUOTE PANEL ──
+function openQuotePanel() {
+  document.getElementById('quoteBackdrop').classList.add('open');
+}
+function closeQuotePanel(e) {
+  if (e.target === document.getElementById('quoteBackdrop')) closeQuotePanelDirect();
+}
+function closeQuotePanelDirect() {
+  document.getElementById('quoteBackdrop').classList.remove('open');
+}
+
+function updatePriceDisplay() {
+  const display = document.getElementById('priceDisplay');
+  if (!selectedServiceLabel) { display.textContent = 'Select a service'; return; }
+  const min = Math.round(selectedBaseMin * selectedMultiplier);
+  const max = Math.round(selectedBaseMax * selectedMultiplier);
+  display.textContent = '$' + min.toLocaleString() + '–$' + max.toLocaleString() + selectedUnit;
+  document.getElementById('qpPriceField').value = '$' + min + '–$' + max + selectedUnit;
+}
+
+function selectService(el, label, min, max, unit) {
+  document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedServiceLabel = label;
+  selectedBaseMin = min;
+  selectedBaseMax = max;
+  selectedUnit = unit;
+  document.getElementById('qpServiceField').value = label;
+  updatePriceDisplay();
+  document.getElementById('step1Next').disabled = false;
+}
+
+function selectComplexity(el, mult) {
+  document.querySelectorAll('.complexity-item').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMultiplier = mult;
+  updatePriceDisplay();
+  document.getElementById('step2Next').disabled = false;
+}
+
+function goStep(step) {
+  document.querySelectorAll('.qp-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('qpStep' + step).classList.add('active');
+}
+
+// ── LEAD FORM SUBMIT ──
+document.getElementById('leadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.submit-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('leadFormWrap').style.display = 'none';
+      document.getElementById('leadSuccess').classList.add('show');
+    } else {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
+});
+
+// ── QUOTE FORM SUBMIT ──
+document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.qp-next-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('qpFormWrap').style.display = 'none';
+      document.getElementById('qpSuccess').classList.add('show');
+    } else {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
+});
+
+// ── INIT ──
+buildProgress();
+buildDots();
+</script>
+</body>
+</html>
