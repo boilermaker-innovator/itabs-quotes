@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perth Pro Plumbing — Joondalup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #1d4ed8;
+    --accent-light: #3b82f6;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  .widget-root {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 6px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-segment {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #333350;
+    transition: background 0.3s;
+  }
+  .progress-segment.viewed { background: rgba(255,255,255,0.45); }
+  .progress-segment.active { background: var(--accent-light); }
+
+  /* CARD DECK */
+  .card-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    margin: 6px 10px 10px;
+    overflow: hidden;
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.38s;
+    will-change: transform, opacity;
+  }
+  .card.state-active  { transform: translateX(0);     opacity: 1;   z-index: 5; }
+  .card.state-prev    { transform: translateX(-105%);  opacity: 0;   z-index: 4; }
+  .card.state-next    { transform: translateX(105%);   opacity: 0;   z-index: 4; }
+  .card.state-hidden  { transform: translateX(105%);   opacity: 0;   z-index: 1; }
+
+  /* HERO */
+  .card-hero {
+    position: relative;
+    height: 220px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .card-hero img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .hero-content {
+    position: absolute; inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 18px 16px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--accent-light);
+    margin-bottom: 6px;
+  }
+  .hero-headline {
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: #fff;
+  }
+  .hero-headline em {
+    font-style: normal;
+    color: #60a5fa;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 16px 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: #cbd5e1;
+  }
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn .i-icon {
+    width: 18px; height: 18px;
+    background: var(--i-button);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900;
+  }
+
+  /* NAV ARROWS */
+  .nav-arrows {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px 10px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .nav-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid #2a2a45;
+    background: var(--bg-tertiary);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: var(--accent); }
+  .card-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* POWERED BY */
+  .powered-by {
+    text-align: center;
+    font-size: 10px;
+    color: #44445a;
+    padding: 4px 0 6px;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+  }
+  .powered-by a { color: #6060a0; text-decoration: none; }
+  .powered-by a:hover { color: var(--accent-light); }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-quote-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 12px 18px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.5);
+    animation: pulse-amber 2.2s infinite;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  @keyframes pulse-amber {
+    0%,100% { box-shadow: 0 4px 20px rgba(245,158,11,0.5); }
+    50%      { box-shadow: 0 4px 32px rgba(245,158,11,0.85); }
+  }
+
+  /* LEAD FORM IN CARD */
+  .lead-form { display: flex; flex-direction: column; gap: 10px; }
+  .lead-form input, .lead-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a45;
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .lead-form input:focus, .lead-form textarea:focus { border-color: var(--accent-light); }
+  .lead-form textarea { resize: none; height: 80px; }
+  .lead-form-submit {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .lead-form-submit:hover { opacity: 0.88; }
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 20px 10px;
+  }
+  .form-success .success-icon { font-size: 40px; margin-bottom: 10px; }
+  .form-success h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: #4ade80; }
+  .form-success p { font-size: 13px; color: #cbd5e1; line-height: 1.6; }
+  .form-success a { color: #60a5fa; font-weight: 700; }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .quote-sheet {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translate(-50%, 100%);
+    width: 100%;
+    max-width: 430px;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 92vh;
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+    overflow: hidden;
+  }
+  .quote-panel.open { pointer-events: all; }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-panel.open .quote-sheet { transform: translate(-50%, 0); }
+
+  .quote-header {
+    padding: 16px 18px 12px;
+    background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .quote-header h2 { font-size: 16px; font-weight: 800; }
+  .quote-close {
+    background: rgba(255,255,255,0.15);
+    border: none; color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a8a, #1e40af);
+    padding: 10px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .price-strip .label { font-size: 11px; color: #93c5fd; font-weight: 600; letter-spacing: 0.5px; }
+  .price-strip .amount { font-size: 22px; font-weight: 900; color: #fff; }
+
+  .quote-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .service-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 12px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .service-tile:hover { background: #252540; }
+  .service-tile.selected { border-color: var(--accent-light); background: rgba(59,130,246,0.12); }
+  .service-tile .tile-icon { font-size: 26px; margin-bottom: 5px; }
+  .service-tile .tile-label { font-size: 12px; font-weight: 700; color: #e2e8f0; }
+  .service-tile .tile-price { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .complexity-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 12px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-tile:hover { background: #252540; }
+  .complexity-tile.selected { border-color: var(--accent-light); background: rgba(59,130,246,0.12); }
+  .complexity-tile .c-label { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+  .complexity-tile .c-desc { font-size: 10px; color: var(--text-secondary); line-height: 1.4; }
+  .complexity-tile .c-mult { font-size: 10px; color: #60a5fa; margin-top: 3px; font-weight: 700; }
+
+  .step-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .step-back {
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a45;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .step-next {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    flex: 1;
+    transition: opacity 0.2s;
+  }
+  .step-next:disabled { opacity: 0.35; cursor: default; }
+
+  .qform input, .qform textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a45;
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .qform input:focus, .qform textarea:focus { border-color: var(--accent-light); }
+  .qform textarea { resize: none; height: 72px; margin-bottom: 0; }
+  .qform-submit {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: opacity 0.2s;
+  }
+  .qform-submit:hover { opacity: 0.88; }
+  .q-success {
+    display: none;
+    text-align: center;
+    padding: 24px 10px;
+  }
+  .q-success .qs-icon { font-size: 44px; margin-bottom: 10px; }
+  .q-success h3 { font-size: 19px; font-weight: 800; margin-bottom: 8px; color: #4ade80; }
+  .q-success p { font-size: 13px; color: #cbd5e1; line-height: 1.65; }
+  .q-success a { color: #60a5fa; font-weight: 700; }
+
+  /* I-PANEL (info overlay) */
+  .i-panel-overlay {
+    position: fixed; inset: 0;
+    z-index: 300;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .i-panel-overlay.open { opacity: 1; pointer-events: all; }
+  .i-panel {
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    padding: 24px 22px 32px;
+    width: 100%;
+    max-width: 430px;
+    transform: translateY(30px);
+    transition: transform 0.3s;
+  }
+  .i-panel-overlay.open .i-panel { transform: translateY(0); }
+  .i-panel-title { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: var(--i-button); }
+  .i-panel-body { font-size: 14px; line-height: 1.7; color: #cbd5e1; }
+  .i-panel-close {
+    display: block;
+    margin: 18px auto 0;
+    background: var(--bg-tertiary);
+    border: 1px solid #2a2a45;
+    color: #fff;
+    padding: 10px 28px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* Hero gradients */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-blue    { background: linear-gradient(135deg, #1e3a8a, #0f172a); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+
+  /* Steps visibility */
+  .q-step { display: none; }
+  .q-step.active { display: block; }
+</style>
+</head>
+<body>
+<div class="widget-root" id="widgetRoot">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD WRAPPER -->
+  <div class="card-wrapper" id="cardWrapper">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card state-active" data-index="0">
+      <div class="card-hero hero-blue">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Perth Pro Plumbing">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / Perth Pro Plumbing</div>
+          <h1 class="hero-headline">Perth Pro Plumbing —<br><em>Joondalup's trusted local plumbers</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Family owned and operated since 2008, Perth Pro Plumbing has been keeping Joondalup and the northern suburbs flowing smoothly for over 15 years. Whether it's a dripping tap at 7am or a burst pipe on a Sunday afternoon, we treat every job with the same care and urgency we'd give our own home. No job too big or too small — just honest, friendly service from a team you can trust.</p>
+        <div class="card-actions">
+          <button class="i-btn" onclick="openIPanel('about')"><span class="i-icon">i</span> About Perth Pro Plumbing</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: BLOCKED DRAINS -->
+    <div class="card state-next" data-index="1">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Blocked Drains">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / Service</div>
+          <h1 class="hero-headline"><em>Blocked Drains</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Blocked drains are one of the most common call-outs we handle across Joondalup, Currambine and Kingsley. Perth's sandy soils and tree-root intrusion from native gardens are frequent culprits — and left untreated, they can cause serious damage fast. We use high-pressure jet blasting and CCTV drain cameras to clear the blockage and find the cause, not just mask the symptoms.</p>
+        <div class="card-actions"></div>
+      </div>
+    </div>
+
+    <!-- CARD 2: HOT WATER SYSTEMS -->
+    <div class="card state-next" data-index="2">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Hot Water Systems">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / Service</div>
+          <h1 class="hero-headline"><em>Hot Water Systems</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Waking up to cold water is never fun — especially on a chilly Joondalup winter morning. Perth Pro Plumbing supplies and installs all major hot water system brands, including Rheem, Rinnai and Dux. We handle gas, electric and heat pump units, and with WA rebates now available on heat pump systems, we'll make sure you're getting the best value for your home and budget.</p>
+        <div class="card-actions"></div>
+      </div>
+    </div>
+
+    <!-- CARD 3: GAS LEAKS -->
+    <div class="card state-next" data-index="3">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Gas Leaks">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / Service</div>
+          <h1 class="hero-headline"><em>Gas Leaks</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">A suspected gas leak is a serious emergency — don't wait. Our licensed gas plumbers respond fast across Joondalup and surrounding suburbs, locating and repairing leaks to keep your household safe. We're fully licensed under WA's Plumbers Licensing Board and work with both natural gas and LPG systems in homes and commercial properties. If you smell gas, call us immediately.</p>
+        <div class="card-actions"></div>
+      </div>
+    </div>
+
+    <!-- CARD 4: BURST PIPES -->
+    <div class="card state-next" data-index="4">
+      <div class="card-hero hero-blue">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Burst Pipes">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">05 / Service</div>
+          <h1 class="hero-headline"><em>Burst Pipes</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Burst pipes can flood your property in minutes. Our emergency plumbing team is on call to reach you fast across Joondalup, Edgewater, Beldon and the northern suburbs. Perth's high water pressure combined with ageing copper or poly pipework makes burst pipes more common than people expect — we'll locate the break, repair or replace the affected section, and check the rest of your system while we're there.</p>
+        <div class="card-actions"></div>
+      </div>
+    </div>
+
+    <!-- CARD 5: BATHROOM RENOVATIONS -->
+    <div class="card state-next" data-index="5">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Bathroom Renovations">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">06 / Service</div>
+          <h1 class="hero-headline"><em>Bathroom Renovations</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Thinking of giving your Joondalup home a bathroom refresh? We handle all the rough-in plumbing for new bathrooms and complete reno projects — from relocating waste lines to connecting new vanities, showers, toilets and baths. Working alongside tilers and builders across the northern suburbs, we make sure the plumbing side is done right the first time so your reno stays on schedule.</p>
+        <div class="card-actions"></div>
+      </div>
+    </div>
+
+    <!-- CARD 6: LEAD CAPTURE -->
+    <div class="card state-next" data-index="6">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Get a Quote">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">Get a Quote</div>
+          <h1 class="hero-headline">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="cardFormWrap">
+          <form class="lead-form" id="cardLeadForm">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Enquiry — Perth Pro Plumbing (iTabs Widget)">
+            <input type="hidden" name="from_name" value="iTabs Widget — Perth Pro Plumbing">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Perth Pro Plumbing">
+            <input type="hidden" name="trade" value="Plumber">
+            <input type="hidden" name="suburb" value="Joondalup">
+            <input type="text"  name="name"    placeholder="Your name"           required>
+            <input type="tel"   name="phone"   placeholder="Phone number"        required>
+            <input type="email" name="email"   placeholder="Email address"       required>
+            <textarea           name="message" placeholder="Tell us about the job (e.g. blocked drain, hot water replacement, bathroom reno)"></textarea>
+            <button type="submit" class="lead-form-submit">Send my enquiry →</button>
+          </form>
+          <div class="form-success" id="cardFormSuccess">
+            <div class="success-icon">🎉</div>
+            <h3>Enquiry sent!</h3>
+            <p>Thanks! The team at Perth Pro Plumbing will be in touch shortly.<br>Need us sooner? Call us now:<br><a href="tel:0412555333">0412 555 333</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end card-wrapper -->
+
+  <!-- NAV ARROWS -->
+  <div class="nav-arrows">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="card-counter" id="cardCounter">1 / 7</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- POWERED BY -->
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- end widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-quote-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <h2>💰 Perth Pro Plumbing — Quote</h2>
+      <button class="quote-close" onclick="closeQuotePanel()">✕</button>
+    </div>
+    <div class="price-strip">
+      <div>
+        <div class="label">ESTIMATED RANGE</div>
+        <div class="amount" id="priceDisplay">Select a service</div>
+      </div>
+      <div style="font-size:26px">🔧</div>
+    </div>
+    <div class="quote-body">
+
+      <!-- STEP 1 -->
+      <div class="q-step active" id="qStep1">
+        <div class="step-title">Step 1 — What do you need?</div>
+        <div class="service-grid">
+          <div class="service-tile" onclick="selectService(this,'Blocked Drain',180,320)">
+            <div class="tile-icon">🚿</div>
+            <div class="tile-label">Blocked Drain</div>
+            <div class="tile-price">$180–$320</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Hot Water System',900,1800)">
+            <div class="tile-icon">🔥</div>
+            <div class="tile-label">Hot Water System</div>
+            <div class="tile-price">$900–$1,800</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Gas Leak',280,550)">
+            <div class="tile-icon">⚠️</div>
+            <div class="tile-label">Gas Leak</div>
+            <div class="tile-price">$280–$550</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Burst Pipe',350,750)">
+            <div class="tile-icon">💧</div>
+            <div class="tile-label">Burst Pipe</div>
+            <div class="tile-price">$350–$750</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Bathroom Renovation',3500,9000)">
+            <div class="tile-icon">🛁</div>
+            <div class="tile-label">Bathroom Reno</div>
+            <div class="tile-price">$3,500–$9,000</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'General Plumbing',180,350)">
+            <div class="tile-icon">🔩</div>
+            <div class="tile-label">General Plumbing</div>
+            <div class="tile-price">$180–$350</div>
+          </div>
+        </div>
+        <div class="step-nav" style="margin-top:14px;">
+          <button class="step-next" id="step1Next" onclick="goStep(2)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="q-step" id="qStep2">
+        <div class="step-title">Step 2 — Job complexity</div>
+        <div class="complexity-grid">
+          <div class="complexity-tile" onclick="selectComplexity(this,0.85)">
+            <div class="c-label">🟢 Basic</div>
+            <div class="c-desc">Straightforward, easy access</div>
+            <div class="c-mult">Save ~15%</div>
+          </div>
+          <div class="complexity-tile selected" onclick="selectComplexity(this,1.0)">
+            <div class="c-label">🔵 Standard</div>
+            <div class="c-desc">Typical job, average access</div>
+            <div class="c-mult">Base price</div>
+          </div>
+          <div class="complexity-tile" onclick="selectComplexity(this,1.35)">
+            <div class="c-label">🔴 Complex</div>
+            <div class="c-desc">Difficult access or major work</div>
+            <div class="c-mult">+35%</div>
+          </div>
+        </div>
+        <div class="step-nav" style="margin-top:14px;">
+          <button class="step-back" onclick="goStep(1)">← Back</button>
+          <button class="step-next" onclick="goStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="q-step" id="qStep3">
+        <div class="step-title">Step 3 — Your details</div>
+        <div id="qFormWrap">
+          <form class="qform" id="quotePanelForm">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Quote Request — Perth Pro Plumbing (iTabs Widget)">
+            <input type="hidden" name="from_name" value="iTabs Widget — Perth Pro Plumbing">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Perth Pro Plumbing">
+            <input type="hidden" name="trade" value="Plumber">
+            <input type="hidden" name="suburb" value="Joondalup">
+            <input type="hidden" name="selected_service" id="qServiceHidden">
+            <input type="hidden" name="estimated_price" id="qPriceHidden">
+            <input type="text"  name="name"    placeholder="Your name"    required>
+            <input type="tel"   name="phone"   placeholder="Phone number" required>
+            <input type="email" name="email"   placeholder="Email address" required>
+            <textarea           name="notes"   placeholder="Any extra details about the job?"></textarea>
+            <button type="submit" class="qform-submit">Send my quote request →</button>
+          </form>
+          <div class="q-success" id="qFormSuccess">
+            <div class="qs-icon">✅</div>
+            <h3>Quote request sent!</h3>
+            <p>Thanks! Perth Pro Plumbing will be in touch very soon.<br>For urgent jobs call us now:<br><a href="tel:0412555333">0412 555 333</a></p>
+          </div>
+        </div>
+        <div class="step-nav" style="margin-top:6px;">
+          <button class="step-back" onclick="goStep(2)">← Back</button>
+        </div>
+      </div>
+
+    </div><!-- end quote-body -->
+  </div>
+</div><!-- end quote-panel -->
+
+<!-- I-PANEL (info overlay) -->
+<div class="i-panel-overlay" id="iPanelOverlay" onclick="closeIPanel(event)">
+  <div class="i-panel">
+    <div class="i-panel-title" id="iPanelTitle"></div>
+    <div class="i-panel-body"  id="iPanelBody"></div>
+    <button class="i-panel-close" onclick="closeIPanelDirect()">Close</button>
+  </div>
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const TOTAL_CARDS = 7;
+let currentCard = 0;
+
+const iPanelContent = {
+  about: {
+    title: 'About Perth Pro Plumbing',
+    body: `Perth Pro Plumbing has been a trusted name in Joondalup's plumbing scene since 2008 — built from the ground up as a family business with a simple philosophy: treat every customer the way you'd want to be treated. Owned and operated by locals who live in the northern suburbs, we genuinely care about the community we work in. From quick tap repairs to full bathroom renovations, we bring the same level of professionalism and friendliness to every single job.`
+  }
+};
+
+// ── PROGRESS BAR ─────────────────────────────────────────────────────────────
+function renderProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < TOTAL_CARDS; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'progress-segment';
+    if (i === currentCard)       seg.classList.add('active');
+    else if (i < currentCard)    seg.classList.add('viewed');
+    bar.appendChild(seg);
+  }
+}
+
+// ── CARD NAVIGATION ───────────────────────────────────────────────────────────
+function getCards() { return document.querySelectorAll('.card'); }
+
+function navigate(dir) {
+  const cards = getCards();
+  const next = currentCard + dir;
+  if (next < 0 || next >= TOTAL_CARDS) return;
+
+  cards[currentCard].className = `card ${dir > 0 ? 'state-prev' : 'state-next'}`;
+  currentCard = next;
+  cards[currentCard].className = 'card state-active';
+
+  // reset others
+  cards.forEach((c, i) => {
+    if (i !== currentCard && c.className !== `card state-prev` && c.className !== `card state-next`) {
+      c.className = `card ${i < currentCard ? 'state-prev' : 'state-next'}`;
+    }
+  });
+
+  document.getElementById('prevBtn').disabled = (currentCard === 0);
+  document.getElementById('nextBtn').disabled = (currentCard === TOTAL_CARDS - 1);
+  document.getElementById('cardCounter').textContent = `${currentCard + 1} / ${TOTAL_CARDS}`;
+  renderProgress();
+}
+
+// ── TOUCH SWIPE ───────────────────────────────────────────────────────────────
+(function() {
+  const wrapper = document.getElementById('cardWrapper');
+  let startX = 0, startY = 0, dragging = false;
+  wrapper.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dragging = true;
+  }, {passive:true});
+  wrapper.addEventListener('touchend', e => {
+    if (!dragging) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      navigate(dx < 0 ? 1 : -1);
+    }
+    dragging = false;
+  }, {passive:true});
+})();
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quotePanel').classList.contains('open')) return;
+  if (e.key === 'ArrowLeft')  navigate(-1);
+  if (e.key === 'ArrowRight') navigate(1);
+});
+
+// ── QUOTE PANEL ───────────────────────────────────────────────────────────────
+let qServiceMin = 0, qServiceMax = 0, qMultiplier = 1.0, qServiceName = '';
+
+function openQuotePanel() {
+  document.getElementById('quotePanel').classList.add('open');
+}
+function closeQuotePanel() {
+  document.getElementById('quotePanel').classList.remove('open');
+}
+
+function formatRange(min, max) {
+  const fmt = n => '$' + Math.round(n).toLocaleString('en-AU');
+  return `${fmt(min)} – ${fmt(max)}`;
+}
+
+function updatePriceDisplay() {
+  if (!qServiceName) { document.getElementById('priceDisplay').textContent = 'Select a service'; return; }
+  document.getElementById('priceDisplay').textContent = formatRange(qServiceMin * qMultiplier, qServiceMax * qMultiplier);
+}
+
+function selectService(el, name, min, max) {
+  document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  qServiceName = name; qServiceMin = min; qServiceMax = max;
+  updatePriceDisplay();
+  document.getElementById('step1Next').disabled = false;
+}
+
+function selectComplexity(el, mult) {
+  document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  qMultiplier = mult;
+  updatePriceDisplay();
+}
+
+function goStep(n) {
+  document.querySelectorAll('.q-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('qStep' + n).classList.add('active');
+  if (n === 3) {
+    document.getElementById('qServiceHidden').value = qServiceName;
+    document.getElementById('qPriceHidden').value = formatRange(qServiceMin * qMultiplier, qServiceMax * qMultiplier);
+  }
+}
+
+// ── QUOTE PANEL FORM SUBMIT ───────────────────────────────────────────────────
+document.getElementById('quotePanelForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.qform-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('qFormWrap').querySelector('form').style.display = 'none';
+      document.getElementById('qFormSuccess').style.display = 'block';
+    } else { throw new Error(); }
+  } catch {
+    btn.textContent = 'Error — please try again';
+    btn.disabled = false;
+  }
+});
+
+// ── CARD LEAD FORM SUBMIT ─────────────────────────────────────────────────────
+document.getElementById('cardLeadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.lead-form-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      this.style.display = 'none';
+      document.getElementById('cardFormSuccess').style.display = 'block';
+    } else { throw new Error(); }
+  } catch {
+    btn.textContent = 'Error — please try again';
+    btn.disabled = false;
+  }
+});
+
+// ── I-PANEL ───────────────────────────────────────────────────────────────────
+function openIPanel(key) {
+  const d = iPanelContent[key];
+  if (!d) return;
+  document.getElementById('iPanelTitle').textContent = d.title;
+  document.getElementById('iPanelBody').textContent  = d.body;
+  document.getElementById('iPanelOverlay').classList.add('open');
+}
+function closeIPanel(e) {
+  if (e.target === document.getElementById('iPanelOverlay')) closeIPanelDirect();
+}
+function closeIPanelDirect() {
+  document.getElementById('iPanelOverlay').classList.remove('open');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderProgress();
+document.getElementById('cardCounter').textContent = `1 / ${TOTAL_CARDS}`;
+</script>
+</body>
+</html>
