@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Widget Builder — Build Your Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --accent-light: #a855f7;
+    --i-button: #f59e0b;
+    --success: #10b981;
+    --card-radius: 16px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow-x: hidden;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* ─── TOP BAR ─── */
+  .top-bar {
+    width: 100%;
+    max-width: 430px;
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #a855f7, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .logo span { font-weight: 300; }
+  .top-tagline {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: right;
+    line-height: 1.3;
+  }
+
+  /* ─── MAIN WRAPPER ─── */
+  .builder-wrap {
+    width: 100%;
+    max-width: 430px;
+    padding: 0 16px;
+    flex: 1;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .progress-track {
+    height: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7c3aed, #a855f7);
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .step-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    justify-content: center;
+  }
+  .step-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    transition: all 0.3s ease;
+  }
+  .step-dot.done { background: var(--accent-light); }
+  .step-dot.active { background: var(--i-button); width: 18px; border-radius: 3px; }
+
+  /* ─── STEP PANELS ─── */
+  .steps-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .step-panel {
+    display: none;
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .step-panel.active { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(32px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-32px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .step-panel.back-anim { animation: slideInLeft 0.4s cubic-bezier(0.4,0,0.2,1); }
+
+  .step-heading {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .step-heading em {
+    font-style: normal;
+    background: linear-gradient(135deg, #a855f7, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .step-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* ─── TRADE GRID ─── */
+  .trade-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .trade-card {
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 18px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .trade-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(124,58,237,0.08), rgba(168,85,247,0.04));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .trade-card:hover { border-color: rgba(124,58,237,0.4); transform: translateY(-1px); }
+  .trade-card:hover::before { opacity: 1; }
+  .trade-card.selected { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .trade-card.selected::before { opacity: 1; }
+  .trade-emoji { font-size: 32px; display: block; margin-bottom: 8px; }
+  .trade-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .trade-check {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 18px; height: 18px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .trade-card.selected .trade-check { opacity: 1; }
+
+  /* ─── TEXT INPUT ─── */
+  .input-field {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s;
+    outline: none;
+    margin-bottom: 8px;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .input-field::placeholder { color: var(--text-secondary); font-weight: 400; font-size: 15px; }
+  .input-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    padding-left: 4px;
+  }
+
+  /* ─── LIVE PREVIEW MINI ─── */
+  .live-preview-mini {
+    background: linear-gradient(135deg, #4c1d95, #1e1b4b);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .live-preview-mini::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=400&q=60') center/cover no-repeat;
+    opacity: 0.12;
+  }
+  .lpm-icon { font-size: 36px; position: relative; z-index: 1; flex-shrink: 0; }
+  .lpm-text { position: relative; z-index: 1; }
+  .lpm-name { font-size: 16px; font-weight: 700; color: #fff; min-height: 22px; }
+  .lpm-trade { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+  .lpm-pulse {
+    position: absolute;
+    right: 14px; bottom: 14px;
+    background: var(--i-button);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    z-index: 1;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  }
+
+  /* ─── SERVICE CHECKBOXES ─── */
+  .services-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .service-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-secondary);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .service-check:hover { border-color: rgba(124,58,237,0.3); }
+  .service-check.checked { border-color: var(--accent); background: rgba(124,58,237,0.1); }
+  .service-check input { display: none; }
+  .sc-box {
+    width: 20px; height: 20px;
+    border: 2px solid var(--bg-tertiary);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    background: var(--bg-tertiary);
+  }
+  .service-check.checked .sc-box { background: var(--accent); border-color: var(--accent); }
+  .sc-emoji { font-size: 20px; }
+  .sc-text { flex: 1; }
+  .sc-name { font-size: 14px; font-weight: 600; }
+  .sc-price { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .max-note {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 24px;
+    margin-top: 4px;
+  }
+
+  /* ─── BUTTONS ─── */
+  .btn-next {
+    width: 100%;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    margin-bottom: 12px;
+    letter-spacing: 0.2px;
+  }
+  .btn-next:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,58,237,0.4); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .btn-back {
+    width: 100%;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--bg-tertiary);
+    border-radius: 12px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+  }
+  .btn-back:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+  .btn-skip {
+    width: 100%;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    transition: all 0.2s;
+  }
+  .btn-skip:hover { color: var(--text-primary); text-decoration-color: var(--text-secondary); }
+
+  /* ─── STEP 5: PREVIEW ─── */
+  .preview-heading {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .preview-heading h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .preview-heading p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* ─── WIDGET PREVIEW ─── */
+  .widget-preview {
+    background: var(--bg-primary);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,58,237,0.2);
+  }
+  .wp-notch {
+    height: 24px;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wp-notch-inner {
+    width: 80px; height: 12px;
+    background: #1a1a1a;
+    border-radius: 6px;
+  }
+
+  /* ─── CARD SLIDER ─── */
+  .wp-progress {
+    display: flex;
+    gap: 3px;
+    padding: 8px 12px 4px;
+    background: var(--bg-primary);
+  }
+  .wp-prog-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--bg-tertiary);
+    transition: background 0.3s;
+  }
+  .wp-prog-seg.active { background: var(--accent); }
+  .wp-prog-seg.viewed { background: rgba(255,255,255,0.3); }
+
+  .wp-slider {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+  }
+  .wp-card {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(40px);
+  }
+  .wp-card.active { opacity: 1; transform: translateX(0); }
+  .wp-card.prev { opacity: 0; transform: translateX(-40px); }
+
+  .wp-card-hero {
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+  }
+  .wp-card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .wp-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.2) 100%);
+  }
+  .wp-card-content { position: relative; z-index: 2; }
+  .wp-card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .wp-card-title {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .wp-card-title em { font-style: italic; color: #c4b5fd; }
+  .wp-card-summary {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+  .wp-i-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .wp-i-btn {
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    color: var(--i-button);
+    border-radius: 20px;
+    padding: 5px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .wp-i-btn:hover { background: rgba(245,158,11,0.25); }
+
+  /* Nav arrows */
+  .wp-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+  }
+  .wp-nav-btn {
+    width: 32px; height: 32px;
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: 50%;
+    color: var(--text-primary);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .wp-nav-btn:hover { background: var(--accent); }
+  .wp-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .wp-nav-dots {
+    display: flex;
+    gap: 5px;
+  }
+  .wp-nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .wp-nav-dot.active { background: var(--accent); width: 14px; border-radius: 3px; }
+
+  /* Float button */
+  .wp-float-btn {
+    position: absolute;
+    bottom: 56px;
+    right: 14px;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 24px;
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    animation: pulse 2s infinite;
+    z-index: 10;
+    box-shadow: 0 4px 16px rgba(245,158,11,0.5);
+  }
+
+  /* ─── CTA BLOCK ─── */
+  .cta-block {
+    background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(245,158,11,0.08));
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .cta-block h2 {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .cta-block p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .cta-block p strong { color: var(--text-primary); }
+  .price-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #000;
+    font-size: 32px;
+    font-weight: 900;
+    padding: 4px 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .price-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+  .btn-deploy {
+    width: 100%;
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 18px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    letter-spacing: 0.2px;
+    text-decoration: none;
+    display: block;
+  }
+  .btn-deploy:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(245,158,11,0.5); }
+
+  .includes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 16px 0;
+    text-align: left;
+  }
+  .inc-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .inc-item span:first-child { font-size: 16px; }
+  .inc-item strong { color: var(--text-primary); }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    width: 100%;
+    max-width: 430px;
+    text-align: center;
+    padding: 20px 16px;
+    font-size: 11px;
+    color: rgba(144,144,176,0.5);
+  }
+  .footer a { color: rgba(144,144,176,0.7); text-decoration: none; }
+  .footer a:hover { color: var(--accent-light); }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--success);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ─── HERO GRADIENT THEMES ─── */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  /* responsive guard */
+  @media (max-width: 430px) {
+    .builder-wrap { padding: 0 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <div class="logo">i<span>Tabs</span></div>
+  <div class="top-tagline">Build your quote widget<br>in 60 seconds</div>
+</div>
+
+<!-- MAIN BUILDER -->
+<div class="builder-wrap">
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span id="stepLabel">Step 1 of 4</span>
+      <span id="stepName">Choose your trade</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:25%"></div>
+    </div>
+    <div class="step-dots">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <div class="step-dot" id="dot4"></div>
+    </div>
+  </div>
+
+  <!-- STEPS CONTAINER -->
+  <div class="steps-container">
+
+    <!-- STEP 1: TRADE -->
+    <div class="step-panel active" id="step1">
+      <h1 class="step-heading">What's your <em>trade?</em></h1>
+      <p class="step-sub">Pick one — we'll tailor your widget to your specific services and pricing.</p>
+      <div class="trade-grid">
+        <div class="trade-card" data-trade="Fencing" onclick="selectTrade(this)">
+          <span class="trade-emoji">🏗️</span>
+          <div class="trade-name">Fencing</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Plumbing" onclick="selectTrade(this)">
+          <span class="trade-emoji">🔧</span>
+          <div class="trade-name">Plumbing</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Electrical" onclick="selectTrade(this)">
+          <span class="trade-emoji">⚡</span>
+          <div class="trade-name">Electrical</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Landscaping" onclick="selectTrade(this)">
+          <span class="trade-emoji">🌿</span>
+          <div class="trade-name">Landscaping</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Painting" onclick="selectTrade(this)">
+          <span class="trade-emoji">🎨</span>
+          <div class="trade-name">Painting</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Roofing" onclick="selectTrade(this)">
+          <span class="trade-emoji">🏠</span>
+          <div class="trade-name">Roofing</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Concreting" onclick="selectTrade(this)">
+          <span class="trade-emoji">🪨</span>
+          <div class="trade-name">Concreting</div>
+          <div class="trade-check">✓</div>
+        </div>
+        <div class="trade-card" data-trade="Tiling" onclick="selectTrade(this)">
+          <span class="trade-emoji">🔲</span>
+          <div class="trade-name">Tiling</div>
+          <div class="trade-check">✓</div>
+        </div>
+      </div>
+      <button class="btn-next" id="nextBtn1" onclick="goToStep(2)" disabled>Next — Name your business →</button>
+    </div>
+
+    <!-- STEP 2: BUSINESS NAME -->
+    <div class="step-panel" id="step2">
+      <h1 class="step-heading">What's your <em>business name?</em></h1>
+      <p class="step-sub">This appears live on your widget as you type — watch it update below.</p>
+      <div class="live-preview-mini">
+        <div class="lpm-icon" id="lpmEmoji">🏗️</div>
+        <div class="lpm-text">
+          <div class="lpm-name" id="lpmName">Your Business Name</div>
+          <div class="lpm-trade" id="lpmTrade">Perth Tradie</div>
+        </div>
+        <div class="lpm-pulse">💰 Quote</div>
+      </div>
+      <input type="text" class="input-field" id="businessNameInput" placeholder="e.g. Smith's Fencing Perth" maxlength="40" oninput="updateBusinessName(this.value)">
+      <div class="input-hint">Keep it short and punchy — this is your brand headline.</div>
+      <button class="btn-next" id="nextBtn2" onclick="goToStep(3)" disabled>Next — Choose your services →</button>
+      <button class="btn-back" onclick="goToStep(1, true)">← Back</button>
+    </div>
+
+    <!-- STEP 3: SERVICES -->
+    <div class="step-panel" id="step3">
+      <h1 class="step-heading">What are your <em>main services?</em></h1>
+      <p class="step-sub">Each one becomes a swipeable card in your widget. Pick up to 4.</p>
+      <div class="services-grid" id="servicesGrid"></div>
+      <div class="max-note" id="maxNote">Select 1–4 services</div>
+      <button class="btn-next" id="nextBtn3" onclick="goToStep(4)" disabled>Next — Add your phone number →</button>
+      <button class="btn-back" onclick="goToStep(2, true)">← Back</button>
+    </div>
+
+    <!-- STEP 4: PHONE -->
+    <div class="step-panel" id="step4">
+      <h1 class="step-heading">What's your <em>phone number?</em></h1>
+      <p class="step-sub">This shows on your widget so customers can call you directly. Optional — you can add it later.</p>
+      <input type="tel" class="input-field" id="phoneInput" placeholder="e.g. 0412 345 678" maxlength="15">
+      <div class="input-hint">Shown as a tap-to-call link in your widget.</div>
+      <button class="btn-next" onclick="goToStep(5)">Generate my widget preview →</button>
+      <button class="btn-back" onclick="goToStep(3, true)">← Back</button>
+      <button class="btn-skip" onclick="goToStep(5)">Skip — show my preview without a number</button>
+    </div>
+
+    <!-- STEP 5: PREVIEW -->
+    <div class="step-panel" id="step5">
+      <div class="preview-heading">
+        <h2>✨ Here's your widget</h2>
+        <p>Tap the arrows to swipe through your cards</p>
+      </div>
+
+      <!-- WIDGET PREVIEW -->
+      <div class="widget-preview" id="widgetPreview">
+        <div class="wp-notch"><div class="wp-notch-inner"></div></div>
+        <div class="wp-progress" id="wpProgress"></div>
+        <div class="wp-slider" id="wpSlider"></div>
+        <div class="wp-nav">
+          <button class="wp-nav-btn" id="wpPrev" onclick="wpNav(-1)">←</button>
+          <div class="wp-nav-dots" id="wpDots"></div>
+          <button class="wp-nav-btn" id="wpNext" onclick="wpNav(1)">→</button>
+        </div>
+        <button class="wp-float-btn">💰 Get a Quote</button>
+      </div>
+
+      <!-- CTA BLOCK -->
+      <div class="cta-block">
+        <h2>This is <em style="font-style:normal;background:linear-gradient(135deg,#a855f7,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">yours.</em></h2>
+        <p>We'll deploy it to your own link —<br><strong>fully working, live on the web today.</strong></p>
+        <div class="price-tag">$290</div>
+        <div class="price-sub">One-off. No ongoing fees. No subscriptions.</div>
+        <div class="includes-list">
+          <div class="inc-item"><span>🔗</span><span>Your own link — <strong>itabs.ai/yourbusiness</strong></span></div>
+          <div class="inc-item"><span>📱</span><span><strong>Mobile-first</strong> swipeable widget</span></div>
+          <div class="inc-item"><span>💰</span><span><strong>Live quote panel</strong> with Perth pricing</span></div>
+          <div class="inc-item"><span>📩</span><span><strong>Leads emailed</strong> direct to you</span></div>
+          <div class="inc-item"><span>⚡</span><span><strong>Live within 24 hours</strong> of payment</span></div>
+        </div>
+        <a class="btn-deploy" id="deployBtn" href="#" onclick="handleDeploy(event)">Get mine deployed →</a>
+      </div>
+
+      <button class="btn-back" onclick="goToStep(4, true)" style="margin-bottom:8px;">← Edit my details</button>
+    </div>
+
+  </div><!-- /steps-container -->
+</div><!-- /builder-wrap -->
+
+<!-- FOOTER -->
+<div class="footer">
+  <a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✅ Details sent! We'll be in touch.</div>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+const state = {
+  trade: '',
+  tradeEmoji: '',
+  businessName: '',
+  services: [],
+  phone: '',
+  currentStep: 1
+};
+
+/* ═══════════════════════════════════════
+   TRADE DATA
+═══════════════════════════════════════ */
+const TRADE_DATA = {
+  Fencing: {
+    emoji: '🏗️',
+    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Perth fencing you can count on',
+    services: [
+      { emoji: '🔩', name: 'Colorbond Fencing',   price: '$85–$120/m',   summary: 'Low-maintenance Colorbond in all standard colours — popular for Perth homes and properties.' },
+      { emoji: '🪵', name: 'Timber Fencing',      price: '$70–$100/m',   summary: 'Classic treated pine and hardwood fencing to suit any backyard style across Perth.' },
+      { emoji: '🏊', name: 'Pool Fencing',         price: '$120–$180/m',  summary: 'Compliant frameless glass and aluminium pool fencing — BCA & WA regulations met.' },
+      { emoji: '🚪', name: 'Gates & Automation',  price: '$450–$900',    summary: 'Custom gates with automated openers — driveway and pedestrian options available.' },
+      { emoji: '🏗️', name: 'Rural Fencing',       price: '$25–$55/m',    summary: 'Post & rail, barbed wire, and stockyard fencing for rural Perth properties.' },
+      { emoji: '🧱', name: 'Retaining Walls',     price: '$280–$450/m',  summary: 'Sleeper and limestone retaining walls to manage Perth\'s sandy slopes.' }
+    ]
+  },
+  Plumbing: {
+    emoji: '🔧',
+    image: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Licensed Perth plumbers, fast response',
+    services: [
+      { emoji: '🚿', name: 'Blocked Drains',      price: '$180–$320',    summary: 'Same-day drain clearing with high-pressure jetting — Perth\'s sandy soil is hard on pipes.' },
+      { emoji: '🔥', name: 'Hot Water Systems',   price: '$900–$1,800',  summary: 'Gas, electric and heat pump hot water — supply and installation across Perth metro.' },
+      { emoji: '💧', name: 'Leak Detection',      price: '$180–$350',    summary: 'Non-invasive leak detection before your water bill blows out in summer.' },
+      { emoji: '🪠', name: 'Fixture Installation',price: '$180–$280',    summary: 'Taps, toilets, sinks and showers — quality brands, clean installation.' },
+      { emoji: '🏗️', name: 'New Connections',     price: '$450–$900',    summary: 'New plumbing rough-ins for extensions, granny flats and renovations.' },
+      { emoji: '🚽', name: 'Bathroom Renovation', price: '$2,000–$5,000',summary: 'Full bathroom plumbing makeovers — manage your Perth reno stress-free.' }
+    ]
+  },
+  Electrical: {
+    emoji: '⚡',
+    image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Licensed electricians across Perth',
+    services: [
+      { emoji: '🔌', name: 'Switchboard Upgrades',price: '$800–$1,500',  summary: 'Upgrade old switchboards to meet current WA safety standards — essential for Perth\'s older homes.' },
+      { emoji: '💡', name: 'LED Lighting',        price: '$120–$180/pt', summary: 'LED downlight installation and upgrades — slash your power bill across Perth\'s hot summers.' },
+      { emoji: '🔋', name: 'Solar & Battery',     price: '$4,500–$8,000',summary: 'STC-eligible solar panel and battery storage systems — Perth gets more sun than almost anywhere.' },
+      { emoji: '🔌', name: 'Power Points & USB',  price: '$120–$200/pt', summary: 'Additional GPOs, USB outlets and data points installed neatly by a licensed sparky.' },
+      { emoji: '🏠', name: 'New Home Wiring',     price: 'Quote on site', summary: 'Full electrical rough-in and fit-off for new builds and extensions in Perth metro.' },
+      { emoji: '🌡️', name: 'Air Con Wiring',      price: '$280–$450',    summary: 'Dedicated circuits for split-system and ducted air conditioning — essential for Perth summers.' }
+    ]
+  },
+  Landscaping: {
+    emoji: '🌿',
+    image: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Perth gardens that thrive in the heat',
+    services: [
+      { emoji: '🌱', name: 'Garden Design',        price: '$800–$2,000',  summary: 'Drought-tolerant Perth garden designs with native plants and waterwise principles.' },
+      { emoji: '✂️', name: 'Lawn & Maintenance',   price: '$60–$120/visit',summary: 'Regular lawn mowing and garden maintenance across the Perth metro area.' },
+      { emoji: '🧱', name: 'Retaining Walls',      price: '$280–$450/m',  summary: 'Sleeper, limestone and block retaining walls to manage Perth\'s sandy, sloping blocks.' },
+      { emoji: '💧', name: 'Reticulation',         price: '$1,200–$2,500',summary: 'Smart irrigation systems designed for Perth\'s two-day watering restrictions.' },
+      { emoji: '🏡', name: 'Paving & Paths',       price: '$60–$95/m²',   summary: 'Brick paving, limestone and concrete paths for Perth homes and commercial sites.' },
+      { emoji: '🌳', name: 'Tree & Stump Removal', price: '$350–$1,200',  summary: 'Safe tree removal and stump grinding across Perth — fully insured, clean finish.' }
+    ]
+  },
+  Painting: {
+    emoji: '🎨',
+    image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Quality painting for Perth homes',
+    services: [
+      { emoji: '🏠', name: 'Interior Painting',   price: '$18–$28/m²',   summary: 'Clean, dust-free interior painting for Perth homes — prep, prime and paint included.' },
+      { emoji: '🌞', name: 'Exterior Painting',   price: '$22–$35/m²',   summary: 'Durable exterior paint systems built to handle Perth\'s UV, heat and coastal air.' },
+      { emoji: '🏚️', name: 'Roof Painting',       price: '$1,800–$3,500',summary: 'Roof restoration and anti-fungal roof paint — extends the life of Perth tile and iron roofs.' },
+      { emoji: '🎭', name: 'Feature Walls',       price: '$280–$500',    summary: 'Bold feature walls with designer finishes — Dulux and Taubmans premium colours.' },
+      { emoji: '🏗️', name: 'New Builds',          price: 'Quote on site', summary: 'Full paint packages for new home builders and developers across Perth metro.' },
+      { emoji: '🧹', name: 'Pressure Washing',    price: '$180–$380',    summary: 'Pre-paint surface prep with pressure washing — essential for Perth\'s dirty brick facades.' }
+    ]
+  },
+  Roofing: {
+    emoji: '🏠',
+    image: 'https://images.unsplash.com/photo-1632823471565-1ecdf5c6da9d?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Perth roofing that takes the heat',
+    services: [
+      { emoji: '🔨', name: 'Roof Restoration',    price: '$2,200–$4,000',summary: 'Full tile clean, re-bedding, re-pointing and coating — adds years to Perth tile roofs.' },
+      { emoji: '💧', name: 'Leak Repairs',        price: '$280–$600',    summary: 'Fast leak detection and repair — stop water damage before Perth\'s winter rains hit.' },
+      { emoji: '🏗️', name: 'Re-Roofing',         price: '$8,000–$18,000',summary: 'Full tile or metal re-roof — upgrade your home\'s protection and value across Perth.' },
+      { emoji: '🌊', name: 'Gutters & Downpipes', price: '$45–$75/m',    summary: 'Colorbond gutter replacement and leaf guard installation for Perth homes.' },
+      { emoji: '☀️', name: 'Roof Ventilation',    price: '$380–$750',    summary: 'Solar whirlybirds and ridge vents — essential for Perth\'s 40°C+ summer attics.' },
+      { emoji: '🪟', name: 'Skylights',           price: '$680–$1,400',  summary: 'Velux and fixed skylight supply and install — brighten Perth homes naturally.' }
+    ]
+  },
+  Concreting: {
+    emoji: '🪨',
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Solid concrete work across Perth',
+    services: [
+      { emoji: '🚗', name: 'Driveways',           price: '$65–$95/m²',   summary: 'Plain, exposed and decorative driveways — built for Perth\'s summer heat expansion.' },
+      { emoji: '🏡', name: 'Patios & Alfresco',   price: '$60–$85/m²',   summary: 'Outdoor living concrete perfect for Perth\'s year-round alfresco lifestyle.' },
+      { emoji: '🚶', name: 'Paths & Footpaths',   price: '$55–$75/m²',   summary: 'Neat concrete pathways around homes and commercial properties across Perth.' },
+      { emoji: '🏗️', name: 'Slabs & Foundations', price: '$70–$95/m²',   summary: 'Residential slabs for sheds, garages and extensions — engineered to Perth soil standards.' },
+      { emoji: '🔲', name: 'Exposed Aggregate',   price: '$85–$120/m²',  summary: 'Decorative exposed aggregate — popular Perth finish for driveways and pool surrounds.' },
+      { emoji: '🧱', name: 'Retaining Walls',     price: '$280–$450/m',  summary: 'Concrete block retaining walls for Perth\'s sloped lots and sandy soils.' }
+    ]
+  },
+  Tiling: {
+    emoji: '🔲',
+    image: 'https://images.unsplash.com/photo-1558618047-f4e860a8c4b1?w=860&q=80&auto=format&fit=crop',
+    tagline: 'Precision tiling across Perth homes',
+    services: [
+      { emoji: '🚿', name: 'Bathroom Tiling',     price: '$1,800–$3,500',summary: 'Full bathroom tile and waterproofing — WAWA-compliant wet area installation.' },
+      { emoji: '🏠', name: 'Floor Tiling',        price: '$45–$75/m²',   summary: 'Porcelain, ceramic and natural stone floor tiles for Perth homes.' },
+      { emoji: '🍳', name: 'Splashbacks',         price: '$380–$700',    summary: 'Kitchen and laundry splashbacks — glass, subway and feature tiles available.' },
+      { emoji: '🌿', name: 'Outdoor & Alfresco',  price: '$50–$80/m²',   summary: 'Non-slip outdoor tiles for Perth patios, pool surrounds and entertainment areas.' },
+      { emoji: '🔧', name: 'Regrouting & Repairs',price: '$180–$450',    summary: 'Regrout, re-seal and repair existing tiles — restore tired Perth bathrooms fast.' },
+      { emoji: '🏗️', name: 'Large Format Tiles',  price: '$65–$100/m²',  summary: 'Specialist laying of large format 600×600 to 1200×600 tiles across Perth.' }
+    ]
+  }
+};
+
+const HERO_IMAGES = {
+  Fencing:     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop',
+  Plumbing:    'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop',
+  Electrical:  'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=860&q=80&auto=format&fit=crop',
+  Landscaping: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop',
+  Painting:    'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop',
+  Roofing:     'https://images.unsplash.com/photo-1632823471565-1ecdf5c6da9d?w=860&q=80&auto=format&fit=crop',
+  Concreting:  'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=860&q=80&auto=format&fit=crop',
+  Tiling:      'https://images.unsplash.com/photo-1558618047-f4e860a8c4b1?w=860&q=80&auto=format&fit=crop'
+};
+
+const HERO_THEMES = ['hero-default','hero-purple','hero-cyan','hero-amber','hero-green'];
+
+/* ═══════════════════════════════════════
+   STEP NAV
+═══════════════════════════════════════ */
+const STEP_NAMES = ['','Choose your trade','Name your business','Select services','Add your number'];
+const STEP_PROGRESS = ['','25%','50%','75%','100%'];
+
+function goToStep(n, back = false) {
+  const cur = state.currentStep;
+  const curPanel = document.getElementById('step' + cur);
+  const nextPanel = document.getElementById('step' + n);
+
+  curPanel.classList.remove('active');
+  nextPanel.classList.remove('back-anim');
+  if (back) nextPanel.classList.add('back-anim');
+  nextPanel.classList.add('active');
+
+  state.currentStep = n;
+  updateProgress(n);
+
+  if (n === 3) buildServicesGrid();
+  if (n === 5) buildWidgetPreview();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(n) {
+  if (n === 5) {
+    document.getElementById('progressWrap').style.display = 'none';
+    return;
+  }
+  document.getElementById('progressWrap').style.display = 'block';
+  document.getElementById('stepLabel').textContent = `Step ${n} of 4`;
+  document.getElementById('stepName').textContent = STEP_NAMES[n];
+  document.getElementById('progressFill').style.width = STEP_PROGRESS[n];
+
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById('dot' + i);
+    dot.className = 'step-dot';
+    if (i < n) dot.classList.add('done');
+    else if (i === n) dot.classList.add('active');
+  }
+}
+
+/* ═══════════════════════════════════════
+   STEP 1 — TRADE SELECT
+═══════════════════════════════════════ */
+function selectTrade(el) {
+  document.querySelectorAll('.trade-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  state.trade = el.dataset.trade;
+  state.tradeEmoji = TRADE_DATA[state.trade].emoji;
+  state.services = [];
+  document.getElementById('nextBtn1').disabled = false;
+
+  // Update mini preview
+  document.getElementById('lpmEmoji').textContent = state.tradeEmoji;
+  document.getElementById('lpmTrade').textContent = state.trade + ' · Perth';
+}
+
+/* ═══════════════════════════════════════
+   STEP 2 — BUSINESS NAME
+═══════════════════════════════════════ */
+function updateBusinessName(val) {
+  state.businessName = val.trim();
+  const display = state.businessName || 'Your Business Name';
+  document.getElementById('lpmName').textContent = display;
+  document.getElementById('nextBtn2').disabled = state.businessName.length < 2;
+}
+
+/* ═══════════════════════════════════════
+   STEP 3 — SERVICES
+═══════════════════════════════════════ */
+function buildServicesGrid() {
+  const grid = document.getElementById('servicesGrid');
+  grid.innerHTML = '';
+  const services = TRADE_DATA[state.trade].services;
+
+  services.forEach((svc, i) => {
+    const div = document.createElement('div');
+    div.className = 'service-check';
+    div.dataset.index = i;
+    div.innerHTML = `
+      <div class="sc-box" id="scBox${i}"></div>
+      <div class="sc-emoji">${svc.emoji}</div>
+      <div class="sc-text">
+        <div class="sc-name">${svc.name}</div>
+        <div class="sc-price">${svc.price}</div>
+      </div>`;
+    div.onclick = () => toggleService(i, div);
+    grid.appendChild(div);
+  });
+  updateServicesNext();
+}
+
+function toggleService(i, el) {
+  const idx = state.services.indexOf(i);
+  if (idx > -1) {
+    state.services.splice(idx, 1);
+    el.classList.remove('checked');
+    document.getElementById('scBox' + i).textContent = '';
+  } else {
+    if (state.services.length >= 4) {
+      showToastMsg('Max 4 services — deselect one first');
+      return;
+    }
+    state.services.push(i);
+    el.classList.add('checked');
+    document.getElementById('scBox' + i).textContent = '✓';
+  }
+  updateServicesNext();
+}
+
+function updateServicesNext() {
+  const n = state.services.length;
+  document.getElementById('nextBtn3').disabled = n === 0;
+  document.getElementById('maxNote').textContent = n === 0
+    ? 'Select 1–4 services'
+    : n < 4
+    ? `${n} selected — you can add up to ${4 - n} more`
+    : '4 selected — looking good!';
+}
+
+/* ═══════════════════════════════════════
+   STEP 5 — BUILD WIDGET PREVIEW
+═══════════════════════════════════════ */
+let wpCurrentCard = 0;
+let wpTotalCards = 0;
+
+function buildWidgetPreview() {
+  state.phone = document.getElementById('phoneInput').value.trim();
+
+  const tradeData = TRADE_DATA[state.trade];
+  const selectedServices = state.services.map(i => tradeData.services[i]);
+  const businessName = state.businessName;
+  const phone = state.phone;
+  const tradeImg = HERO_IMAGES[state.trade];
+
+  // Build cards array: intro + service cards + CTA
+  const cards = [];
+
+  // INTRO card
+  cards.push({
+    theme: HERO_THEMES[1],
+    image: tradeImg,
+    tag: `01 / ${state.trade.toUpperCase()}`,
+    title: `${businessName}`,
+    titleEm: ` — ${tradeData.tagline}`,
+    summary: `Based in Perth, ${businessName} delivers quality ${state.trade.toLowerCase()} work across the metro area. Fully licensed, insured, and trusted by local homeowners.`,
+    ibtns: [`ℹ️ About ${businessName}`, `📍 Perth Metro`]
+  });
+
+  // SERVICE cards
+  selectedServices.forEach((svc, idx) => {
+    cards.push({
+      theme: HERO_THEMES[(idx + 2) % HERO_THEMES.length],
+      image: tradeImg,
+      tag: `0${idx + 2} / SERVICE`,
+      title: '',
+      titleEm: svc.name,
+      summary: svc.summary,
+      ibtns: [`💰 ${svc.price}`, `${svc.emoji} Details`]
+    });
+  });
+
+  // LEAD card
+  cards.push({
+    theme: 'hero-green',
+    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop',
+    tag: 'GET A QUOTE',
+    title: 'Get your free ',
+    titleEm: 'quote today',
+    summary: phone
+      ? `Call ${businessName} direct on ${phone} — or tap below to get a free quote by email.`
+      : `Tap below to get a free quote from ${businessName} — fast response guaranteed.`,
+    ibtns: phone ? [`📞 Call ${phone}`, '✉️ Email us'] : ['✉️ Get a quote', '📍 Perth Metro']
+  });
+
+  wpTotalCards = cards.length;
+  wpCurrentCard = 0;
+
+  // Build slider HTML
+  const slider = document.getElementById('wpSlider');
+  slider.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const div = document.createElement('div');
+    div.className = 'wp-card' + (idx === 0 ? ' active' : '');
+    div.id = 'wpCard' + idx;
+
+    const ibtnHtml = card.ibtns.map(b =>
+      `<button class="wp-i-btn">${b}</button>`).join('');
+
+    div.innerHTML = `
+      <div class="wp-card-hero ${card.theme}">
+        <img src="${card.image}" alt="${state.trade}" loading="lazy">
+        <div class="wp-card-overlay"></div>
+        <div class="wp-card-content">
+          <div class="wp-card-tag">${card.tag}</div>
+          <div class="wp-card-title">${card.title}<em>${card.titleEm}</em></div>
+          <div class="wp-card-summary">${card.summary}</div>
+          <div class="wp-i-buttons">${ibtnHtml}</div>
+        </div>
+      </div>`;
+    slider.appendChild(div);
+  });
+
+  // Build progress + dots
+  updateWpProgress();
+
+  // Deploy button
+  const mailSubject = encodeURIComponent(`I want mine deployed — ${businessName}`);
+  document.getElementById('deployBtn').href = `mailto:build@itabs.ai?subject=${mailSubject}`;
+
+  // Touch support
+  initWpSwipe();
+}
+
+function updateWpProgress() {
+  const progress = document.getElementById('wpProgress');
+  const dots = document.getElementById('wpDots');
+  progress.innerHTML = '';
+  dots.innerHTML = '';
+
+  for (let i = 0; i < wpTotalCards; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'wp-prog-seg' + (i === wpCurrentCard ? ' active' : i < wpCurrentCard ? ' viewed' : '');
+    progress.appendChild(seg);
+
+    const dot = document.createElement('div');
+    dot.className = 'wp-nav-dot' + (i === wpCurrentCard ? ' active' : '');
+    dot.onclick = () => wpGoTo(i);
+    dots.appendChild(dot);
+  }
+
+  document.getElementById('wpPrev').disabled = wpCurrentCard === 0;
