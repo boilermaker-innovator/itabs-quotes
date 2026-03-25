@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Trim & Brick — Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg-primary:#0a0a0f;
+    --bg-secondary:#12121a;
+    --bg-tertiary:#1e1e2e;
+    --text-primary:#ffffff;
+    --text-secondary:#9090b0;
+    --accent:#7c3aed;
+    --i-button:#f59e0b;
+  }
+  html,body{
+    height:100%;width:100%;
+    overflow:hidden;
+    font-family:'Inter',sans-serif;
+    background:var(--bg-primary);
+    color:var(--text-primary);
+  }
+  .widget-root{
+    max-width:430px;
+    width:100%;
+    height:100vh;
+    margin:0 auto;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar{
+    display:flex;
+    gap:3px;
+    padding:10px 14px 8px;
+    background:var(--bg-primary);
+    flex-shrink:0;
+    z-index:10;
+  }
+  .prog-seg{
+    flex:1;
+    height:3px;
+    border-radius:2px;
+    background:#2a2a3a;
+    transition:background 0.3s;
+  }
+  .prog-seg.viewed{background:#ffffff55;}
+  .prog-seg.active{background:var(--accent);}
+
+  /* CARD DECK */
+  .card-deck{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+  }
+  .card{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    padding:20px 18px 16px;
+    opacity:0;
+    pointer-events:none;
+    transform:translateX(60px);
+    transition:opacity 0.35s ease, transform 0.35s ease;
+    overflow-y:auto;
+  }
+  .card.active{
+    opacity:1;
+    pointer-events:all;
+    transform:translateX(0);
+  }
+  .card.prev{
+    opacity:0;
+    transform:translateX(-60px);
+  }
+  .hero-default{background:linear-gradient(135deg,#1e293b,#0f172a);}
+  .hero-purple{background:linear-gradient(135deg,#4c1d95,#1e1b4b);}
+  .hero-cyan{background:linear-gradient(135deg,#164e63,#0c4a6e);}
+  .hero-amber{background:linear-gradient(135deg,#78350f,#431407);}
+  .hero-green{background:linear-gradient(135deg,#14532d,#052e16);}
+
+  .card-tag{
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--text-secondary);
+    margin-bottom:10px;
+  }
+  .card-headline{
+    font-size:26px;
+    font-weight:900;
+    line-height:1.15;
+    margin-bottom:14px;
+    color:var(--text-primary);
+  }
+  .card-headline em{
+    font-style:normal;
+    color:#a78bfa;
+  }
+  .card-summary{
+    font-size:14px;
+    line-height:1.65;
+    color:#c8c8e0;
+    flex:1;
+  }
+  .card-summary p+p{margin-top:8px;}
+
+  /* I-BUTTON */
+  .i-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:16px;
+    background:rgba(245,158,11,0.15);
+    border:1px solid rgba(245,158,11,0.4);
+    color:var(--i-button);
+    font-size:12px;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:background 0.2s;
+  }
+  .i-btn:hover{background:rgba(245,158,11,0.25);}
+  .i-btn .i-dot{
+    width:16px;height:16px;
+    background:var(--i-button);
+    color:#000;
+    border-radius:50%;
+    font-size:10px;
+    font-weight:900;
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* I-TOOLTIP */
+  .i-tooltip{
+    display:none;
+    margin-top:12px;
+    background:rgba(245,158,11,0.1);
+    border:1px solid rgba(245,158,11,0.3);
+    border-radius:12px;
+    padding:12px 14px;
+    font-size:13px;
+    line-height:1.6;
+    color:#fde68a;
+  }
+  .i-tooltip.open{display:block;}
+
+  /* NAV ARROWS */
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:8px 14px 10px;
+    background:var(--bg-primary);
+    flex-shrink:0;
+    z-index:10;
+  }
+  .nav-btn{
+    width:40px;height:40px;
+    border-radius:50%;
+    border:1px solid #2a2a3a;
+    background:var(--bg-tertiary);
+    color:var(--text-primary);
+    font-size:18px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background 0.2s,border 0.2s;
+  }
+  .nav-btn:hover{background:#2a2a3a;border-color:#7c3aed;}
+  .nav-btn:disabled{opacity:0.3;cursor:default;}
+  .card-counter{
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-secondary);
+    letter-spacing:0.08em;
+  }
+
+  /* POWERED BY */
+  .powered-by{
+    text-align:center;
+    font-size:10px;
+    color:#3a3a5a;
+    padding:4px 0 6px;
+    background:var(--bg-primary);
+    flex-shrink:0;
+    letter-spacing:0.06em;
+  }
+  .powered-by a{color:#5a5a8a;text-decoration:none;}
+
+  /* FLOATING BUTTON */
+  .float-btn{
+    position:fixed;
+    bottom:76px;
+    right:14px;
+    z-index:150;
+    background:var(--i-button);
+    color:#000;
+    font-size:13px;
+    font-weight:800;
+    padding:12px 16px;
+    border-radius:28px;
+    border:none;
+    cursor:pointer;
+    box-shadow:0 0 0 0 rgba(245,158,11,0.7);
+    animation:pulse-amber 2.2s infinite;
+    display:flex;align-items:center;gap:6px;
+    white-space:nowrap;
+  }
+  @keyframes pulse-amber{
+    0%{box-shadow:0 0 0 0 rgba(245,158,11,0.7);}
+    60%{box-shadow:0 0 0 12px rgba(245,158,11,0);}
+    100%{box-shadow:0 0 0 0 rgba(245,158,11,0);}
+  }
+
+  /* LEAD CAPTURE FORM IN CARD */
+  .lead-form{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+  .lead-form input,.lead-form textarea{
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    padding:11px 13px;
+    color:#fff;
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+    transition:border 0.2s;
+    width:100%;
+  }
+  .lead-form input:focus,.lead-form textarea:focus{border-color:rgba(124,58,237,0.6);}
+  .lead-form textarea{resize:none;height:72px;}
+  .lead-form button{
+    background:linear-gradient(135deg,#16a34a,#15803d);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:13px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:opacity 0.2s;
+  }
+  .lead-form button:hover{opacity:0.9;}
+  .success-msg{
+    display:none;
+    text-align:center;
+    padding:20px 10px;
+  }
+  .success-msg .tick{font-size:40px;margin-bottom:10px;}
+  .success-msg h3{font-size:18px;font-weight:800;margin-bottom:8px;}
+  .success-msg p{font-size:13px;color:#a0ffa0;line-height:1.5;}
+  .success-msg a{color:#4ade80;font-weight:700;}
+
+  /* QUOTE PANEL OVERLAY */
+  .quote-overlay{
+    position:fixed;
+    inset:0;
+    z-index:200;
+    background:rgba(0,0,0,0.7);
+    backdrop-filter:blur(4px);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s;
+  }
+  .quote-overlay.open{opacity:1;pointer-events:all;}
+  .quote-panel{
+    width:100%;
+    max-width:430px;
+    background:var(--bg-secondary);
+    border-radius:20px 20px 0 0;
+    padding:0 0 30px;
+    transform:translateY(100%);
+    transition:transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    max-height:92vh;
+    overflow-y:auto;
+  }
+  .quote-overlay.open .quote-panel{transform:translateY(0);}
+  .qp-handle{
+    width:36px;height:4px;
+    background:#3a3a5a;
+    border-radius:2px;
+    margin:12px auto 0;
+  }
+  .qp-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 18px 10px;
+    border-bottom:1px solid #1e1e2e;
+  }
+  .qp-title{font-size:15px;font-weight:800;color:#fff;}
+  .qp-close{
+    background:none;border:none;color:#9090b0;
+    font-size:22px;cursor:pointer;line-height:1;
+    padding:2px 6px;
+  }
+
+  /* PRICE STRIP */
+  .price-strip{
+    background:linear-gradient(135deg,#1e3a5f,#0c2a4a);
+    padding:12px 18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .price-label{font-size:11px;color:#7ab8f5;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;}
+  .price-range{font-size:20px;font-weight:900;color:#fff;}
+  .price-note{font-size:10px;color:#7090b0;margin-top:2px;}
+
+  /* STEPS */
+  .qp-steps{padding:16px 18px;}
+  .step{display:none;}
+  .step.active{display:block;}
+  .step-title{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;}
+
+  /* SERVICE GRID */
+  .svc-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .svc-card{
+    background:var(--bg-tertiary);
+    border:2px solid transparent;
+    border-radius:12px;
+    padding:12px 10px;
+    cursor:pointer;
+    transition:border 0.2s,background 0.2s;
+    text-align:center;
+  }
+  .svc-card:hover{background:#252535;border-color:#7c3aed55;}
+  .svc-card.selected{border-color:var(--accent);background:#2d1f5e;}
+  .svc-card .svc-emoji{font-size:24px;display:block;margin-bottom:5px;}
+  .svc-card .svc-name{font-size:12px;font-weight:700;color:#fff;display:block;margin-bottom:2px;}
+  .svc-card .svc-price{font-size:10px;color:#9090b0;}
+
+  /* COMPLEXITY */
+  .comp-grid{display:flex;flex-direction:column;gap:8px;}
+  .comp-card{
+    background:var(--bg-tertiary);
+    border:2px solid transparent;
+    border-radius:12px;
+    padding:12px 14px;
+    cursor:pointer;
+    transition:border 0.2s,background 0.2s;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .comp-card:hover{background:#252535;border-color:#7c3aed55;}
+  .comp-card.selected{border-color:var(--accent);background:#2d1f5e;}
+  .comp-left{display:flex;flex-direction:column;}
+  .comp-name{font-size:14px;font-weight:700;color:#fff;}
+  .comp-desc{font-size:11px;color:#9090b0;margin-top:2px;}
+  .comp-mult{font-size:12px;font-weight:700;color:#a78bfa;}
+
+  /* STEP NAV */
+  .step-nav{margin-top:16px;display:flex;gap:8px;}
+  .step-back{
+    flex:0 0 44px;height:44px;
+    background:var(--bg-tertiary);
+    border:1px solid #2a2a3a;
+    border-radius:10px;
+    color:#fff;font-size:18px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step-next{
+    flex:1;height:44px;
+    background:linear-gradient(135deg,var(--accent),#5b21b6);
+    border:none;border-radius:10px;
+    color:#fff;font-size:14px;font-weight:700;
+    cursor:pointer;
+    transition:opacity 0.2s;
+  }
+  .step-next:hover{opacity:0.9;}
+
+  /* QUOTE FORM */
+  .q-form{display:flex;flex-direction:column;gap:10px;}
+  .q-form input,.q-form textarea{
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:10px;
+    padding:11px 13px;
+    color:#fff;
+    font-size:14px;
+    font-family:'Inter',sans-serif;
+    outline:none;
+    transition:border 0.2s;
+    width:100%;
+  }
+  .q-form input:focus,.q-form textarea:focus{border-color:rgba(124,58,237,0.6);}
+  .q-form textarea{resize:none;height:60px;}
+  .q-submit{
+    background:linear-gradient(135deg,var(--i-button),#d97706);
+    border:none;border-radius:10px;padding:13px;
+    color:#000;font-size:14px;font-weight:800;
+    cursor:pointer;transition:opacity 0.2s;
+    margin-top:4px;
+  }
+  .q-submit:hover{opacity:0.9;}
+  .q-success{
+    display:none;
+    text-align:center;
+    padding:20px 10px;
+  }
+  .q-success .tick{font-size:38px;margin-bottom:8px;}
+  .q-success h3{font-size:17px;font-weight:800;margin-bottom:8px;}
+  .q-success p{font-size:13px;color:#fde68a;line-height:1.6;}
+  .q-success a{color:var(--i-button);font-weight:700;}
+
+  /* STEP DOTS */
+  .step-dots{
+    display:flex;gap:6px;justify-content:center;
+    padding:10px 0 4px;
+  }
+  .step-dot{
+    width:7px;height:7px;border-radius:50%;
+    background:#2a2a3a;transition:background 0.2s;
+  }
+  .step-dot.active{background:var(--accent);}
+</style>
+</head>
+<body>
+<div class="widget-root">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar">
+    <div class="prog-seg active" data-index="0"></div>
+    <div class="prog-seg" data-index="1"></div>
+    <div class="prog-seg" data-index="2"></div>
+    <div class="prog-seg" data-index="3"></div>
+    <div class="prog-seg" data-index="4"></div>
+  </div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card hero-default active" data-index="0">
+      <div class="card-tag">01 / Rick's Trim & Brick</div>
+      <h1 class="card-headline">Rick's Trim&nbsp;&amp;&nbsp;Brick —<br>Joondalup's trusted <em>landscaping &amp; bricklaying</em> crew</h1>
+      <div class="card-summary">
+        <p>From solid retaining walls to crisp brick edging, Rick's Trim & Brick has been shaping Joondalup backyards and streetscapes for years. We do the hard stuff properly — no shortcuts.</p>
+        <p>Whether you're in Joondalup, Edgewater, Beldon or anywhere in the northern suburbs, Rick and his team show up on time and deliver a finish you'll be proud of.</p>
+      </div>
+      <button class="i-btn" onclick="toggleTooltip('tt0')">
+        <span class="i-dot">i</span> About Rick's Trim &amp; Brick
+      </button>
+      <div class="i-tooltip" id="tt0">
+        Rick's Trim & Brick is a family-run landscaping and bricklaying business based in Joondalup, specialising in retaining walls, feature paving, garden beds and brick edging across Perth's northern corridor. Rick brings years of hands-on trade experience to every job, personally overseeing the work to make sure standards stay high. The team is known for honest quotes, tidy worksites and results that hold up against Perth's summer heat and sandy soils.
+      </div>
+    </div>
+
+    <!-- CARD 1: RETAINING WALLS -->
+    <div class="card hero-purple" data-index="1">
+      <div class="card-tag">02 / SERVICE</div>
+      <h2 class="card-headline"><em>Retaining Walls</em></h2>
+      <div class="card-summary">
+        <p>Perth's sandy soils and sloping blocks make retaining walls a must-have in many Joondalup properties. Rick's Trim & Brick builds walls in limestone, brick, concrete block and sleeper timber — all engineered to handle the load and comply with WA local council requirements.</p>
+        <p>Whether you need a low garden wall or a multi-tiered structure to reclaim a steep backyard, we design for drainage and longevity so your wall stays put — even after a wet Joondalup winter.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: PAVING -->
+    <div class="card hero-cyan" data-index="2">
+      <div class="card-tag">03 / SERVICE</div>
+      <h2 class="card-headline"><em>Paving</em></h2>
+      <div class="card-summary">
+        <p>A well-laid paved driveway, patio or path adds serious kerb appeal — and real value — to any Joondalup home. We work with clay brick, concrete pavers and natural stone, cutting and laying to your exact design.</p>
+        <p>Perth's UV and heat put pavers through their paces, so we use the right sub-base prep and jointing compounds to prevent shifting and cracking. Driveways, entertaining areas, pool surrounds — we handle it all.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: BRICK EDGING -->
+    <div class="card hero-amber" data-index="3">
+      <div class="card-tag">04 / SERVICE</div>
+      <h2 class="card-headline"><em>Brick Edging</em></h2>
+      <div class="card-summary">
+        <p>Brick edging is the finishing touch that separates a tidy garden from a great one. Rick's team installs soldier course and on-edge brick borders that cleanly define lawns, garden beds and paths — keeping mulch in and creeping lawn out.</p>
+        <p>Popular across Joondalup and Currambine streetscapes, brick edging is low-maintenance and built to handle Perth's harsh clay and sandy soil conditions without heaving or cracking.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: GARDEN BEDS -->
+    <div class="card hero-green" data-index="4">
+      <div class="card-tag">05 / GET A QUOTE</div>
+      <h2 class="card-headline">Get your free <em>quote</em> today</h2>
+      <div class="card-summary">
+        <p>Tell Rick a bit about your job and we'll be in touch with a no-obligation quote — usually within one business day.</p>
+      </div>
+      <form class="lead-form" id="leadForm">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject" value="New Lead: Rick's Trim & Brick — iTabs Widget">
+        <input type="hidden" name="from_name" value="iTabs Widget — Rick's Trim & Brick">
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="tel" name="phone" placeholder="Phone number" required>
+        <input type="email" name="email" placeholder="Email address" required>
+        <textarea name="message" placeholder="Brief job description — e.g. retaining wall 8m, rear yard Joondalup"></textarea>
+        <button type="submit">Send my enquiry →</button>
+      </form>
+      <div class="success-msg" id="leadSuccess">
+        <div class="tick">✅</div>
+        <h3>Enquiry sent!</h3>
+        <p>Rick will be in touch shortly. Need to talk now?<br>
+        <a href="tel:0412000000">Call Rick: 0412 000 000</a></p>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- NAV ROW -->
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="card-counter" id="cardCounter">1 / 5</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL OVERLAY -->
+<div class="quote-overlay" id="quoteOverlay" onclick="overlayClick(event)">
+  <div class="quote-panel" id="quotePanel">
+    <div class="qp-handle"></div>
+    <div class="qp-header">
+      <span class="qp-title">💰 Rick's Trim &amp; Brick — Quote</span>
+      <button class="qp-close" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="price-label">Estimated Range</div>
+        <div class="price-range" id="priceRange">Select a service</div>
+        <div class="price-note">Guide price only — final quote after site visit</div>
+      </div>
+    </div>
+
+    <!-- STEP DOTS -->
+    <div class="step-dots">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
+
+    <div class="qp-steps">
+
+      <!-- STEP 1: SERVICE -->
+      <div class="step active" id="qStep1">
+        <div class="step-title">What do you need?</div>
+        <div class="svc-grid">
+          <div class="svc-card" data-min="2240" data-max="3600" data-label="Retaining Wall" onclick="selectService(this)">
+            <span class="svc-emoji">🧱</span>
+            <span class="svc-name">Retaining Wall</span>
+            <span class="svc-price">$280–$450/m</span>
+          </div>
+          <div class="svc-card" data-min="1500" data-max="3200" data-label="Paving" onclick="selectService(this)">
+            <span class="svc-emoji">🟫</span>
+            <span class="svc-name">Paving</span>
+            <span class="svc-price">$55–$90/m²</span>
+          </div>
+          <div class="svc-card" data-min="600" data-max="1600" data-label="Brick Edging" onclick="selectService(this)">
+            <span class="svc-emoji">🔶</span>
+            <span class="svc-name">Brick Edging</span>
+            <span class="svc-price">$45–$75/m</span>
+          </div>
+          <div class="svc-card" data-min="800" data-max="2000" data-label="Garden Beds" onclick="selectService(this)">
+            <span class="svc-emoji">🌿</span>
+            <span class="svc-name">Garden Beds</span>
+            <span class="svc-price">$800–$2,000</span>
+          </div>
+          <div class="svc-card" data-min="3500" data-max="8000" data-label="Full Landscaping" onclick="selectService(this)">
+            <span class="svc-emoji">🏡</span>
+            <span class="svc-name">Full Landscaping</span>
+            <span class="svc-price">$3,500–$8,000+</span>
+          </div>
+          <div class="svc-card" data-min="1200" data-max="3500" data-label="Combined Works" onclick="selectService(this)">
+            <span class="svc-emoji">⚒️</span>
+            <span class="svc-name">Combined Works</span>
+            <span class="svc-price">Mix of services</span>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="step-next" onclick="goStep(2)">Next: Job Size →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: COMPLEXITY -->
+      <div class="step" id="qStep2">
+        <div class="step-title">How complex is the job?</div>
+        <div class="comp-grid">
+          <div class="comp-card" data-mult="0.85" onclick="selectComplexity(this)">
+            <div class="comp-left">
+              <span class="comp-name">Basic</span>
+              <span class="comp-desc">Straightforward access, flat site, standard materials</span>
+            </div>
+            <span class="comp-mult">×0.85</span>
+          </div>
+          <div class="comp-card selected" data-mult="1.0" onclick="selectComplexity(this)">
+            <div class="comp-left">
+              <span class="comp-name">Standard</span>
+              <span class="comp-desc">Typical suburban block, some excavation or prep needed</span>
+            </div>
+            <span class="comp-mult">×1.0</span>
+          </div>
+          <div class="comp-card" data-mult="1.35" onclick="selectComplexity(this)">
+            <div class="comp-left">
+              <span class="comp-name">Complex</span>
+              <span class="comp-desc">Steep slope, restricted access, custom design or engineering</span>
+            </div>
+            <span class="comp-mult">×1.35</span>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="step-back" onclick="goStep(1)">←</button>
+          <button class="step-next" onclick="goStep(3)">Next: Your Details →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONTACT -->
+      <div class="step" id="qStep3">
+        <div class="step-title">Your details</div>
+        <form class="q-form" id="qForm">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="Quote Request: Rick's Trim & Brick — iTabs Widget">
+          <input type="hidden" name="from_name" value="iTabs Widget — Rick's Trim & Brick">
+          <input type="hidden" name="estimated_range" id="hiddenRange" value="">
+          <input type="hidden" name="service_selected" id="hiddenService" value="">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Any extra details — suburb, size, timing…"></textarea>
+          <button type="submit" class="q-submit">Send my quote request 💰</button>
+        </form>
+        <div class="q-success" id="qSuccess">
+          <div class="tick">🎉</div>
+          <h3>Quote request sent!</h3>
+          <p>Rick will be in touch with your personalised quote.<br>
+          Can't wait? Give Rick a call:<br>
+          <a href="tel:0412000000">0412 000 000</a></p>
+        </div>
+        <div class="step-nav" id="qBackNav">
+          <button class="step-back" onclick="goStep(2)">←</button>
+          <div style="flex:1;text-align:right;font-size:11px;color:#5a5a8a;display:flex;align-items:center;justify-content:flex-end;">Secure via Web3Forms</div>
+        </div>
+      </div>
+
+    </div><!-- /qp-steps -->
+  </div>
+</div>
+
+<script>
+// ===================== CARD NAVIGATION =====================
+let currentCard = 0;
+const totalCards = 5;
+const cards = document.querySelectorAll('.card');
+const segs = document.querySelectorAll('.prog-seg');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const counter = document.getElementById('cardCounter');
+
+function showCard(index) {
+  cards.forEach((c, i) => {
+    c.classList.remove('active', 'prev');
+    if (i === index) c.classList.add('active');
+    else if (i < index) c.classList.add('prev');
+  });
+  segs.forEach((s, i) => {
+    s.classList.remove('active', 'viewed');
+    if (i === index) s.classList.add('active');
+    else if (i < index) s.classList.add('viewed');
+  });
+  prevBtn.disabled = index === 0;
+  nextBtn.disabled = index === totalCards - 1;
+  counter.textContent = (index + 1) + ' / ' + totalCards;
+  currentCard = index;
+}
+
+function navigate(dir) {
+  const next = currentCard + dir;
+  if (next >= 0 && next < totalCards) showCard(next);
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quoteOverlay').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft') navigate(-1);
+});
+
+// Touch swipe
+let touchStartX = 0;
+const deck = document.getElementById('cardDeck');
+deck.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive:true});
+deck.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 40) navigate(dx < 0 ? 1 : -1);
+}, {passive:true});
+
+// ===================== I-BUTTON TOOLTIP =====================
+function toggleTooltip(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ===================== LEAD FORM =====================
+document.getElementById('leadForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body:data });
+    const json = await res.json();
+    if (json.success) {
+      this.style.display = 'none';
+      document.getElementById('leadSuccess').style.display = 'block';
+    }
+  } catch(err) {
+    alert('Something went wrong. Please call Rick directly on 0412 000 000.');
+  }
+});
+
+// ===================== QUOTE PANEL =====================
+function openQuotePanel() {
+  document.getElementById('quoteOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeQuotePanel() {
+  document.getElementById('quoteOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function overlayClick(e) {
+  if (e.target === document.getElementById('quoteOverlay')) closeQuotePanel();
+}
+
+// Pricing state
+let qMin = 0, qMax = 0, qMult = 1.0, qService = '';
+let qCurrentStep = 1;
+
+function updatePriceDisplay() {
+  const lo = Math.round(qMin * qMult / 50) * 50;
+  const hi = Math.round(qMax * qMult / 50) * 50;
+  if (qMin === 0) {
+    document.getElementById('priceRange').textContent = 'Select a service';
+  } else {
+    document.getElementById('priceRange').textContent = '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString();
+  }
+  document.getElementById('hiddenRange').value = '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString();
+}
+
+function selectService(el) {
+  document.querySelectorAll('.svc-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  qMin = parseInt(el.dataset.min);
+  qMax = parseInt(el.dataset.max);
+  qService = el.dataset.label;
+  document.getElementById('hiddenService').value = qService;
+  updatePriceDisplay();
+}
+
+function selectComplexity(el) {
+  document.querySelectorAll('.comp-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  qMult = parseFloat(el.dataset.mult);
+  updatePriceDisplay();
+}
+
+function goStep(step) {
+  if (step === 2 && qMin === 0) {
+    alert('Please select a service first.');
+    return;
+  }
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.remove('active');
+  });
+  document.getElementById('qStep' + step).classList.add('active');
+  qCurrentStep = step;
+  // Update dots
+  document.querySelectorAll('.step-dot').forEach((d, i) => {
+    d.classList.remove('active');
+    if (i === step - 1) d.classList.add('active');
+  });
+  // Hide back nav when on step 3 after form submit
+  if (step === 3) {
+    document.getElementById('qBackNav').style.display = 'flex';
+    document.getElementById('qForm').style.display = 'flex';
+    document.getElementById('qSuccess').style.display = 'none';
+  }
+}
+
+// Quote form submission
+document.getElementById('qForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body:data });
+    const json = await res.json();
+    if (json.success) {
+      this.style.display = 'none';
+      document.getElementById('qSuccess').style.display = 'block';
+      document.getElementById('qBackNav').style.display = 'none';
+    }
+  } catch(err) {
+    alert('Something went wrong. Please call Rick on 0412 000 000.');
+  }
+});
+
+// Initialise
+showCard(0);
+</script>
+</body>
+</html>
