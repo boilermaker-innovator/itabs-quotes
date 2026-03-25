@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Southern Fencing Co — Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+  .widget-root {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-primary);
+    overflow: hidden;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-seg {
+    height: 3px;
+    border-radius: 2px;
+    flex: 1;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .progress-seg.viewed { background: rgba(255,255,255,0.45); }
+  .progress-seg.active { background: var(--accent); }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: transform 0.38s cubic-bezier(0.4,0,0.2,1), opacity 0.38s;
+    will-change: transform, opacity;
+    margin: 0 0 0 0;
+  }
+  .card.state-active  { transform: translateX(0);     opacity: 1;   z-index: 2; }
+  .card.state-prev    { transform: translateX(-105%);  opacity: 0;   z-index: 1; }
+  .card.state-next    { transform: translateX(105%);   opacity: 0;   z-index: 1; }
+  .card.state-far     { transform: translateX(120%);   opacity: 0;   z-index: 0; }
+
+  /* HERO SECTION */
+  .card-hero {
+    position: relative;
+    height: 210px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px 18px;
+  }
+  .hero-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--i-button);
+    margin-bottom: 6px;
+  }
+  .hero-title {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .hero-title em { font-style: normal; color: #a78bfa; }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+  .card-summary strong { color: var(--text-primary); }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    border-radius: 100px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn .i-dot {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--i-button);
+    color: #000;
+    font-weight: 800;
+    font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* I-PANEL */
+  .i-panel {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 12px;
+    padding: 14px;
+    display: none;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    position: relative;
+  }
+  .i-panel.open { display: block; }
+  .i-panel strong { color: var(--text-primary); }
+  .i-close {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: none; border: none;
+    color: var(--text-secondary);
+    font-size: 18px; cursor: pointer;
+    line-height: 1;
+  }
+
+  /* NAV ARROWS */
+  .card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 12px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .nav-arrow {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg-tertiary);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .nav-arrow:disabled { opacity: 0.25; cursor: default; }
+  .nav-arrow:not(:disabled):hover { background: rgba(124,58,237,0.3); }
+  .nav-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* POWERED BY */
+  .powered-by {
+    text-align: center;
+    font-size: 10px;
+    color: #3a3a55;
+    padding: 4px 0 8px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .powered-by a { color: #5a5a80; text-decoration: none; }
+
+  /* FLOATING BUTTON */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 100px;
+    padding: 13px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.2s infinite;
+  }
+  @keyframes pulse-amber {
+    0%,100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50%      { box-shadow: 0 4px 36px rgba(245,158,11,0.75); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    opacity: 0;
+    transition: opacity 0.32s;
+  }
+  .quote-sheet {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.36s cubic-bezier(0.4,0,0.2,1);
+    max-width: 430px;
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 24px;
+  }
+  .quote-panel.open { pointer-events: all; }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-panel.open .quote-sheet    { transform: translateY(0); }
+
+  .quote-header {
+    padding: 18px 18px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .quote-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .quote-close {
+    background: var(--bg-tertiary);
+    border: none;
+    color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PRICE STRIP */
+  .price-strip {
+    margin: 14px 16px;
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    border: 1px solid rgba(96,165,250,0.3);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+  }
+  .price-label { font-size: 11px; color: #93c5fd; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .price-range { font-size: 26px; font-weight: 800; color: #fff; }
+  .price-note  { font-size: 11px; color: #93c5fd; margin-top: 3px; }
+
+  /* STEP INDICATOR */
+  .step-indicator {
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 14px;
+    justify-content: center;
+  }
+  .step-dot {
+    width: 28px; height: 4px;
+    border-radius: 2px;
+    background: #2a2a3a;
+    transition: background 0.25s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done   { background: rgba(255,255,255,0.35); }
+
+  /* STEP CONTENT */
+  .step-content { padding: 0 16px; display: none; }
+  .step-content.active { display: block; }
+  .step-heading { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+
+  /* SERVICE GRID */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .svc-card {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+  }
+  .svc-card:hover  { background: #252535; }
+  .svc-card.chosen { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .svc-emoji { font-size: 26px; margin-bottom: 6px; }
+  .svc-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .svc-price { font-size: 11px; color: var(--text-secondary); }
+
+  /* COMPLEXITY */
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; }
+  .cplx-card {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .cplx-card:hover  { background: #252535; }
+  .cplx-card.chosen { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .cplx-left .cplx-name  { font-size: 14px; font-weight: 700; }
+  .cplx-left .cplx-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .cplx-mult { font-size: 13px; font-weight: 700; color: var(--i-button); }
+
+  /* FORM */
+  .qform { display: flex; flex-direction: column; gap: 11px; }
+  .qform label { font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-bottom: 3px; display: block; }
+  .qform input, .qform textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .qform input:focus, .qform textarea:focus { border-color: var(--accent); }
+  .qform textarea { resize: vertical; min-height: 76px; }
+  .qform-group { display: flex; flex-direction: column; }
+
+  /* BUTTONS */
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .btn-primary:hover { background: #6d28d9; }
+  .btn-primary:disabled { opacity: 0.5; cursor: default; }
+  .btn-back {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.2s;
+    margin-top: 6px;
+  }
+  .btn-back:hover { border-color: rgba(255,255,255,0.3); }
+
+  /* LEAD CAPTURE CARD FORM */
+  .lc-form { display: flex; flex-direction: column; gap: 10px; }
+  .lc-form input, .lc-form textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .lc-form input:focus, .lc-form textarea:focus { border-color: var(--accent); }
+  .lc-form textarea { resize: vertical; min-height: 68px; }
+  .lc-form label { font-size: 12px; color: var(--text-secondary); font-weight: 600; display: block; margin-bottom: 3px; }
+  .lc-submit {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .lc-submit:hover { background: #15803d; }
+  .success-msg {
+    text-align: center;
+    padding: 20px 10px;
+    display: none;
+  }
+  .success-msg .check { font-size: 42px; margin-bottom: 10px; }
+  .success-msg h3 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .success-msg p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .success-msg a { color: var(--i-button); font-weight: 700; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="widget-root" id="widgetRoot">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card state-active" data-index="0">
+      <div class="card-hero hero-default">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">01 / Southern Fencing Co</div>
+          <h1 class="hero-title">Southern Fencing Co —<br><em>Cockburn's trusted fencing crew</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          <strong>Southern Fencing Co</strong> is Cockburn's go-to fencing team, covering the full stretch of Perth's southern suburbs from Fremantle down to Rockingham and beyond. We handle everything from Colorbond boundary fencing to timber feature fences and compliant pool fencing — supply, install and done right the first time.
+        </p>
+        <p class="card-summary">
+          Locally owned and operated, we know the sandy soils, coastal winds and council requirements of the south side. No call centres — you deal directly with the crew who shows up on site.
+        </p>
+        <button class="i-btn" onclick="togglePanel('about-panel')">
+          <span class="i-dot">i</span> About Southern Fencing Co
+        </button>
+        <div class="i-panel" id="about-panel">
+          <button class="i-close" onclick="togglePanel('about-panel')">×</button>
+          <strong>Southern Fencing Co</strong> has been serving Cockburn and Perth's southern suburbs for years, building a reputation on clean installs, fair pricing and showing up when promised. We're fully licensed and insured, with experience across residential, strata and commercial properties throughout suburbs like Hamilton Hill, Bibra Lake, Success and Yangebup. Whether it's a quick gate repair or a full boundary rebuild, we treat every job like it's our own backyard.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: COLORBOND FENCING -->
+    <div class="card state-next" data-index="1">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Colorbond Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">02 / Service</div>
+          <h1 class="hero-title"><em>Colorbond Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          Colorbond is the go-to fencing choice across Perth's south, and for good reason — it handles the coastal salt air, summer heat and sandy conditions better than most alternatives. We stock the full BlueScope Colorbond palette so you can match your home or stand out on the street.
+        </p>
+        <p class="card-summary">
+          Our installs use galvanised steel posts set in concrete footings suited to the variable soils from Cockburn Sound through to Canning Vale. Standard and Infill paling profiles available — and we'll handle any City of Cockburn permit requirements for you.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 2: TIMBER FENCING -->
+    <div class="card state-next" data-index="2">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Timber Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">03 / Service</div>
+          <h1 class="hero-title"><em>Timber Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          Nothing adds character and warmth to a backyard like a well-built timber fence. We work with treated pine and hardwood palings to create everything from traditional lapped fences to contemporary feature designs that complement Perth's modern home styles.
+        </p>
+        <p class="card-summary">
+          In the south's sandy, moisture-variable soils, a good timber fence needs solid posts and quality treated timber — we don't cut corners. Popular across older suburbs like Hamilton Hill, Spearwood and Coolbellup where streetscape character matters. All timber treated for Perth's white ant belt.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 3: POOL FENCING -->
+    <div class="card state-next" data-index="3">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Pool Fencing" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">04 / Service</div>
+          <h1 class="hero-title"><em>Pool Fencing</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          Pool fencing in WA is strictly regulated and non-negotiable — every pool must meet Australian Standard AS1926 and be inspected by a registered building surveyor. We install glass panel, aluminium and frameless pool fencing that ticks every box and looks the part too.
+        </p>
+        <p class="card-summary">
+          We handle the compliance paperwork and liaise with the City of Cockburn or your local council inspection service on your behalf. Popular across new estates in Success, Atwell and Treeby where new pools are being installed in homes every week during Perth's building boom.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 4: GATES -->
+    <div class="card state-next" data-index="4">
+      <div class="card-hero hero-default">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Gates" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">05 / Service</div>
+          <h1 class="hero-title"><em>Gates &amp; Access</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          A quality gate finishes off a fence job and adds real security and street appeal. We fabricate and install single and double driveway gates in Colorbond and steel, plus pedestrian gates in timber and aluminium to match your existing fence line.
+        </p>
+        <p class="card-summary">
+          We can fit manual or automated gate systems with keypad or remote access — a popular upgrade in the newer estates around Cockburn, Aubin Grove and Hammond Park. All gate hardware is heavy-duty and suited to Perth's sun-baked conditions where cheap hinges fail fast.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 5: LEAD CAPTURE -->
+    <div class="card state-next" data-index="5">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=860&q=80&auto=format&fit=crop" alt="Get a Quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">Get a Quote</div>
+          <h1 class="hero-title">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="lcSuccess" class="success-msg">
+          <div class="check">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks — the Southern Fencing Co team will be in touch shortly. For urgent jobs call <a href="tel:0800000000">08 XXXX XXXX</a>.</p>
+        </div>
+        <form class="lc-form" id="lcForm" onsubmit="submitLcForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Enquiry — Southern Fencing Co (iTabs Widget)">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Southern Fencing Co">
+          <input type="hidden" name="trade" value="Fencing — Cockburn, Perth Southern Suburbs">
+          <div class="lc-form-group">
+            <label>Your name</label>
+            <input type="text" name="name" placeholder="e.g. Sarah Thompson" required>
+          </div>
+          <div class="lc-form-group">
+            <label>Phone number</label>
+            <input type="tel" name="phone" placeholder="04XX XXX XXX" required>
+          </div>
+          <div class="lc-form-group">
+            <label>Email address</label>
+            <input type="email" name="email" placeholder="sarah@email.com" required>
+          </div>
+          <div class="lc-form-group">
+            <label>Brief job description</label>
+            <textarea name="message" placeholder="e.g. 30m Colorbond boundary fence at rear of property in Success, need a gate too"></textarea>
+          </div>
+          <button type="submit" class="lc-submit">Send my enquiry →</button>
+        </form>
+      </div>
+    </div>
+
+  </div><!-- end card-deck -->
+
+  <!-- NAV -->
+  <div class="card-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="goTo(currentCard-1)" disabled>&#8592;</button>
+    <span class="nav-counter" id="navCounter">1 / 6</span>
+    <button class="nav-arrow" id="nextBtn" onclick="goTo(currentCard+1)">&#8594;</button>
+  </div>
+
+  <!-- POWERED BY -->
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- end widget-root -->
+
+<!-- FLOATING BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <span class="quote-title">💰 Southern Fencing Co — Quote</span>
+      <button class="quote-close" onclick="closeQuotePanel()">×</button>
+    </div>
+
+    <div class="price-strip">
+      <div class="price-label">Estimated Price Range</div>
+      <div class="price-range" id="priceRange">Select a service</div>
+      <div class="price-note" id="priceNote">Choose a service below to see an estimate</div>
+    </div>
+
+    <div class="step-indicator">
+      <div class="step-dot active" id="sdot0"></div>
+      <div class="step-dot" id="sdot1"></div>
+      <div class="step-dot" id="sdot2"></div>
+    </div>
+
+    <!-- STEP 1: SERVICE TYPE -->
+    <div class="step-content active" id="qstep1">
+      <div class="step-heading">Step 1 — Select service</div>
+      <div class="service-grid">
+        <div class="svc-card" onclick="selectService(this,'Colorbond Fencing',7650,11000)" data-low="7650" data-high="11000">
+          <div class="svc-emoji">🏗️</div>
+          <div class="svc-label">Colorbond Fencing</div>
+          <div class="svc-price">$85–120/m</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Timber Fencing',6300,9000)" data-low="6300" data-high="9000">
+          <div class="svc-emoji">🪵</div>
+          <div class="svc-label">Timber Fencing</div>
+          <div class="svc-price">$70–100/m</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Pool Fencing',1800,3600)" data-low="1800" data-high="3600">
+          <div class="svc-emoji">🏊</div>
+          <div class="svc-label">Pool Fencing</div>
+          <div class="svc-price">$120–180/m</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Single Gate',450,650)" data-low="450" data-high="650">
+          <div class="svc-emoji">🚪</div>
+          <div class="svc-label">Single Gate</div>
+          <div class="svc-price">$450–650</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Double Driveway Gate',750,1200)" data-low="750" data-high="1200">
+          <div class="svc-emoji">🏠</div>
+          <div class="svc-label">Double Gate</div>
+          <div class="svc-price">$750–1,200</div>
+        </div>
+        <div class="svc-card" onclick="selectService(this,'Fence Repair',320,750)" data-low="320" data-high="750">
+          <div class="svc-emoji">🔧</div>
+          <div class="svc-label">Fence Repair</div>
+          <div class="svc-price">$320–750</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="step-content" id="qstep2">
+      <div class="step-heading">Step 2 — Job complexity</div>
+      <div class="complexity-list">
+        <div class="cplx-card" onclick="selectComplexity(this,'Basic',0.85)">
+          <div class="cplx-left">
+            <div class="cplx-name">Basic</div>
+            <div class="cplx-desc">Flat, easy access, straightforward job</div>
+          </div>
+          <span class="cplx-mult">−15%</span>
+        </div>
+        <div class="cplx-card" onclick="selectComplexity(this,'Standard',1.0)">
+          <div class="cplx-left">
+            <div class="cplx-name">Standard</div>
+            <div class="cplx-desc">Typical residential fencing job</div>
+          </div>
+          <span class="cplx-mult">Base</span>
+        </div>
+        <div class="cplx-card" onclick="selectComplexity(this,'Complex',1.35)">
+          <div class="cplx-left">
+            <div class="cplx-name">Complex</div>
+            <div class="cplx-desc">Sloped land, difficult access, existing demo, retaining or automation</div>
+          </div>
+          <span class="cplx-mult">+35%</span>
+        </div>
+      </div>
+      <button class="btn-back" onclick="goQStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: CONTACT FORM -->
+    <div class="step-content" id="qstep3">
+      <div class="step-heading">Step 3 — Your details</div>
+      <div id="qSuccess" class="success-msg">
+        <div class="check">✅</div>
+        <h3>Quote request sent!</h3>
+        <p>The team at Southern Fencing Co will be back to you soon with a proper quote. For fast turnaround call us direct.</p>
+      </div>
+      <form class="qform" id="qForm" onsubmit="submitQuoteForm(event)">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject" value="New Quote Request — Southern Fencing Co (iTabs Widget)">
+        <input type="hidden" name="to" value="responses@itabs.ai">
+        <input type="hidden" name="business" value="Southern Fencing Co">
+        <input type="hidden" name="trade" value="Fencing — Cockburn, Perth Southern Suburbs">
+        <input type="hidden" name="selected_service" id="qServiceField" value="">
+        <input type="hidden" name="complexity" id="qComplexityField" value="">
+        <input type="hidden" name="price_estimate" id="qPriceField" value="">
+        <div class="qform-group">
+          <label>Your name</label>
+          <input type="text" name="name" placeholder="e.g. James Wilson" required>
+        </div>
+        <div class="qform-group">
+          <label>Phone number</label>
+          <input type="tel" name="phone" placeholder="04XX XXX XXX" required>
+        </div>
+        <div class="qform-group">
+          <label>Email address</label>
+          <input type="email" name="email" placeholder="james@email.com" required>
+        </div>
+        <div class="qform-group">
+          <label>Suburb</label>
+          <input type="text" name="suburb" placeholder="e.g. Success, Atwell, Hamilton Hill">
+        </div>
+        <div class="qform-group">
+          <label>Any extra details?</label>
+          <textarea name="message" placeholder="e.g. Approx 25m, removing old timber fence, double driveway gate needed"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" id="qSubmitBtn">Send quote request →</button>
+        <button type="button" class="btn-back" onclick="goQStep(2)">← Back</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ——— CARD NAVIGATION ———
+  const TOTAL_CARDS = 6;
+  let currentCard = 0;
+  const deck = document.getElementById('cardDeck');
+  const cards = Array.from(deck.querySelectorAll('.card'));
+
+  function buildProgress() {
+    const pb = document.getElementById('progressBar');
+    pb.innerHTML = '';
+    for (let i = 0; i < TOTAL_CARDS; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg';
+      if (i < currentCard) seg.classList.add('viewed');
+      else if (i === currentCard) seg.classList.add('active');
+      pb.appendChild(seg);
+    }
+  }
+
+  function goTo(idx) {
+    if (idx < 0 || idx >= TOTAL_CARDS) return;
+    cards.forEach((c, i) => {
+      c.className = 'card';
+      if (i < idx)       c.classList.add('state-prev');
+      else if (i === idx) c.classList.add('state-active');
+      else                c.classList.add('state-next');
+    });
+    currentCard = idx;
+    document.getElementById('prevBtn').disabled = (idx === 0);
+    document.getElementById('nextBtn').disabled = (idx === TOTAL_CARDS - 1);
+    document.getElementById('navCounter').textContent = `${idx + 1} / ${TOTAL_CARDS}`;
+    buildProgress();
+  }
+
+  // Touch swipe
+  let touchStartX = 0;
+  deck.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  deck.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 45) diff > 0 ? goTo(currentCard + 1) : goTo(currentCard - 1);
+  });
+
+  // Keyboard
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') goTo(currentCard + 1);
+    if (e.key === 'ArrowLeft')  goTo(currentCard - 1);
+  });
+
+  // I-panel toggle
+  function togglePanel(id) {
+    const p = document.getElementById(id);
+    p.classList.toggle('open');
+  }
+
+  // Init
+  goTo(0);
+
+  // ——— LEAD CAPTURE FORM ———
+  async function submitLcForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('lcForm');
+    const btn = form.querySelector('.lc-submit');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('lcSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Send my enquiry →';
+        btn.disabled = false;
+        alert('Oops — something went wrong. Please try again.');
+      }
+    } catch {
+      btn.textContent = 'Send my enquiry →';
+      btn.disabled = false;
+      alert('Network error. Please try again.');
+    }
+  }
+
+  // ——— QUOTE PANEL ———
+  let qStep = 1;
+  let qLow = 0, qHigh = 0, qMultiplier = 1.0;
+  let selectedSvcEl = null, selectedCplxEl = null;
+
+  function openQuotePanel() {
+    document.getElementById('quotePanel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeQuotePanel() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  function goQStep(n) {
+    document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+    document.getElementById('qstep' + n).classList.add('active');
+    ['sdot0','sdot1','sdot2'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      el.className = 'step-dot';
+      if (i < n - 1) el.classList.add('done');
+      else if (i === n - 1) el.classList.add('active');
+    });
+    qStep = n;
+  }
+
+  function updatePriceDisplay() {
+    const lo = Math.round(qLow * qMultiplier);
+    const hi = Math.round(qHigh * qMultiplier);
+    document.getElementById('priceRange').textContent = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+    document.getElementById('priceNote').textContent = 'Estimate only — final quote after site assessment';
+    document.getElementById('qPriceField').value = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+  }
+
+  function selectService(el, name, low, high) {
+    if (selectedSvcEl) selectedSvcEl.classList.remove('chosen');
+    el.classList.add('chosen');
+    selectedSvcEl = el;
+    qLow = low; qHigh = high;
+    document.getElementById('qServiceField').value = name;
+    updatePriceDisplay();
+    setTimeout(() => goQStep(2), 260);
+  }
+
+  function selectComplexity(el, label, mult) {
+    if (selectedCplxEl) selectedCplxEl.classList.remove('chosen');
+    el.classList.add('chosen');
+    selectedCplxEl = el;
+    qMultiplier = mult;
+    document.getElementById('qComplexityField').value = label;
+    updatePriceDisplay();
+    setTimeout(() => goQStep(3), 260);
+  }
+
+  async function submitQuoteForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('qForm');
+    const btn = document.getElementById('qSubmitBtn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('qSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Send quote request →';
+        btn.disabled = false;
+        alert('Oops — something went wrong. Please try again.');
+      }
+    } catch {
+      btn.textContent = 'Send quote request →';
+      btn.disabled = false;
+      alert('Network error. Please try again.');
+    }
+  }
+</script>
+</body>
+</html>
