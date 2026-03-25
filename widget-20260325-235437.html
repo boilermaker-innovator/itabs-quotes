@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sparky's Electrical — Osborne Park</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── WIDGET SHELL ── */
+  .widget {
+    width: 100%;
+    max-width: 430px;
+    height: 100dvh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 8px;
+    flex-shrink: 0;
+    z-index: 10;
+    background: var(--bg-primary);
+  }
+  .progress-seg {
+    height: 3px;
+    border-radius: 2px;
+    flex: 1;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .progress-seg.viewed { background: rgba(255,255,255,0.4); }
+  .progress-seg.active { background: var(--accent); }
+
+  /* ── CARD WRAPPER ── */
+  .card-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    margin: 6px 10px 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.42s cubic-bezier(0.4,0,0.2,1), opacity 0.42s;
+    will-change: transform, opacity;
+  }
+  .card.state-current  { transform: translateX(0);     opacity: 1; z-index: 5; }
+  .card.state-prev     { transform: translateX(-110%);  opacity: 0; z-index: 4; }
+  .card.state-next     { transform: translateX(110%);   opacity: 0; z-index: 4; }
+  .card.state-far      { transform: translateX(110%);   opacity: 0; z-index: 3; }
+
+  /* hero gradients */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  .card-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 24px 24px;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .card-inner::-webkit-scrollbar { display: none; }
+
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 14px;
+  }
+
+  .card-headline {
+    font-size: clamp(22px, 6vw, 28px);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+  .card-headline em {
+    font-style: normal;
+    background: linear-gradient(90deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.72);
+    flex: 1;
+  }
+
+  /* ── I-BUTTON ── */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px 16px;
+    background: rgba(245,158,11,0.15);
+    border: 1px solid rgba(245,158,11,0.4);
+    border-radius: 30px;
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.25); }
+  .i-btn .i-circle {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--i-button);
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── INFO MODAL ── */
+  .info-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 300;
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .info-modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .info-modal {
+    background: var(--bg-tertiary);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 24px 40px;
+    width: 100%;
+    max-width: 430px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .info-modal-backdrop.open .info-modal { transform: translateY(0); }
+  .info-modal h3 {
+    font-size: 18px; font-weight: 800;
+    margin-bottom: 12px; color: #fff;
+  }
+  .info-modal p {
+    font-size: 14px; line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+  }
+  .info-modal-close {
+    float: right;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── CARD NAV ── */
+  .card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px 12px;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+  }
+  .nav-arrow {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg-tertiary);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, opacity 0.2s;
+    flex-shrink: 0;
+  }
+  .nav-arrow:disabled { opacity: 0.25; cursor: default; }
+  .nav-arrow:not(:disabled):hover { background: var(--accent); }
+  .card-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── POWERED BY ── */
+  .powered-by {
+    text-align: center;
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    padding-bottom: 6px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+  }
+  .powered-by a { color: rgba(255,255,255,0.35); text-decoration: none; }
+
+  /* ── LEAD CAPTURE FORM ── */
+  .lead-form { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+  .lead-form input,
+  .lead-form textarea {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .lead-form input::placeholder,
+  .lead-form textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .lead-form input:focus,
+  .lead-form textarea:focus { border-color: var(--accent); }
+  .lead-form textarea { resize: none; height: 80px; }
+  .lead-submit {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    font-family: 'Inter', sans-serif;
+  }
+  .lead-submit:hover { opacity: 0.9; }
+  .lead-submit:active { transform: scale(0.98); }
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 24px 0;
+  }
+  .form-success .success-icon { font-size: 48px; margin-bottom: 12px; }
+  .form-success h3 { font-size: 20px; font-weight: 800; margin-bottom: 8px; }
+  .form-success p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+  .form-success a { color: #4ade80; font-weight: 700; text-decoration: none; }
+
+  /* ── FLOATING QUOTE BUTTON ── */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 28px;
+    padding: 13px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.4s infinite;
+    font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+  }
+  @keyframes pulse-amber {
+    0%,100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50%      { box-shadow: 0 4px 36px rgba(245,158,11,0.8), 0 0 0 8px rgba(245,158,11,0.1); }
+  }
+
+  /* ── QUOTE PANEL ── */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    max-width: 430px;
+    margin: 0 auto;
+    left: 0; right: 0;
+  }
+  .quote-panel.open { transform: translateY(0); }
+
+  .qp-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .qp-header h2 { font-size: 16px; font-weight: 800; }
+  .qp-close {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: none; color: #fff;
+    font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .qp-price-strip {
+    background: linear-gradient(90deg, #1e1b4b, #164e63);
+    padding: 14px 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .qp-price-label { font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .qp-price-value { font-size: 22px; font-weight: 900; color: #fff; }
+  .qp-price-value span { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 500; }
+
+  .qp-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    scrollbar-width: none;
+  }
+  .qp-body::-webkit-scrollbar { display: none; }
+
+  .qp-step { display: none; }
+  .qp-step.active { display: block; }
+
+  .qp-step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .service-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 16px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .service-tile:hover { border-color: var(--accent); }
+  .service-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.18); }
+  .service-tile .tile-emoji { font-size: 26px; margin-bottom: 7px; }
+  .service-tile .tile-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .service-tile .tile-price { font-size: 11px; color: var(--text-secondary); }
+
+  .complexity-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .complexity-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-tile:hover { border-color: var(--accent); }
+  .complexity-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.18); }
+  .complexity-icon { font-size: 24px; flex-shrink: 0; }
+  .complexity-info .c-label { font-size: 14px; font-weight: 700; }
+  .complexity-info .c-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .qp-next-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-family: 'Inter', sans-serif;
+    margin-top: 4px;
+  }
+  .qp-next-btn:disabled { opacity: 0.35; cursor: default; }
+  .qp-next-btn:not(:disabled):hover { opacity: 0.9; }
+
+  .qp-form { display: flex; flex-direction: column; gap: 12px; }
+  .qp-form input {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 13px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .qp-form input::placeholder { color: rgba(255,255,255,0.3); }
+  .qp-form input:focus { border-color: var(--accent); }
+
+  .qp-step-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 0 6px;
+    flex-shrink: 0;
+  }
+  .step-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .step-dot.active { background: var(--accent); transform: scale(1.3); }
+
+  .qp-success {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 24px;
+    flex: 1;
+  }
+  .qp-success.show { display: flex; }
+  .qp-success .s-icon { font-size: 64px; margin-bottom: 20px; }
+  .qp-success h3 { font-size: 22px; font-weight: 900; margin-bottom: 10px; }
+  .qp-success p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 20px; }
+  .qp-success a.call-link {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #4ade80; color: #000; font-weight: 800;
+    padding: 13px 24px; border-radius: 30px; text-decoration: none;
+    font-size: 15px; margin-bottom: 14px;
+  }
+
+  /* step back link */
+  .step-back {
+    background: none; border: none; color: rgba(255,255,255,0.4);
+    font-size: 12px; cursor: pointer; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 4px;
+    font-family: 'Inter', sans-serif;
+  }
+  .step-back:hover { color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<div class="widget" id="widget">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD WRAPPER -->
+  <div class="card-wrapper" id="cardWrapper">
+
+    <!-- CARD 0 — INTRO -->
+    <div class="card hero-default state-current" data-index="0">
+      <div class="card-inner">
+        <div class="card-tag">01 / ELECTRICIAN</div>
+        <h1 class="card-headline">Sparky's Electrical — <em>Osborne Park's trusted sparky</em></h1>
+        <p class="card-summary">
+          Brad and the team at Sparky's Electrical have been keeping homes and businesses in Osborne Park and across Perth's northern suburbs powered safely for years. Whether it's a quick power point upgrade or a full switchboard overhaul, they show up on time, do it right, and leave the site clean.
+          <br><br>Fully licensed, WA-compliant, and backed by solid workmanship guarantees — Sparky's is the call to make when you need it done properly.
+        </p>
+        <button class="i-btn" onclick="openModal('about')">
+          <span class="i-circle">i</span>
+          About Sparky's Electrical
+        </button>
+      </div>
+    </div>
+
+    <!-- CARD 1 — POWER POINTS & SWITCHES -->
+    <div class="card hero-purple state-next" data-index="1">
+      <div class="card-inner">
+        <div class="card-tag">02 / SERVICE</div>
+        <h2 class="card-headline"><em>Power Points &amp; Switches</em></h2>
+        <p class="card-summary">
+          Upgrading your power points or adding new GPOs is one of the most common electrical jobs across Perth homes — and for good reason. Older Osborne Park homes often have dated cabling and insufficient outlets for modern appliances and home offices.
+          <br><br>Sparky's can add USB-A/USB-C combo points, install double GPOs to replace singles, and fit smart switches throughout your home — all to current AS/NZS 3000 standards. No mess, no fuss, no guesswork.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 2 — SWITCHBOARD UPGRADES -->
+    <div class="card hero-cyan state-next" data-index="2">
+      <div class="card-inner">
+        <div class="card-tag">03 / SERVICE</div>
+        <h2 class="card-headline"><em>Switchboard Upgrades</em></h2>
+        <p class="card-summary">
+          Western Power and Energy Safety WA now require modern safety switches (RCDs) on all circuits in Perth homes. If your switchboard still has old ceramic fuses or a cramped single-phase board, it's not just outdated — it may not pass a home inspection.
+          <br><br>Sparky's handles full switchboard replacements and upgrades across Osborne Park and surrounding suburbs, fitting circuit breakers, RCDs, and surge protection to bring your home up to current WA standards and handle today's electrical loads.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 3 — AIR CON INSTALLATIONS -->
+    <div class="card hero-amber state-next" data-index="3">
+      <div class="card-inner">
+        <div class="card-tag">04 / SERVICE</div>
+        <h2 class="card-headline"><em>Air Con Installations</em></h2>
+        <p class="card-summary">
+          Perth summers are brutal — Osborne Park regularly hits 40°C+ and a reliable split system isn't a luxury, it's a necessity. Sparky's handles the full electrical side of split system and ducted air conditioning installs, including dedicated circuits, isolator switches, and weatherproof cabling.
+          <br><br>Working alongside your preferred installer or as part of a full package, Brad ensures your aircon is wired safely, efficiently, and ready for WA's punishing summer heat without tripping your board.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 4 — SAFETY INSPECTIONS -->
+    <div class="card hero-purple state-next" data-index="4">
+      <div class="card-inner">
+        <div class="card-tag">05 / SERVICE</div>
+        <h2 class="card-headline"><em>Safety Inspections</em></h2>
+        <p class="card-summary">
+          Electrical faults are a leading cause of house fires in WA. Whether you're buying a new property in the northern suburbs, renting out an investment home, or just want peace of mind, a professional safety inspection from a licensed Perth electrician is essential.
+          <br><br>Sparky's provides thorough electrical inspections covering switchboards, wiring condition, safety switch testing, smoke alarm compliance, and any visible hazards — with a written report you can use for insurance, real estate, or your own records.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 5 — LEAD CAPTURE -->
+    <div class="card hero-green state-next" data-index="5">
+      <div class="card-inner">
+        <div class="card-tag">GET A QUOTE</div>
+        <h2 class="card-headline">Get your free <em>quote</em> today</h2>
+        <p class="card-summary" style="margin-bottom:4px;">Tell Brad what you need and he'll be in touch fast — usually same day.</p>
+
+        <div id="leadFormWrap">
+          <form class="lead-form" id="leadForm" onsubmit="submitLead(event)">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Enquiry — Sparky's Electrical (Osborne Park)">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Sparky's Electrical">
+            <input type="hidden" name="trade" value="Electrician">
+            <input type="text"  name="name"    placeholder="Your name"          required>
+            <input type="tel"   name="phone"   placeholder="Phone number"       required>
+            <input type="email" name="email"   placeholder="Email address"      required>
+            <textarea           name="message" placeholder="Brief job description — what do you need done?"></textarea>
+            <button type="submit" class="lead-submit">Send my enquiry →</button>
+          </form>
+          <div class="form-success" id="leadSuccess">
+            <div class="success-icon">⚡</div>
+            <h3>Enquiry sent!</h3>
+            <p>Thanks — Brad will be in touch soon.<br>Need to talk now? Give him a call:</p>
+            <a href="tel:0411777444">📞 0411 777 444</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-wrapper -->
+
+  <!-- CARD NAV -->
+  <div class="card-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="card-counter" id="cardCounter">1 / 6</span>
+    <button class="nav-arrow" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- POWERED BY -->
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget -->
+
+<!-- ── FLOATING BUTTON ── -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- ── INFO MODAL ── -->
+<div class="info-modal-backdrop" id="infoBackdrop" onclick="closeModal(event)">
+  <div class="info-modal">
+    <button class="info-modal-close" onclick="closeModal(true)">✕</button>
+    <h3 id="modalTitle"></h3>
+    <p id="modalBody"></p>
+  </div>
+</div>
+
+<!-- ── QUOTE PANEL ── -->
+<div class="quote-panel" id="quotePanel">
+  <div class="qp-header">
+    <h2>💰 Sparky's Electrical — Quote</h2>
+    <button class="qp-close" onclick="closeQuotePanel()">✕</button>
+  </div>
+
+  <div class="qp-price-strip">
+    <div>
+      <div class="qp-price-label">Estimated range</div>
+      <div class="qp-price-value" id="qpPriceVal">Select a service <span>to start</span></div>
+    </div>
+    <div style="font-size:28px;">⚡</div>
+  </div>
+
+  <div class="qp-step-dots">
+    <div class="step-dot active" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+  </div>
+
+  <div class="qp-body" id="qpBody">
+
+    <!-- STEP 1 — SERVICE -->
+    <div class="qp-step active" id="qpStep1">
+      <div class="qp-step-title">Step 1 — What do you need?</div>
+      <div class="service-grid" id="serviceGrid">
+        <div class="service-tile" onclick="selectService(this, 'Power Points', 120, 200, 'per point')" >
+          <div class="tile-emoji">🔌</div>
+          <div class="tile-label">Power Points</div>
+          <div class="tile-price">$120–$200/point</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Switchboard Upgrade', 800, 1500, 'per board')">
+          <div class="tile-emoji">⚡</div>
+          <div class="tile-label">Switchboard</div>
+          <div class="tile-price">$800–$1,500</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Air Con Installation', 350, 800, 'electrical fit-off')">
+          <div class="tile-emoji">❄️</div>
+          <div class="tile-label">Air Con Install</div>
+          <div class="tile-price">$350–$800</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Safety Inspection', 180, 350, 'full inspection')">
+          <div class="tile-emoji">🔍</div>
+          <div class="tile-label">Safety Inspection</div>
+          <div class="tile-price">$180–$350</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'LED Lighting', 120, 180, 'per point')">
+          <div class="tile-emoji">💡</div>
+          <div class="tile-label">LED Lighting</div>
+          <div class="tile-price">$120–$180/point</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'General Electrical', 150, 400, 'per job')">
+          <div class="tile-emoji">🛠️</div>
+          <div class="tile-label">General Electrical</div>
+          <div class="tile-price">$150–$400</div>
+        </div>
+      </div>
+      <button class="qp-next-btn" id="step1Next" disabled onclick="goToStep(2)">Next — Job complexity →</button>
+    </div>
+
+    <!-- STEP 2 — COMPLEXITY -->
+    <div class="qp-step" id="qpStep2">
+      <button class="step-back" onclick="goToStep(1)">← Back</button>
+      <div class="qp-step-title">Step 2 — Job complexity</div>
+      <div class="complexity-grid">
+        <div class="complexity-tile" onclick="selectComplexity(this, 0.85)">
+          <div class="complexity-icon">🟢</div>
+          <div class="complexity-info">
+            <div class="c-label">Basic</div>
+            <div class="c-desc">Straightforward job, easy access, standard setup</div>
+          </div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 1.0)">
+          <div class="complexity-icon">🟡</div>
+          <div class="complexity-info">
+            <div class="c-label">Standard</div>
+            <div class="c-desc">Typical residential job, some prep or cable runs needed</div>
+          </div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 1.35)">
+          <div class="complexity-icon">🔴</div>
+          <div class="complexity-info">
+            <div class="c-label">Complex</div>
+            <div class="c-desc">Older wiring, hard access, large scope or upgrade required</div>
+          </div>
+        </div>
+      </div>
+      <button class="qp-next-btn" id="step2Next" disabled onclick="goToStep(3)">Next — Your details →</button>
+    </div>
+
+    <!-- STEP 3 — CONTACT -->
+    <div class="qp-step" id="qpStep3">
+      <button class="step-back" onclick="goToStep(2)">← Back</button>
+      <div class="qp-step-title">Step 3 — Your details</div>
+      <form class="qp-form" id="qpForm" onsubmit="submitQuote(event)">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject"     id="qpSubject" value="Quote Request — Sparky's Electrical">
+        <input type="hidden" name="to"          value="responses@itabs.ai">
+        <input type="hidden" name="business"    value="Sparky's Electrical">
+        <input type="hidden" name="trade"        value="Electrician">
+        <input type="hidden" name="service"      id="qpServiceHidden">
+        <input type="hidden" name="complexity"   id="qpComplexityHidden">
+        <input type="hidden" name="estimate"     id="qpEstimateHidden">
+        <input type="text"  name="name"    placeholder="Your full name"    required>
+        <input type="tel"   name="phone"   placeholder="Phone number"      required>
+        <input type="email" name="email"   placeholder="Email address"     required>
+        <button type="submit" class="qp-next-btn">Send quote request →</button>
+      </form>
+    </div>
+
+  </div><!-- /qp-body -->
+
+  <!-- SUCCESS STATE -->
+  <div class="qp-success" id="qpSuccess">
+    <div class="s-icon">⚡</div>
+    <h3>Quote request sent!</h3>
+    <p>Brad from Sparky's Electrical will get back to you shortly with a detailed quote for your job in the Osborne Park area.</p>
+    <a class="call-link" href="tel:0411777444">📞 Call Brad now</a>
+    <button class="qp-next-btn" style="max-width:220px;" onclick="closeQuotePanel()">Close</button>
+  </div>
+
+</div><!-- /quote-panel -->
+
+<script>
+  // ── STATE ──
+  const TOTAL_CARDS = 6;
+  let currentCard = 0;
+  let startX = 0, isDragging = false;
+
+  // ── PROGRESS & NAV ──
+  function renderProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < TOTAL_CARDS; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg' + (i === currentCard ? ' active' : i < currentCard ? ' viewed' : '');
+      bar.appendChild(seg);
+    }
+    document.getElementById('cardCounter').textContent = (currentCard + 1) + ' / ' + TOTAL_CARDS;
+    document.getElementById('prevBtn').disabled = currentCard === 0;
+    document.getElementById('nextBtn').disabled = currentCard === TOTAL_CARDS - 1;
+  }
+
+  function setCardStates() {
+    document.querySelectorAll('.card').forEach((card, i) => {
+      card.className = card.className.replace(/state-\w+/g, '').trim();
+      if (i === currentCard)          card.classList.add('state-current');
+      else if (i === currentCard - 1) card.classList.add('state-prev');
+      else                             card.classList.add('state-next');
+    });
+    renderProgress();
+  }
+
+  function navigate(dir) {
+    const next = currentCard + dir;
+    if (next < 0 || next >= TOTAL_CARDS) return;
+    currentCard = next;
+    setCardStates();
+  }
+
+  // ── KEYBOARD ──
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('quotePanel').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+
+  // ── TOUCH SWIPE ──
+  const wrapper = document.getElementById('cardWrapper');
+  wrapper.addEventListener('touchstart', e => { startX = e.touches[0].clientX; isDragging = true; }, { passive: true });
+  wrapper.addEventListener('touchend',   e => {
+    if (!isDragging) return;
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 45) navigate(diff > 0 ? 1 : -1);
+    isDragging = false;
+  }, { passive: true });
+
+  // ── INFO MODAL ──
+  const modals = {
+    about: {
+      title: 'About Sparky\'s Electrical',
+      body: 'Sparky\'s Electrical is Brad\'s locally owned and operated electrical business servicing Osborne Park, Stirling, Scarborough and the wider Perth northern suburbs. Fully licensed under WA Electrical Licensing regulations, Brad brings a no-nonsense approach to residential and light commercial electrical work — on time, fairly priced, and always to code. With years of hands-on Perth experience, Sparky\'s is the name locals trust when the job has to be done right the first time.'
+    }
+  };
+
+  function openModal(key) {
+    const m = modals[key];
+    document.getElementById('modalTitle').textContent = m.title;
+    document.getElementById('modalBody').textContent  = m.body;
+    document.getElementById('infoBackdrop').classList.add('open');
+  }
+  function closeModal(force) {
+    if (force === true || force.target === document.getElementById('infoBackdrop')) {
+      document.getElementById('infoBackdrop').classList.remove('open');
+    }
+  }
+
+  // ── LEAD FORM ──
+  async function submitLead(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type=submit]');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: new FormData(form)
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('leadSuccess').style.display = 'block';
+      } else { throw new Error(); }
+    } catch {
+      btn.textContent = 'Error — try again'; btn.disabled = false;
+    }
+  }
+
+  // ── QUOTE PANEL ──
+  let qpService = null, qpMin = 0, qpMax = 0, qpUnit = '', qpComplexity = 1.0, qpComplexityLabel = 'Standard';
+
+  function openQuotePanel()  { document.getElementById('quotePanel').classList.add('open'); }
+  function closeQuotePanel() {
+    document.getElementById('quotePanel').classList.remove('open');
+    resetQuotePanel();
+  }
+
+  function resetQuotePanel() {
+    qpService = null; qpMin = 0; qpMax = 0; qpUnit = ''; qpComplexity = 1.0;
+    document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+    document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+    document.getElementById('step1Next').disabled = true;
+    document.getElementById('step2Next').disabled = true;
+    document.getElementById('qpPriceVal').innerHTML = 'Select a service <span>to start</span>';
+    goToStep(1, true);
+    document.getElementById('qpSuccess').classList.remove('show');
+    document.getElementById('qpBody').style.display = '';
+    document.getElementById('qpForm').reset();
+  }
+
+  function updatePriceStrip() {
+    if (!qpService) return;
+    const lo = Math.round(qpMin * qpComplexity);
+    const hi = Math.round(qpMax * qpComplexity);
+    document.getElementById('qpPriceVal').innerHTML =
+      '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString() + ' <span>' + qpUnit + '</span>';
+    document.getElementById('qpEstimateHidden').value = '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString();
+  }
+
+  function selectService(el, name, min, max, unit) {
+    document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    qpService = name; qpMin = min; qpMax = max; qpUnit = unit;
+    document.getElementById('qpServiceHidden').value = name;
+    document.getElementById('step1Next').disabled = false;
+    document.getElementById('qpSubject').value = 'Quote Request — Sparky\'s Electrical — ' + name;
+    updatePriceStrip();
+  }
+
+  function selectComplexity(el, mult) {
+    document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    qpComplexity = mult;
+    qpComplexityLabel = el.querySelector('.c-label').textContent;
+    document.getElementById('qpComplexityHidden').value = qpComplexityLabel;
+    document.getElementById('step2Next').disabled = false;
+    updatePriceStrip();
+  }
+
+  function goToStep(n, silent) {
+    document.querySelectorAll('.qp-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('qpStep' + n).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === n - 1);
+    });
+    if (!silent) document.getElementById('qpBody').scrollTop = 0;
+  }
+
+  // ── QUOTE SUBMIT ──
+  async function submitQuote(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn  = form.querySelector('button[type=submit]');
+    btn.textContent = 'Sending…'; btn.disabled = true;
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: new FormData(form)
+      });
+      if (res.ok) {
+        document.getElementById('qpBody').style.display = 'none';
+        document.getElementById('qpSuccess').classList.add('show');
+        document.getElementById('qpPriceVal').innerHTML = 'Quote sent! ✓';
+      } else { throw new Error(); }
+    } catch {
+      btn.textContent = 'Error — try again'; btn.disabled = false;
+    }
+  }
+
+  // ── INIT ──
+  setCardStates();
+</script>
+</body>
+</html>
