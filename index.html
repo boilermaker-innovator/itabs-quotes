@@ -193,15 +193,18 @@ html,body { height:100%; overflow:hidden; background:var(--bg); font-family:'Int
         <div class="trade-grid" id="tradeGrid"></div>
       </div>
 
-      <!-- Step 2 -->
+      <!-- Step 2 — Contact first (lead capture before they drop off) -->
       <div class="screen" id="s2">
-        <div class="step-label">Step 2 of 4 — Your Business</div>
-        <h2>What's your <em>business name?</em></h2>
-        <p>This appears on your widget — exactly as you type it.</p>
-        <input class="inp" id="bizInput" type="text" placeholder="e.g. Pete's Fencing Co" maxlength="40">
+        <div class="step-label">Step 2 of 4 — Quick Intro</div>
+        <h2>Who are we <em>building this for?</em></h2>
+        <p>So we can personalise your widget and send you the live link.</p>
+        <input class="inp" id="bizInput" type="text" placeholder="Business name e.g. Pete's Fencing Co" maxlength="40" style="margin-bottom:10px;">
+        <input class="inp" id="contactName" type="text" placeholder="Your name" maxlength="40" style="margin-bottom:10px;">
+        <input class="inp" id="phoneInput" type="tel" placeholder="Phone number e.g. 0412 345 678" maxlength="20" style="margin-bottom:6px;">
+        <p style="font-size:11px;color:var(--t2);margin-top:4px;">Phone is optional — but we'll need it to send you the live link 👆</p>
       </div>
 
-      <!-- Step 3 -->
+      <!-- Step 3 — Services (brief fires silently here) -->
       <div class="screen" id="s3">
         <div class="step-label">Step 3 of 4 — Your Services</div>
         <h2>Pick your <em>main services</em></h2>
@@ -209,13 +212,14 @@ html,body { height:100%; overflow:hidden; background:var(--bg); font-family:'Int
         <div id="svcGrid"></div>
       </div>
 
-      <!-- Step 4 -->
+      <!-- Step 4 — Preview teaser -->
       <div class="screen" id="s4">
-        <div class="step-label">Step 4 of 4 — Contact</div>
-        <h2>Your <em>phone number?</em></h2>
-        <p>Shows on your widget so customers can call directly.</p>
-        <input class="inp" id="phoneInput" type="tel" placeholder="e.g. 0412 345 678" maxlength="20">
-        <p style="font-size:11px;color:var(--t2);margin-top:8px;">Optional — you can add it later</p>
+        <div class="step-label">Step 4 of 4 — Almost Done</div>
+        <h2>Your widget is <em>ready to build</em></h2>
+        <p>Here's what we'll create for you:</p>
+        <div style="background:var(--bg2);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;" id="summaryPreview">
+        </div>
+        <p style="font-size:12px;color:var(--t2);margin-top:14px;line-height:1.6;">Tap "Build my widget →" to see it live. We'll also email you the link so you can share it.</p>
       </div>
 
     </div>
@@ -305,7 +309,7 @@ const HERO_THEMES = ["hero-purple","hero-green","hero-amber","hero-cyan","hero-d
 const TAG_THEMES = ["tag-purple","tag-green","tag-amber","tag-cyan",""];
 
 let step = 0;
-let trade = "", bizName = "", services = [], phone = "";
+let trade = "", bizName = "", contactName = "", services = [], phone = "";
 let wCurrent = 0, wCards = [];
 const TOTAL_STEPS = 5;
 
@@ -324,6 +328,7 @@ const TOTAL_STEPS = 5;
     g.appendChild(b);
   });
   document.getElementById('bizInput').oninput = e => { bizName = e.target.value; updateNav(); };
+  document.getElementById('contactName').oninput = e => { contactName = e.target.value; updateNav(); };
   document.getElementById('phoneInput').oninput = e => { phone = e.target.value; };
   renderProg();
   updateNav();
@@ -348,7 +353,7 @@ function updateProg() {
 function canNext() {
   if(step===0) return true;
   if(step===1) return trade!=='';
-  if(step===2) return bizName.trim().length>=2;
+  if(step===2) return bizName.trim().length>=2 && contactName.trim().length>=2;
   if(step===3) return services.length>=1;
   if(step===4) return true;
   return false;
@@ -373,15 +378,55 @@ function showScreen(n) {
   updateNav();
 }
 
-function goNext() {
-  if(!canNext()) return;
-  if(step===3) buildSvcGrid();
-  if(step===TOTAL_STEPS-1) { buildWidget(); return; }
-  showScreen(step+1);
-  if(step===3) buildSvcGrid();
+function silentBriefFire() {
+  // Fire brief to Web3Forms as soon as services are selected — regardless of whether they complete
+  fetch('https://api.web3forms.com/submit', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      access_key:'99a11c15-5c61-4765-99c5-673adec64b16',
+      subject:`🔔 New iTabs Brief — ${bizName} (${trade})`,
+      source: 'iTabs Configurator — Step 3 auto-capture',
+      business_name: bizName,
+      contact_name: contactName,
+      trade: trade,
+      services: services.join(', '),
+      phone: phone || 'Not provided yet',
+      note: 'Auto-captured when services selected. May not have completed widget build.',
+    })
+  }).catch(()=>{});
 }
 
-function goBack() { if(step>0) showScreen(step-1); if(step===3) buildSvcGrid(); }
+function buildSummaryPreview() {
+  const el = document.getElementById('summaryPreview');
+  if(!el) return;
+  el.innerHTML = [
+    ['🏗️', 'Trade', trade],
+    ['🏢', 'Business', bizName],
+    ['👤', 'Contact', contactName],
+    ['📋', 'Services', services.join(' · ')],
+    phone ? ['📞', 'Phone', phone] : null,
+  ].filter(Boolean).map(([icon,label,val])=>`
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">${icon}</span>
+      <div>
+        <div style="font-size:10px;color:var(--t2);text-transform:uppercase;letter-spacing:.1em;">${label}</div>
+        <div style="font-size:14px;font-weight:600;">${val}</div>
+      </div>
+    </div>`).join('');
+}
+
+function goNext() {
+  if(!canNext()) return;
+  // Step 2→3: build svc grid
+  if(step===2) { showScreen(step+1); buildSvcGrid(); return; }
+  // Step 3→4: fire brief silently + build summary
+  if(step===3) { silentBriefFire(); showScreen(step+1); buildSummaryPreview(); return; }
+  // Step 4: build widget
+  if(step===TOTAL_STEPS-1) { buildWidget(); return; }
+  showScreen(step+1);
+}
+
+function goBack() { if(step>0) showScreen(step-1); }
 
 function buildSvcGrid() {
   const g = document.getElementById('svcGrid');
