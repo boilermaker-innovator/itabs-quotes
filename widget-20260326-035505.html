@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Perth Decking Pros — Wanneroo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    touch-action: none;
+  }
+
+  .widget-root {
+    max-width: 430px;
+    width: 100%;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-segment {
+    height: 3px;
+    border-radius: 2px;
+    flex: 1;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .progress-segment.viewed { background: rgba(255,255,255,0.45); }
+  .progress-segment.active { background: var(--accent); }
+
+  /* CARD WRAPPER */
+  .card-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* CARDS */
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(60px);
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    height: 240px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 18px 16px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+  }
+  .card-headline {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.18;
+    color: #fff;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #f59e0b;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 18px 18px 80px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(245,158,11,0.13);
+    border: 1px solid rgba(245,158,11,0.35);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--i-button);
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn-icon {
+    width: 18px; height: 18px;
+    background: var(--i-button);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900;
+  }
+
+  /* TOOLTIP/POPUP */
+  .tooltip-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .tooltip-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .tooltip-box {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.35);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 360px;
+    width: 100%;
+  }
+  .tooltip-box h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #fff;
+  }
+  .tooltip-box p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+  .tooltip-close {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* NAV ARROWS */
+  .nav-row {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    background: var(--bg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    z-index: 20;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #fff;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:not(:disabled):hover { background: rgba(124,58,237,0.25); }
+  .nav-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 28px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.2s infinite;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 4px 20px rgba(245,158,11,0.45); transform: scale(1); }
+    50% { box-shadow: 0 6px 28px rgba(245,158,11,0.7); transform: scale(1.04); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .quote-panel.open .quote-backdrop {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .quote-sheet {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+    pointer-events: all;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  .quote-panel.open .quote-sheet {
+    transform: translateY(0);
+  }
+
+  .quote-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 5;
+    border-radius: 22px 22px 0 0;
+  }
+  .quote-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .quote-close {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-label { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; }
+  .price-value { font-size: 22px; font-weight: 900; color: #60c4ff; }
+
+  .quote-step { padding: 20px; }
+  .step-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 14px; }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .service-option {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .service-option:hover, .service-option.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.12);
+  }
+  .service-option .svc-emoji { font-size: 24px; margin-bottom: 6px; }
+  .service-option .svc-label { font-size: 12px; font-weight: 600; color: #fff; }
+  .service-option .svc-price { font-size: 10px; color: var(--text-secondary); margin-top: 3px; }
+
+  .complexity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .complexity-option {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-option:hover, .complexity-option.selected {
+    border-color: var(--i-button);
+    background: rgba(245,158,11,0.1);
+  }
+  .complexity-option .cx-label { font-size: 12px; font-weight: 700; color: #fff; }
+  .complexity-option .cx-desc { font-size: 10px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* FORM */
+  .qform { display: flex; flex-direction: column; gap: 12px; }
+  .qform input, .qform textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .qform input:focus, .qform textarea:focus {
+    border-color: var(--accent);
+  }
+  .qform input::placeholder, .qform textarea::placeholder {
+    color: rgba(255,255,255,0.3);
+  }
+  .qform textarea { resize: none; height: 80px; }
+
+  .submit-btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .submit-btn:hover { background: #6d28d9; }
+  .submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .back-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  /* LEAD CARD FORM */
+  .lead-form { display: flex; flex-direction: column; gap: 11px; margin-top: 4px; }
+  .lead-form input, .lead-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .lead-form input:focus, .lead-form textarea:focus { border-color: #22c55e; }
+  .lead-form input::placeholder, .lead-form textarea::placeholder { color: rgba(255,255,255,0.3); }
+  .lead-form textarea { resize: none; height: 75px; }
+  .lead-submit-btn {
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .lead-submit-btn:hover { background: #16a34a; }
+
+  .success-msg {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .success-msg .success-icon { font-size: 48px; margin-bottom: 12px; }
+  .success-msg h3 { font-size: 18px; font-weight: 800; margin-bottom: 8px; color: #22c55e; }
+  .success-msg p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px; }
+  .success-msg a { color: var(--i-button); font-weight: 700; text-decoration: none; }
+
+  /* FOOTER */
+  .widget-footer {
+    background: var(--bg-primary);
+    text-align: center;
+    padding: 6px 0 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    flex-shrink: 0;
+    z-index: 10;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .widget-footer a { color: rgba(255,255,255,0.35); text-decoration: none; }
+
+  /* Hero themes */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  /* Step indicators */
+  .step-indicators {
+    display: flex;
+    gap: 6px;
+    padding: 0 20px 12px;
+  }
+  .step-dot {
+    height: 3px;
+    border-radius: 2px;
+    flex: 1;
+    background: rgba(255,255,255,0.12);
+    transition: background 0.3s;
+  }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: rgba(255,255,255,0.4); }
+
+  .quote-success {
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .quote-success .qs-icon { font-size: 52px; margin-bottom: 14px; }
+  .quote-success h3 { font-size: 20px; font-weight: 800; color: #22c55e; margin-bottom: 10px; }
+  .quote-success p { font-size: 13px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 16px; }
+  .quote-success a { color: var(--i-button); font-weight: 700; text-decoration: none; }
+
+  @media (min-height: 700px) {
+    .hero { height: 260px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="widget-root">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD WRAPPER -->
+  <div class="card-wrapper" id="cardWrapper">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="hero hero-default">
+        <img src="https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?w=860&q=80&auto=format&fit=crop" alt="Decking">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / Perth Decking Pros</div>
+          <h1 class="card-headline">Extend your living <em>outdoors</em> — Wanneroo's deck specialists</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth Decking Pros have been transforming Wanneroo backyards into stunning outdoor spaces for years. Whether you're after a classic hardwood deck, a low-maintenance composite solution, or a beautiful pergola to beat the WA sun, we bring the craftsmanship and materials to make it happen. All treated pine and hardwood options available — and your first design consultation is completely free.</p>
+        <button class="i-btn" onclick="showTooltip('about')">
+          <span class="i-btn-icon">i</span>
+          About Perth Decking Pros
+        </button>
+      </div>
+    </div>
+
+    <!-- CARD 1: TIMBER DECKING -->
+    <div class="card" data-index="1">
+      <div class="hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?w=860&q=80&auto=format&fit=crop" alt="Timber Decking">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / SERVICE</div>
+          <h1 class="card-headline"><em>Timber Decking</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Nothing beats the warmth and character of natural timber underfoot. We work with premium treated pine, jarrah, and Merbau hardwood — all chosen for their durability in Perth's harsh UV and heat. Wanneroo homes love a timber deck that wraps around the alfresco, and our team handles everything from footings to the final coat of Cutek oil.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: COMPOSITE DECKING -->
+    <div class="card" data-index="2">
+      <div class="hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?w=860&q=80&auto=format&fit=crop" alt="Composite Decking">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / SERVICE</div>
+          <h1 class="card-headline"><em>Composite Decking</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Composite decking is the smart choice for Perth homeowners who want a beautiful outdoor space without the ongoing maintenance. Our composite boards resist fading, splintering, and the intense summer heat that beats down across the northern suburbs. Ideal around pools, on rooftop terraces, and in coastal-adjacent areas like Wanneroo where salt air can age natural timber faster.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: DECK REPAIRS -->
+    <div class="card" data-index="3">
+      <div class="hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Deck Repairs">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / SERVICE</div>
+          <h1 class="card-headline"><em>Deck Repairs</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth's UV-intense summers and occasional wet winters can take a real toll on older decks — rotting boards, wobbly posts, and faded surfaces are all common in Wanneroo homes built in the 90s and early 2000s. We assess, quote, and repair quickly so your outdoor space is safe and looking great again. Board replacements, re-stumping, sanding and re-oiling — we handle it all.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: PERGOLAS -->
+    <div class="card" data-index="4">
+      <div class="hero hero-default">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Pergolas">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">05 / SERVICE</div>
+          <h1 class="card-headline"><em>Pergolas</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">A well-built pergola turns a plain backyard into a year-round outdoor living zone — essential in Perth where you're entertaining outdoors ten months of the year. We design and construct freestanding or attached pergolas using treated pine or hardwood, sized and positioned to make the most of your block. Council approval assistance available for Wanneroo City builds.</p>
+      </div>
+    </div>
+
+    <!-- CARD 5: CARPORTS -->
+    <div class="card" data-index="5">
+      <div class="hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Carports">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">06 / SERVICE</div>
+          <h1 class="card-headline"><em>Carports</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Protect your vehicle from Perth's punishing summer sun with a quality timber or Colorbond carport. We build single and double carports to match your home's style, ensuring all work meets WA building codes and City of Wanneroo requirements. From a simple single-bay cover to a full double carport with integrated storage, we'll design and price it up at no cost.</p>
+      </div>
+    </div>
+
+    <!-- CARD 6: LEAD CAPTURE -->
+    <div class="card" data-index="6">
+      <div class="hero hero-green">
+        <img src="https://images.unsplash.com/photo-1588854337115-1c67d9247e4d?w=860&q=80&auto=format&fit=crop" alt="Get a Quote">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">GET A QUOTE</div>
+          <h1 class="card-headline">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Tell us a little about your project and we'll come back to you fast with a free, no-obligation quote. Free design consultation included for all new builds.</p>
+        <div id="leadFormWrap">
+          <form class="lead-form" id="leadForm" onsubmit="submitLeadForm(event)">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Enquiry — Perth Decking Pros (iTabs Widget)">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Perth Decking Pros">
+            <input type="hidden" name="trade" value="Carpenter / Decking">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="tel" name="phone" placeholder="Phone number" required>
+            <input type="email" name="email" placeholder="Email address" required>
+            <textarea name="message" placeholder="Brief description of your project (e.g. 40m² hardwood deck with pergola, Wanneroo)"></textarea>
+            <button type="submit" class="lead-submit-btn">Send my enquiry →</button>
+          </form>
+        </div>
+        <div id="leadSuccess" style="display:none">
+          <div class="success-msg">
+            <div class="success-icon">✅</div>
+            <h3>Enquiry sent!</h3>
+            <p>Thanks — the team at Perth Decking Pros will be in touch shortly. Or call us now on <a href="tel:0444123456">0444 123 456</a>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end card-wrapper -->
+
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+    <span class="nav-counter" id="navCounter">1 / 7</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="widget-footer">
+    Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a>
+  </div>
+
+</div><!-- end widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuote()">💰 Get a Quote</button>
+
+<!-- TOOLTIP OVERLAY -->
+<div class="tooltip-overlay" id="tooltipOverlay" onclick="hideTooltip(event)">
+  <div class="tooltip-box" id="tooltipBox">
+    <h3 id="tooltipTitle"></h3>
+    <p id="tooltipBody"></p>
+    <button class="tooltip-close" onclick="closeTooltip()">Got it</button>
+  </div>
+</div>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuote()"></div>
+  <div class="quote-sheet" id="quoteSheet">
+    <div class="quote-header">
+      <span class="quote-title">💰 Perth Decking Pros — Quote</span>
+      <button class="quote-close" onclick="closeQuote()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="price-label">ESTIMATED RANGE</div>
+        <div class="price-value" id="priceDisplay">Select a service</div>
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,0.4);text-align:right;">Wanneroo, WA<br>GST incl. estimate</div>
+    </div>
+
+    <!-- STEP INDICATORS -->
+    <div class="step-indicators">
+      <div class="step-dot active" id="sdot0"></div>
+      <div class="step-dot" id="sdot1"></div>
+      <div class="step-dot" id="sdot2"></div>
+    </div>
+
+    <!-- STEP 1: SERVICE -->
+    <div class="quote-step" id="qStep1">
+      <div class="step-title">What do you need?</div>
+      <div class="service-grid">
+        <div class="service-option" onclick="selectService(this,'Timber Decking',3500,9500)">
+          <div class="svc-emoji">🪵</div>
+          <div class="svc-label">Timber Decking</div>
+          <div class="svc-price">$280–$450/m²</div>
+        </div>
+        <div class="service-option" onclick="selectService(this,'Composite Decking',4000,11000)">
+          <div class="svc-emoji">🏡</div>
+          <div class="svc-label">Composite Decking</div>
+          <div class="svc-price">$320–$500/m²</div>
+        </div>
+        <div class="service-option" onclick="selectService(this,'Deck Repairs',450,2500)">
+          <div class="svc-emoji">🔨</div>
+          <div class="svc-label">Deck Repairs</div>
+          <div class="svc-price">$450–$2,500</div>
+        </div>
+        <div class="service-option" onclick="selectService(this,'Pergola',3500,8000)">
+          <div class="svc-emoji">🌿</div>
+          <div class="svc-label">Pergola</div>
+          <div class="svc-price">$3,500–$8,000</div>
+        </div>
+        <div class="service-option" onclick="selectService(this,'Carport',4000,9000)">
+          <div class="svc-emoji">🚗</div>
+          <div class="svc-label">Carport</div>
+          <div class="svc-price">$4,000–$9,000</div>
+        </div>
+        <div class="service-option" onclick="selectService(this,'Design Consultation',0,0)">
+          <div class="svc-emoji">📐</div>
+          <div class="svc-label">Free Consultation</div>
+          <div class="svc-price">No charge</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="quote-step" id="qStep2" style="display:none">
+      <div class="step-title">Job complexity?</div>
+      <div class="complexity-grid">
+        <div class="complexity-option" onclick="selectComplexity(this,0.85)">
+          <div class="cx-label">Basic</div>
+          <div class="cx-desc">Straightforward, small area</div>
+        </div>
+        <div class="complexity-option" onclick="selectComplexity(this,1.0)">
+          <div class="cx-label">Standard</div>
+          <div class="cx-desc">Typical residential job</div>
+        </div>
+        <div class="complexity-option" onclick="selectComplexity(this,1.35)">
+          <div class="cx-label">Complex</div>
+          <div class="cx-desc">Multi-level, custom design</div>
+        </div>
+      </div>
+      <button class="back-btn" onclick="goStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: CONTACT -->
+    <div class="quote-step" id="qStep3" style="display:none">
+      <div class="step-title">Your details — we'll confirm your quote</div>
+      <div id="qFormWrap">
+        <form class="qform" id="quoteForm" onsubmit="submitQuoteForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="Quote Request — Perth Decking Pros (iTabs Widget)">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Perth Decking Pros">
+          <input type="hidden" name="trade" value="Carpenter / Decking">
+          <input type="hidden" name="service_selected" id="qServiceHidden">
+          <input type="hidden" name="complexity" id="qComplexityHidden">
+          <input type="hidden" name="estimate" id="qEstimateHidden">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="notes" placeholder="Any extra details about your job?" style="height:70px;resize:none;"></textarea>
+          <button type="submit" class="submit-btn" id="qSubmitBtn">Send my quote request →</button>
+        </form>
+      </div>
+      <div id="qSuccess" style="display:none">
+        <div class="quote-success">
+          <div class="qs-icon">🎉</div>
+          <h3>Quote request sent!</h3>
+          <p>The Perth Decking Pros team will be in touch very soon. Can't wait? Call us now on <a href="tel:0444123456">0444 123 456</a>.</p>
+        </div>
+      </div>
+      <button class="back-btn" id="qBack3" onclick="goStep(2)">← Back</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ---- STATE ----
+  const TOTAL_CARDS = 7;
+  let currentCard = 0;
+  let viewedCards = new Set([0]);
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  // Quote state
+  let qServiceLabel = '';
+  let qPriceLow = 0;
+  let qPriceHigh = 0;
+  let qMultiplier = 1.0;
+  let qComplexityLabel = '';
+
+  // ---- PROGRESS BAR ----
+  function buildProgressBar() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < TOTAL_CARDS; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-segment';
+      if (i === currentCard) seg.classList.add('active');
+      else if (viewedCards.has(i)) seg.classList.add('viewed');
+      bar.appendChild(seg);
+    }
+  }
+
+  // ---- NAVIGATION ----
+  function navigate(dir) {
+    const cards = document.querySelectorAll('.card');
+    const prev = currentCard;
+    const next = currentCard + dir;
+    if (next < 0 || next >= TOTAL_CARDS) return;
+
+    cards[prev].classList.remove('active');
+    cards[prev].classList.add(dir > 0 ? 'prev' : '');
+    if (dir < 0) cards[prev].classList.remove('prev');
+
+    currentCard = next;
+    viewedCards.add(currentCard);
+
+    // Reset all, then apply
+    cards.forEach((c, i) => {
+      c.classList.remove('active', 'prev');
+      if (i < currentCard) c.classList.add('prev');
+    });
+    cards[currentCard].classList.add('active');
+    cards[currentCard].classList.remove('prev');
+
+    document.getElementById('prevBtn').disabled = currentCard === 0;
+    document.getElementById('nextBtn').disabled = currentCard === TOTAL_CARDS - 1;
+    document.getElementById('navCounter').textContent = `${currentCard + 1} / ${TOTAL_CARDS}`;
+    buildProgressBar();
+  }
+
+  // ---- SWIPE ----
+  const wrapper = document.getElementById('cardWrapper');
+  wrapper.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  wrapper.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      navigate(dx < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+
+  // ---- KEYBOARD ----
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  });
+
+  // ---- TOOLTIP ----
+  const tooltips = {
+    about: {
+      title: 'About Perth Decking Pros',
+      body: 'Perth Decking Pros are Wanneroo-based specialists in outdoor timber structures, with deep expertise in treated pine, hardwood, and composite decking for Perth\'s unique climate. We\'re a tight-knit local crew who treat every job like it\'s our own backyard — quality materials, clean workmanship, and honest pricing. Every new build starts with a completely free design consultation so you get exactly what you\'re after.'
+    }
+  };
+  function showTooltip(key) {
+    const t = tooltips[key];
+    document.getElementById('tooltipTitle').textContent = t.title;
+    document.getElementById('tooltipBody').textContent = t.body;
+    document.getElementById('tooltipOverlay').classList.add('show');
+  }
+  function hideTooltip(e) {
+    if (e.target === document.getElementById('tooltipOverlay')) closeTooltip();
+  }
+  function closeTooltip() {
+    document.getElementById('tooltipOverlay').classList.remove('show');
+  }
+
+  // ---- QUOTE PANEL ----
+  function openQuote() {
+    document.getElementById('quotePanel').classList.add('open');
+  }
+  function closeQuote() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  function goStep(n) {
+    document.getElementById('qStep1').style.display = n === 1 ? 'block' : 'none';
+    document.getElementById('qStep2').style.display = n === 2 ? 'block' : 'none';
+    document.getElementById('qStep3').style.display = n === 3 ? 'block' : 'none';
+    ['sdot0','sdot1','sdot2'].forEach((id,i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('active','done');
+      if (i < n - 1) el.classList.add('done');
+      if (i === n - 1) el.classList.add('active');
+    });
+    document.getElementById('qBack3').style.display = n === 3 ? 'block' : 'none';
+  }
+
+  function updatePriceDisplay() {
+    const el = document.getElementById('priceDisplay');
+    if (qPriceLow === 0 && qPriceHigh === 0) {
+      el.textContent = 'Free — no charge';
+      return;
+    }
+    const lo = Math.round(qPriceLow * qMultiplier / 100) * 100;
+    const hi = Math.round(qPriceHigh * qMultiplier / 100) * 100;
+    el.textContent = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+    document.getElementById('qEstimateHidden').value = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+  }
+
+  function selectService(el, label, low, high) {
+    document.querySelectorAll('.service-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    qServiceLabel = label;
+    qPriceLow = low;
+    qPriceHigh = high;
+    qMultiplier = 1.0;
+    document.getElementById('qServiceHidden').value = label;
+    updatePriceDisplay();
+    setTimeout(() => {
+      if (low === 0 && high === 0) {
+        goStep(3);
+      } else {
+        goStep(2);
+      }
+    }, 220);
+  }
+
+  function selectComplexity(el, mult) {
+    document.querySelectorAll('.complexity-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    qMultiplier = mult;
+    qComplexityLabel = el.querySelector('.cx-label').textContent;
+    document.getElementById('qComplexityHidden').value = qComplexityLabel;
+    updatePriceDisplay();
+    setTimeout(() => goStep(3), 220);
+  }
+
+  async function submitQuoteForm(e) {
+    e.preventDefault();
+    const btn = document.getElementById('qSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    const form = document.getElementById('quoteForm');
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        document.getElementById('qFormWrap').style.display = 'none';
+        document.getElementById('qBack3').style.display = 'none';
+        document.getElementById('qSuccess').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Try again →';
+        alert('Something went wrong. Please try again.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Try again →';
+      alert('Network error. Please check your connection.');
+    }
+  }
+
+  async function submitLeadForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('leadForm');
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        document.getElementById('leadFormWrap').style.display = 'none';
+        document.getElementById('leadSuccess').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Send my enquiry →';
+        alert('Something went wrong. Please try again.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = 'Send my enquiry →';
+      alert('Network error. Please check your connection.');
+    }
+  }
+
+  // ---- INIT ----
+  buildProgressBar();
+  goStep(1);
+</script>
+</body>
+</html>
