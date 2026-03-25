@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dunno Concreting — Rockingham</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .widget-root {
+    max-width: 430px;
+    width: 100%;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-primary);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .progress-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: #2a2a3e;
+    transition: background 0.3s ease;
+  }
+  .progress-seg.active { background: var(--accent); }
+  .progress-seg.viewed { background: rgba(255,255,255,0.5); }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    margin: 0 10px 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .card.active { transform: translateX(0); }
+  .card.prev { transform: translateX(-100%); }
+
+  .card-hero {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px 20px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-hero.hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .card-hero.hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .card-hero.hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .card-hero.hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .card-hero.hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  .hero-noise {
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--i-button);
+    margin-bottom: 10px;
+    opacity: 0.9;
+  }
+
+  .card-headline {
+    font-size: 26px;
+    font-weight: 900;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: var(--i-button);
+  }
+
+  .card-summary {
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.72);
+    margin-bottom: 16px;
+  }
+
+  .card-footer {
+    background: var(--bg-secondary);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 99px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    transition: transform 0.15s, opacity 0.15s;
+    flex-shrink: 0;
+  }
+  .i-btn:active { transform: scale(0.95); opacity: 0.85; }
+  .i-btn .i-circle {
+    width: 16px; height: 16px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 900;
+  }
+
+  /* NAV ARROWS */
+  .nav-arrows {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .nav-arrow {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .nav-arrow:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  .nav-arrow:disabled { opacity: 0.25; cursor: default; }
+
+  .card-counter {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* I-PANEL (tooltip modal) */
+  .i-panel-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .i-panel-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .i-panel {
+    background: var(--bg-tertiary);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 22px 32px;
+    max-width: 430px;
+    width: 100%;
+    transform: translateY(20px);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .i-panel-overlay.open .i-panel { transform: translateY(0); }
+  .i-panel-handle {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 99px;
+    margin: 0 auto 18px;
+  }
+  .i-panel-title {
+    font-size: 16px; font-weight: 800;
+    margin-bottom: 10px; color: var(--i-button);
+  }
+  .i-panel-body {
+    font-size: 14px; line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+  }
+  .i-panel-close {
+    margin-top: 18px;
+    background: rgba(255,255,255,0.07);
+    border: none; border-radius: 10px;
+    color: #fff; padding: 10px 0;
+    width: 100%; font-size: 13px; font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* LEAD CAPTURE FORM */
+  .lead-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .lead-form input,
+  .lead-form textarea {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+    width: 100%;
+  }
+  .lead-form input::placeholder,
+  .lead-form textarea::placeholder { color: rgba(255,255,255,0.35); }
+  .lead-form input:focus,
+  .lead-form textarea:focus { border-color: var(--accent); }
+  .lead-form textarea { resize: none; height: 72px; }
+  .lead-form .submit-btn {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    border: none; border-radius: 12px;
+    color: #fff; font-size: 15px; font-weight: 700;
+    padding: 13px;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .lead-form .submit-btn:active { transform: scale(0.97); opacity: 0.9; }
+  .success-msg {
+    text-align: center;
+    padding: 16px 8px;
+    display: none;
+  }
+  .success-msg .tick { font-size: 36px; margin-bottom: 8px; }
+  .success-msg h3 { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
+  .success-msg p { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+  .success-msg a { color: var(--i-button); font-weight: 700; text-decoration: none; }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-quote-btn {
+    position: fixed;
+    bottom: 76px; right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 99px;
+    padding: 13px 18px;
+    font-size: 13.5px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.2s infinite;
+    transition: transform 0.15s;
+    max-width: 430px;
+  }
+  .float-quote-btn:active { transform: scale(0.95); }
+  @keyframes pulse-amber {
+    0%,100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50%      { box-shadow: 0 4px 40px rgba(245,158,11,0.75), 0 0 0 8px rgba(245,158,11,0.12); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-overlay {
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .quote-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .quote-panel {
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-width: 430px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    border-top: 1px solid rgba(255,255,255,0.09);
+    overscroll-behavior: contain;
+  }
+  .quote-overlay.open .quote-panel { transform: translateY(0); }
+
+  .quote-panel-handle {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 99px;
+    margin: 12px auto 0;
+  }
+  .quote-panel-header {
+    padding: 14px 18px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .quote-panel-title {
+    font-size: 16px; font-weight: 800; color: var(--i-button);
+  }
+  .quote-close-btn {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: none; color: #fff;
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .quote-close-btn:hover { background: rgba(255,255,255,0.14); }
+
+  .price-strip {
+    margin: 14px 16px 0;
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid rgba(59,130,246,0.25);
+  }
+  .price-strip-label { font-size: 11px; color: #93c5fd; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .price-strip-value { font-size: 22px; font-weight: 900; color: #fff; }
+  .price-strip-sub { font-size: 10px; color: #93c5fd; margin-top: 1px; }
+
+  .quote-steps { padding: 16px 16px 24px; }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .step-title {
+    font-size: 17px; font-weight: 800;
+    margin-bottom: 14px; color: #fff;
+  }
+
+  /* SERVICE GRID */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .service-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 13px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .service-tile:hover { border-color: var(--accent); background: rgba(124,58,237,0.1); }
+  .service-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.18); }
+  .service-tile .st-emoji { font-size: 24px; margin-bottom: 6px; }
+  .service-tile .st-label { font-size: 12.5px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .service-tile .st-price { font-size: 11px; color: var(--text-secondary); }
+
+  /* COMPLEXITY */
+  .complexity-options { display: flex; flex-direction: column; gap: 9px; }
+  .complexity-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 13px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s;
+  }
+  .complexity-tile:hover { border-color: var(--accent); }
+  .complexity-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.15); }
+  .ct-icon { font-size: 22px; flex-shrink: 0; }
+  .ct-info { flex: 1; }
+  .ct-label { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+  .ct-desc { font-size: 12px; color: var(--text-secondary); }
+  .ct-mult { font-size: 12px; font-weight: 700; color: var(--i-button); }
+
+  /* QUOTE CONTACT FORM */
+  .quote-form { display: flex; flex-direction: column; gap: 10px; }
+  .quote-form input,
+  .quote-form textarea {
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+    width: 100%;
+  }
+  .quote-form input::placeholder,
+  .quote-form textarea::placeholder { color: rgba(255,255,255,0.35); }
+  .quote-form input:focus,
+  .quote-form textarea:focus { border-color: var(--accent); }
+  .quote-form textarea { resize: none; height: 68px; }
+
+  .step-nav { display: flex; gap: 10px; margin-top: 14px; }
+  .btn-back {
+    background: rgba(255,255,255,0.07);
+    border: none; border-radius: 10px;
+    color: #fff; padding: 12px 16px;
+    font-size: 13.5px; font-weight: 600;
+    cursor: pointer; flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.12); }
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), #5b21b6);
+    border: none; border-radius: 10px;
+    color: #fff; padding: 12px 0;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; flex: 1;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-next:active { transform: scale(0.97); opacity: 0.9; }
+  .btn-submit-quote {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none; border-radius: 10px;
+    color: #000; padding: 13px 0;
+    font-size: 14.5px; font-weight: 800;
+    cursor: pointer; width: 100%;
+    letter-spacing: 0.01em;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-submit-quote:active { transform: scale(0.97); opacity: 0.9; }
+
+  .quote-success {
+    text-align: center;
+    padding: 24px 16px 32px;
+    display: none;
+  }
+  .quote-success .qs-tick { font-size: 48px; margin-bottom: 12px; }
+  .quote-success h3 { font-size: 18px; font-weight: 900; margin-bottom: 8px; }
+  .quote-success p { font-size: 13.5px; color: rgba(255,255,255,0.65); line-height: 1.65; margin-bottom: 14px; }
+  .quote-success a { color: var(--i-button); font-weight: 700; text-decoration: none; }
+
+  /* POWERED BY */
+  .powered-by {
+    position: fixed;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    max-width: 430px; width: 100%;
+    background: var(--bg-primary);
+    text-align: center;
+    padding: 8px 0 10px;
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    z-index: 10;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .powered-by a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  /* Scrollbar */
+  .quote-panel::-webkit-scrollbar { width: 0; }
+  .card-hero::-webkit-scrollbar { width: 0; }
+  .card-hero { overflow-y: auto; }
+</style>
+</head>
+<body>
+
+<div class="widget-root">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="card-hero hero-default">
+        <div class="hero-noise"></div>
+        <div class="card-tag">01 / DUNNO CONCRETING</div>
+        <h2 class="card-headline">Dunno Concreting —<br><em>Rockingham's trusted</em> concreters</h2>
+        <p class="card-summary">Dave and the crew at Dunno Concreting have been laying solid foundations across Rockingham and the southern suburbs for years. From new driveways and shed slabs to stunning exposed aggregate finishes, they do it right first time — no cut corners, no surprises on the invoice.</p>
+      </div>
+      <div class="card-footer">
+        <button class="i-btn" onclick="openIPanel('about')">
+          <span class="i-circle">i</span> About Dunno Concreting
+        </button>
+        <div class="nav-arrows">
+          <span class="card-counter" id="counter0">1 / 6</span>
+          <button class="nav-arrow" id="prevBtn0" disabled onclick="goTo(0-1)">&#8592;</button>
+          <button class="nav-arrow" id="nextBtn0" onclick="goTo(1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: DRIVEWAYS -->
+    <div class="card" data-index="1">
+      <div class="card-hero hero-amber">
+        <div class="hero-noise"></div>
+        <div class="card-tag">02 / SERVICE</div>
+        <h2 class="card-headline"><em>Driveways</em></h2>
+        <p class="card-summary">A quality concrete driveway handles Rockingham's summer heat and the wear from daily traffic without cracking or crumbling. Dunno Concreting forms, pours and finishes to a professional standard — whether it's a straight run to a single garage or a wide double-entry for a big block. Coloured and exposed finishes available too.</p>
+      </div>
+      <div class="card-footer">
+        <div class="nav-arrows" style="margin-left:0; width:100%; justify-content:space-between;">
+          <span class="card-counter">2 / 6</span>
+          <div style="display:flex;gap:8px;">
+            <button class="nav-arrow" onclick="goTo(0)">&#8592;</button>
+            <button class="nav-arrow" onclick="goTo(2)">&#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: SHED SLABS -->
+    <div class="card" data-index="2">
+      <div class="card-hero hero-cyan">
+        <div class="hero-noise"></div>
+        <div class="card-tag">03 / SERVICE</div>
+        <h2 class="card-headline"><em>Shed Slabs</em></h2>
+        <p class="card-summary">Getting a shed slab right in Rockingham means accounting for the sandy coastal soil and correct edge-beam depth so the structure stays level for life. Dunno Concreting handles the prep, formwork, steel reinforcing and pour — leaving you a flat, strong slab ready for your Colorbond shed or workshop.</p>
+      </div>
+      <div class="card-footer">
+        <div class="nav-arrows" style="margin-left:0; width:100%; justify-content:space-between;">
+          <span class="card-counter">3 / 6</span>
+          <div style="display:flex;gap:8px;">
+            <button class="nav-arrow" onclick="goTo(1)">&#8592;</button>
+            <button class="nav-arrow" onclick="goTo(3)">&#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: PATIOS & ALFRESCO -->
+    <div class="card" data-index="3">
+      <div class="card-hero hero-purple">
+        <div class="hero-noise"></div>
+        <div class="card-tag">04 / SERVICE</div>
+        <h2 class="card-headline"><em>Patios &amp; Alfresco</em></h2>
+        <p class="card-summary">Rockingham's outdoor lifestyle calls for a patio you can actually use year-round. Dunno Concreting pours smooth broom-finish or stencilled alfresco slabs that look great under a pergola and hold up to the coastal UV and salt air. Perfect for a BBQ area, outdoor dining or a kids' play zone out back.</p>
+      </div>
+      <div class="card-footer">
+        <div class="nav-arrows" style="margin-left:0; width:100%; justify-content:space-between;">
+          <span class="card-counter">4 / 6</span>
+          <div style="display:flex;gap:8px;">
+            <button class="nav-arrow" onclick="goTo(2)">&#8592;</button>
+            <button class="nav-arrow" onclick="goTo(4)">&#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4: EXPOSED AGGREGATE -->
+    <div class="card" data-index="4">
+      <div class="card-hero hero-default">
+        <div class="hero-noise"></div>
+        <div class="card-tag">05 / SERVICE</div>
+        <h2 class="card-headline"><em>Exposed Aggregate</em></h2>
+        <p class="card-summary">Exposed aggregate is one of the most popular finishes in the southern suburbs — it looks premium, hides dirt well and provides excellent slip resistance around pools and wet areas. Dunno Concreting uses quality local stone mixes and applies a professional sealer to protect your investment from Rockingham's coastal conditions.</p>
+      </div>
+      <div class="card-footer">
+        <div class="nav-arrows" style="margin-left:0; width:100%; justify-content:space-between;">
+          <span class="card-counter">5 / 6</span>
+          <div style="display:flex;gap:8px;">
+            <button class="nav-arrow" onclick="goTo(3)">&#8592;</button>
+            <button class="nav-arrow" onclick="goTo(5)">&#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 5: LEAD CAPTURE -->
+    <div class="card" data-index="5">
+      <div class="card-hero hero-green" style="justify-content:flex-start; padding-top:22px;">
+        <div class="hero-noise"></div>
+        <div class="card-tag">GET A QUOTE</div>
+        <h2 class="card-headline" style="font-size:22px;">Get your free <em>quote</em> today</h2>
+        <p class="card-summary" style="margin-bottom:12px;">Tell Dave what you need and he'll get back to you fast with a straight-up price — no fluff, no hidden extras.</p>
+
+        <form class="lead-form" id="leadForm" onsubmit="submitLeadForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Lead — Dunno Concreting (Rockingham)">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Dunno Concreting">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Describe your job — e.g. 6×6 shed slab in Rockingham"></textarea>
+          <button type="submit" class="submit-btn">Send my enquiry →</button>
+        </form>
+
+        <div class="success-msg" id="leadSuccess">
+          <div class="tick">✅</div>
+          <h3>Cheers, we'll be in touch!</h3>
+          <p>Dave from Dunno Concreting will give you a call shortly.<br>Need it urgent? Ring now on <a href="tel:0412888555">0412 888 555</a>.</p>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="nav-arrows" style="margin-left:0; width:100%; justify-content:space-between;">
+          <span class="card-counter">6 / 6</span>
+          <div style="display:flex;gap:8px;">
+            <button class="nav-arrow" onclick="goTo(4)">&#8592;</button>
+            <button class="nav-arrow" disabled>&#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+</div><!-- /widget-root -->
+
+<!-- POWERED BY -->
+<div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-quote-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- I-PANEL OVERLAY -->
+<div class="i-panel-overlay" id="iPanelOverlay" onclick="closeIPanel(event)">
+  <div class="i-panel">
+    <div class="i-panel-handle"></div>
+    <div class="i-panel-title" id="iPanelTitle"></div>
+    <div class="i-panel-body" id="iPanelBody"></div>
+    <button class="i-panel-close" onclick="closeIPanelDirect()">Close</button>
+  </div>
+</div>
+
+<!-- QUOTE PANEL OVERLAY -->
+<div class="quote-overlay" id="quoteOverlay" onclick="closeQuoteIfOutside(event)">
+  <div class="quote-panel" id="quotePanel">
+    <div class="quote-panel-handle"></div>
+    <div class="quote-panel-header">
+      <div class="quote-panel-title">💰 Dunno Concreting — Quote</div>
+      <button class="quote-close-btn" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="price-strip-label">Estimated range</div>
+        <div class="price-strip-sub" id="priceStripSub">Select a service to get started</div>
+      </div>
+      <div class="price-strip-value" id="priceStripValue">$—</div>
+    </div>
+
+    <div class="quote-steps">
+
+      <!-- STEP 1 -->
+      <div class="step active" id="qStep1">
+        <div class="step-label">Step 1 of 3</div>
+        <div class="step-title">What do you need done?</div>
+        <div class="service-grid">
+          <div class="service-tile" onclick="selectService(this,'Driveway','$65–$95/m²',65,95)">
+            <div class="st-emoji">🚗</div>
+            <div class="st-label">Driveway</div>
+            <div class="st-price">$65–$95/m²</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Shed Slab','$70–$95/m²',70,95)">
+            <div class="st-emoji">🏗️</div>
+            <div class="st-label">Shed Slab</div>
+            <div class="st-price">$70–$95/m²</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Patio / Alfresco','$60–$85/m²',60,85)">
+            <div class="st-emoji">🌿</div>
+            <div class="st-label">Patio / Alfresco</div>
+            <div class="st-price">$60–$85/m²</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Exposed Aggregate','$90–$130/m²',90,130)">
+            <div class="st-emoji">💎</div>
+            <div class="st-label">Exposed Aggregate</div>
+            <div class="st-price">$90–$130/m²</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Pathway','$55–$75/m²',55,75)">
+            <div class="st-emoji">🛤️</div>
+            <div class="st-label">Pathway</div>
+            <div class="st-price">$55–$75/m²</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this,'Pool Surrounds','$85–$120/m²',85,120)">
+            <div class="st-emoji">🏊</div>
+            <div class="st-label">Pool Surrounds</div>
+            <div class="st-price">$85–$120/m²</div>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn-next" id="step1Next" onclick="goToStep(2)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="step" id="qStep2">
+        <div class="step-label">Step 2 of 3</div>
+        <div class="step-title">How complex is the job?</div>
+        <div class="complexity-options">
+          <div class="complexity-tile" onclick="selectComplexity(this, 0.85, 'Basic')">
+            <div class="ct-icon">🟢</div>
+            <div class="ct-info">
+              <div class="ct-label">Basic</div>
+              <div class="ct-desc">Simple shape, easy access, standard finish</div>
+            </div>
+            <div class="ct-mult">-15%</div>
+          </div>
+          <div class="complexity-tile" onclick="selectComplexity(this, 1.0, 'Standard')">
+            <div class="ct-icon">🟡</div>
+            <div class="ct-info">
+              <div class="ct-label">Standard</div>
+              <div class="ct-desc">Average job, some prep work, regular finish</div>
+            </div>
+            <div class="ct-mult">Base rate</div>
+          </div>
+          <div class="complexity-tile" onclick="selectComplexity(this, 1.35, 'Complex')">
+            <div class="ct-icon">🔴</div>
+            <div class="ct-info">
+              <div class="ct-label">Complex</div>
+              <div class="ct-desc">Tight access, demo/excavation needed, premium finish</div>
+            </div>
+            <div class="ct-mult">+35%</div>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="btn-back" onclick="goToStep(1)">← Back</button>
+          <button class="btn-next" id="step2Next" onclick="goToStep(3)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="step" id="qStep3">
+        <div class="step-label">Step 3 of 3</div>
+        <div class="step-title">Your contact details</div>
+        <form class="quote-form" id="quoteForm" onsubmit="submitQuoteForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="Quote Request — Dunno Concreting (Rockingham)">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Dunno Concreting">
+          <input type="hidden" name="selected_service" id="qfService" value="">
+          <input type="hidden" name="complexity" id="qfComplexity" value="">
+          <input type="hidden" name="estimated_range" id="qfRange" value="">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Anything else we should know? (e.g. size, location, access)"></textarea>
+          <div class="step-nav" style="margin-top:0;">
+            <button type="button" class="btn-back" onclick="goToStep(2)">← Back</button>
+            <button type="submit" class="btn-submit-quote">💰 Send Quote Request</button>
+          </div>
+        </form>
+
+        <div class="quote-success" id="quoteSuccess">
+          <div class="qs-tick">🎉</div>
+          <h3>Quote request sent!</h3>
+          <p>Dave will be in touch shortly with your estimate.<br>Want to talk now? Call <a href="tel:0412888555">0412 888 555</a>.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── STATE ─────────────────────────────────────────────────────────────────
+  let currentCard = 0;
+  const totalCards = 6;
+  let selectedServiceLow = 0;
+  let selectedServiceHigh = 0;
+  let selectedServiceName = '';
+  let complexityMultiplier = 1;
+  let complexityName = '';
+
+  // ─── I-PANEL DATA ──────────────────────────────────────────────────────────
+  const iPanelData = {
+    about: {
+      title: 'About Dunno Concreting',
+      body: 'Dave runs Dunno Concreting out of Rockingham — a straight-talking local concreting business serving the southern suburbs of Perth. Whether it\'s a new driveway in Secret Harbour, a patio slab in Baldivis or an exposed aggregate finish in Port Kennedy, Dunno Concreting brings solid workmanship and fair pricing to every job. Dave\'s been in the game long enough to know what works in WA\'s coastal conditions, and he\'ll always give you an honest quote upfront.'
+    }
+  };
+
+  // ─── PROGRESS BAR ──────────────────────────────────────────────────────────
+  function renderProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < totalCards; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg';
+      if (i === currentCard) seg.classList.add('active');
+      else if (i < currentCard) seg.classList.add('viewed');
+      bar.appendChild(seg);
+    }
+  }
+
+  // ─── CARD NAVIGATION ───────────────────────────────────────────────────────
+  function goTo(index) {
+    if (index < 0 || index >= totalCards) return;
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((c, i) => {
+      c.classList.remove('active', 'prev');
+      if (i === index) c.classList.add('active');
+      else if (i < index) c.classList.add('prev');
+    });
+    currentCard = index;
+    renderProgress();
+  }
+
+  // ─── KEYBOARD NAVIGATION ───────────────────────────────────────────────────
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('quoteOverlay').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') goTo(currentCard + 1);
+    if (e.key === 'ArrowLeft')  goTo(currentCard - 1);
+  });
+
+  // ─── TOUCH SWIPE ───────────────────────────────────────────────────────────
+  let touchStartX = 0;
+  let touchStartY = 0;
+  const deck = document.getElementById('cardDeck');
+
+  deck.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  deck.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0) goTo(currentCard + 1);
+      else goTo(currentCard - 1);
+    }
+  }, { passive: true });
+
+  // ─── I-PANEL ───────────────────────────────────────────────────────────────
+  function openIPanel(key) {
+    const data = iPanelData[key];
+    if (!data) return;
+    document.getElementById('iPanelTitle').textContent = data.title;
+    document.getElementById('iPanelBody').textContent = data.body;
+    document.getElementById('iPanelOverlay').classList.add('open');
+  }
+
+  function closeIPanel(e) {
+    if (e.target === document.getElementById('iPanelOverlay')) closeIPanelDirect();
+  }
+  function closeIPanelDirect() {
+    document.getElementById('iPanelOverlay').classList.remove('open');
+  }
+
+  // ─── QUOTE PANEL ───────────────────────────────────────────────────────────
+  function openQuotePanel() {
+    document.getElementById('quoteOverlay').classList.add('open');
+  }
+  function closeQuotePanel() {
+    document.getElementById('quoteOverlay').classList.remove('open');
+  }
+  function closeQuoteIfOutside(e) {
+    if (e.target === document.getElementById('quoteOverlay')) closeQuotePanel();
+  }
+
+  // ─── QUOTE STEPS ───────────────────────────────────────────────────────────
+  function goToStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('qStep' + n).classList.add('active');
+  }
+
+  function selectService(el, name, priceLabel, low, high) {
+    document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedServiceName = name;
+    selectedServiceLow = low;
+    selectedServiceHigh = high;
+    updatePriceStrip();
+    document.getElementById('step1Next').disabled = false;
+    document.getElementById('qfService').value = name;
+  }
+
+  function selectComplexity(el, mult, name) {
+    document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    complexityMultiplier = mult;
+    complexityName = name;
+    updatePriceStrip();
+    document.getElementById('step2Next').disabled = false;
+    document.getElementById('qfComplexity').value = name;
+  }
+
+  function updatePriceStrip() {
+    if (selectedServiceLow === 0) return;
+    const lo = Math.round(selectedServiceLow  * complexityMultiplier * 20);
+    const hi = Math.round(selectedServiceHigh * complexityMultiplier * 20);
+    // assume ~20m² as a reference size for display
+    const loFormatted = '$' + (Math.round(selectedServiceLow  * complexityMultiplier)).toLocaleString();
+    const hiFormatted = '$' + (Math.round(selectedServiceHigh * complexityMultiplier)).toLocaleString();
+    const rangeStr = loFormatted + '–' + hiFormatted + '/m²';
+    document.getElementById('priceStripValue').textContent = rangeStr;
+    document.getElementById('priceStripSub').textContent = selectedServiceName + (complexityName ? ' · ' + complexityName : '');
+    document.getElementById('qfRange').value = rangeStr + ' (' + selectedServiceName + ', ' + complexityName + ')';
+  }
+
+  // ─── LEAD FORM SUBMIT ──────────────────────────────────────────────────────
+  async function submitLeadForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('leadForm');
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const data = new FormData(form);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('leadSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again →';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again →';
+      btn.disabled = false;
+    }
+  }
+
+  // ─── QUOTE FORM SUBMIT ─────────────────────────────────────────────────────
+  async function submitQuoteForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('quoteForm');
+    const btn = form.querySelector('.btn-submit-quote');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const data = new FormData(form);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('quoteSuccess').style.display = 'block';
+      } else {
+        btn.textContent = '💰 Send Quote Request';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = '💰 Send Quote Request';
+      btn.disabled = false;
+    }
+  }
+
+  // ─── INIT ──────────────────────────────────────────────────────────────────
+  renderProgress();
+</script>
+</body>
+</html>
