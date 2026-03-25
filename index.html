@@ -208,7 +208,7 @@ html,body { height:100%; overflow:hidden; background:var(--bg); font-family:'Int
       <div class="screen" id="s3">
         <div class="step-label">Step 3 of 4 — Your Services</div>
         <h2>Pick your <em>main services</em></h2>
-        <p>Choose up to 4. Each one becomes a swipeable card in your widget.</p>
+        <p>Pick as many as you offer. Each one becomes a swipeable card in your widget.</p>
         <div id="svcGrid"></div>
       </div>
 
@@ -439,7 +439,7 @@ function buildSvcGrid() {
     b.onclick = () => {
       const idx = services.indexOf(sv.name);
       if(idx>-1){ services.splice(idx,1); b.classList.remove('sel'); b.querySelector('.svc-chk').textContent=''; }
-      else if(services.length<4){ services.push(sv.name); b.classList.add('sel'); b.querySelector('.svc-chk').textContent='✓'; }
+      else { services.push(sv.name); b.classList.add('sel'); b.querySelector('.svc-chk').textContent='✓'; }
       updateNav();
     };
     g.appendChild(b);
