@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smith Plumbing — Joondalup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  .widget-root {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-primary);
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 12px 16px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #333;
+    transition: background 0.3s;
+  }
+  .progress-seg.active { background: var(--accent); }
+  .progress-seg.viewed { background: #fff; }
+
+  /* CARD WRAPPER */
+  .card-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1), opacity 0.38s;
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    height: 52%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  .hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+  }
+  .hero-content {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    padding: 20px 20px 18px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--i-button);
+    margin-bottom: 8px;
+  }
+  .card-headline {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #a78bfa;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn .i-circle {
+    width: 18px; height: 18px;
+    background: var(--i-button);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* I-PANEL */
+  .i-panel {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    display: none;
+  }
+  .i-panel.open { display: block; }
+
+  /* NAV ARROWS */
+  .card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 6px;
+    background: var(--bg-secondary);
+  }
+  .nav-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: rgba(124,58,237,0.3); }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .card-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* LEAD CAPTURE FORM */
+  .lead-form { display: flex; flex-direction: column; gap: 10px; }
+  .lead-form input, .lead-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .lead-form input:focus, .lead-form textarea:focus {
+    border-color: var(--accent);
+  }
+  .lead-form textarea { resize: none; height: 80px; }
+  .lead-form input::placeholder, .lead-form textarea::placeholder { color: var(--text-secondary); }
+  .submit-btn {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .submit-btn:hover { opacity: 0.88; }
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .form-success .tick {
+    font-size: 44px;
+    margin-bottom: 10px;
+  }
+  .form-success h3 { font-size: 18px; margin-bottom: 8px; }
+  .form-success p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  .form-success a { color: var(--i-button); text-decoration: none; font-weight: 700; }
+
+  /* FOOTER */
+  .widget-footer {
+    padding: 6px 0 8px;
+    text-align: center;
+    font-size: 10px;
+    color: #444;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .widget-footer a { color: #666; text-decoration: none; }
+  .widget-footer a:hover { color: var(--accent); }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 28px;
+    padding: 13px 18px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.2s infinite;
+  }
+  @keyframes pulse-amber {
+    0%,100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50% { box-shadow: 0 4px 36px rgba(245,158,11,0.75), 0 0 0 8px rgba(245,158,11,0.12); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-panel.open { pointer-events: all; }
+
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+
+  .quote-sheet {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: 20px 20px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1);
+    max-width: 430px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .quote-panel.open .quote-sheet { transform: translateY(0); }
+
+  .quote-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 5;
+    border-radius: 20px 20px 0 0;
+  }
+  .quote-title {
+    font-size: 16px;
+    font-weight: 800;
+  }
+  .quote-close {
+    background: var(--bg-tertiary);
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .price-strip {
+    background: linear-gradient(135deg, #1e40af, #1d4ed8);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-label { font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 500; }
+  .price-value { font-size: 22px; font-weight: 900; color: #fff; }
+
+  .quote-steps { padding: 20px; }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    margin-bottom: 14px;
+  }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .service-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .service-tile:hover { border-color: rgba(124,58,237,0.4); }
+  .service-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .service-tile .svc-emoji { font-size: 26px; margin-bottom: 6px; }
+  .service-tile .svc-label { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+  .service-tile .svc-range { font-size: 10px; color: var(--text-secondary); }
+
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .complexity-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .complexity-tile:hover { border-color: rgba(124,58,237,0.4); }
+  .complexity-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .complexity-left { display: flex; flex-direction: column; gap: 2px; }
+  .complexity-name { font-size: 14px; font-weight: 700; }
+  .complexity-desc { font-size: 12px; color: var(--text-secondary); }
+  .complexity-mult { font-size: 12px; color: var(--i-button); font-weight: 700; }
+
+  .quote-form { display: flex; flex-direction: column; gap: 10px; }
+  .quote-form input, .quote-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .quote-form input:focus, .quote-form textarea:focus { border-color: var(--accent); }
+  .quote-form input::placeholder, .quote-form textarea::placeholder { color: var(--text-secondary); }
+  .quote-form textarea { resize: none; height: 72px; }
+
+  .step-nav { display: flex; gap: 10px; margin-top: 4px; }
+  .step-back {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    border-radius: 10px;
+    padding: 13px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .step-next {
+    flex: 1;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .step-next:hover { opacity: 0.88; }
+  .step-next:disabled { opacity: 0.35; cursor: default; }
+
+  .quote-success { display: none; text-align: center; padding: 30px 20px; }
+  .quote-success .tick { font-size: 50px; margin-bottom: 14px; }
+  .quote-success h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
+  .quote-success p { font-size: 14px; color: var(--text-secondary); line-height: 1.65; }
+  .quote-success a { color: var(--i-button); text-decoration: none; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="widget-root">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar">
+    <!-- segments injected by JS -->
+  </div>
+
+  <!-- CARD WRAPPER -->
+  <div class="card-wrapper" id="cardWrapper">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Plumbing" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / SMITH PLUMBING</div>
+          <div class="card-headline">Smith Plumbing —<br><em>Joondalup's trusted local plumbers</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">From blocked drains to burst pipes, Smith Plumbing has been keeping Joondalup homes and businesses flowing smoothly. We respond fast, quote honestly, and get the job done right the first time — no call-out surprises.</p>
+        <button class="i-btn" onclick="togglePanel('about-panel')">
+          <span class="i-circle">i</span> About Smith Plumbing
+        </button>
+        <div class="i-panel" id="about-panel">
+          Smith Plumbing is a family-run plumbing business based in Joondalup, servicing all of Perth's northern suburbs. With over a decade of hands-on experience across residential and light commercial work, we've built a reputation on honest pricing and reliable service. Whether it's a leaking tap at 7am or a gas issue that can't wait, we're the team Joondalup locals call first.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: BLOCKED DRAINS -->
+    <div class="card" data-index="1">
+      <div class="hero hero-default">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Blocked Drains" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / SERVICE</div>
+          <div class="card-headline"><em>Blocked Drains</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Joondalup's coastal soils and mature tree canopies mean root intrusion and debris blockages are incredibly common. Smith Plumbing uses high-pressure water jetting and CCTV drain cameras to clear and diagnose blockages fast — from kitchen sinks to main sewer lines.</p>
+        <p class="card-summary">We're typically on-site the same day, and most residential blocked drains are resolved in a single visit. Typical cost: $180–$320.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: HOT WATER SYSTEMS -->
+    <div class="card" data-index="2">
+      <div class="hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Hot Water Systems" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / SERVICE</div>
+          <div class="card-headline"><em>Hot Water Systems</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth's hard water is notorious for cutting hot water system lifespans short. Whether your storage tank has failed or you're ready to upgrade to an energy-efficient heat pump or continuous gas system, Smith Plumbing handles supply and installation across all major brands.</p>
+        <p class="card-summary">We're familiar with WA's rebate schemes for solar and heat pump hot water — we'll help you choose the right system and maximise any eligible savings. Typical cost: $900–$1,800.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: GAS LEAKS -->
+    <div class="card" data-index="3">
+      <div class="hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Gas Leaks" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / SERVICE</div>
+          <div class="card-headline"><em>Gas Leaks</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">A gas leak is a plumbing emergency — don't wait. Smith Plumbing are fully licensed gas fitters in WA, able to respond urgently to suspected leaks, faulty gas appliances, and gas line repairs across Joondalup and surrounding suburbs.</p>
+        <p class="card-summary">If you smell gas, leave the property, don't operate switches, and call us immediately. We carry gas detection equipment on every van and can isolate, locate, and repair leaks safely and to code. Typical inspection & repair: $180–$350.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: LEAKING TAPS -->
+    <div class="card" data-index="4">
+      <div class="hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Leaking Taps" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">05 / SERVICE</div>
+          <div class="card-headline"><em>Leaking Taps</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">A dripping tap in Perth wastes thousands of litres of our precious water every year — and adds up on your Water Corporation bill. Smith Plumbing replaces washers, O-rings, ceramic cartridges, and tap seats quickly and affordably across all tap types and brands.</p>
+        <p class="card-summary">We also check your water pressure at the same visit, as Joondalup's mains pressure can be high enough to cause ongoing tap wear if left unmanaged. Typical cost: $180–$280 per tap.</p>
+      </div>
+    </div>
+
+    <!-- CARD 5: LEAD CAPTURE -->
+    <div class="card" data-index="5">
+      <div class="hero hero-green">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Get a Quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">GET A QUOTE</div>
+          <div class="card-headline">Get your free <em>quote</em> today</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="lead-form" id="leadForm" onsubmit="submitLead(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Plumbing Enquiry — Smith Plumbing (Joondalup)">
+          <input type="hidden" name="from_name" value="Smith Plumbing iTabs Widget">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Your phone number" required>
+          <input type="email" name="email" placeholder="Your email address" required>
+          <textarea name="message" placeholder="Briefly describe the job (e.g. blocked kitchen sink, need hot water replaced)"></textarea>
+          <button type="submit" class="submit-btn">Send my enquiry →</button>
+        </form>
+        <div class="form-success" id="leadSuccess">
+          <div class="tick">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks — Smith Plumbing will be in touch shortly.<br><br>Need to talk now? Call us directly:<br><a href="tel:0412555333">0412 555 333</a></p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end card-wrapper -->
+
+  <!-- NAV -->
+  <div class="card-nav" id="cardNav">
+    <button class="nav-btn" id="prevBtn" onclick="goCard(-1)" disabled>← Prev</button>
+    <span class="card-counter" id="cardCounter">1 / 6</span>
+    <button class="nav-btn" id="nextBtn" onclick="goCard(1)">Next →</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="widget-footer">
+    Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a>
+  </div>
+
+</div><!-- end widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuote()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuote()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <div class="quote-title">💰 Smith Plumbing — Quote</div>
+      <button class="quote-close" onclick="closeQuote()">✕</button>
+    </div>
+    <div class="price-strip">
+      <div>
+        <div class="price-label">Estimated range</div>
+        <div class="price-value" id="priceDisplay">Select a service</div>
+      </div>
+      <div style="font-size:28px">🔧</div>
+    </div>
+    <div class="quote-steps">
+
+      <!-- STEP 1: SERVICE -->
+      <div class="step active" id="qStep1">
+        <div class="step-title">Step 1 of 3 — What do you need?</div>
+        <div class="service-grid">
+          <div class="service-tile" onclick="selectService(this, 180, 320, 'Blocked Drain')">
+            <div class="svc-emoji">🚿</div>
+            <div class="svc-label">Blocked Drain</div>
+            <div class="svc-range">$180 – $320</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 900, 1800, 'Hot Water System')">
+            <div class="svc-emoji">🔥</div>
+            <div class="svc-label">Hot Water System</div>
+            <div class="svc-range">$900 – $1,800</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 180, 350, 'Gas Leak')">
+            <div class="svc-emoji">💨</div>
+            <div class="svc-label">Gas Leak</div>
+            <div class="svc-range">$180 – $350</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 180, 280, 'Leaking Tap')">
+            <div class="svc-emoji">💧</div>
+            <div class="svc-label">Leaking Tap</div>
+            <div class="svc-range">$180 – $280</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 150, 300, 'General Plumbing')">
+            <div class="svc-emoji">🔩</div>
+            <div class="svc-label">General Plumbing</div>
+            <div class="svc-range">$150 – $300</div>
+          </div>
+          <div class="service-tile" onclick="selectService(this, 200, 450, 'Pipe Repair')">
+            <div class="svc-emoji">🪛</div>
+            <div class="svc-label">Pipe Repair</div>
+            <div class="svc-range">$200 – $450</div>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="step-next" id="step1Next" onclick="goStep(2)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: COMPLEXITY -->
+      <div class="step" id="qStep2">
+        <div class="step-title">Step 2 of 3 — Job complexity</div>
+        <div class="complexity-list">
+          <div class="complexity-tile" onclick="selectComplexity(this, 0.85)">
+            <div class="complexity-left">
+              <div class="complexity-name">Basic</div>
+              <div class="complexity-desc">Straightforward job, easy access, single fixture</div>
+            </div>
+            <div class="complexity-mult">−15%</div>
+          </div>
+          <div class="complexity-tile" onclick="selectComplexity(this, 1.0)">
+            <div class="complexity-left">
+              <div class="complexity-name">Standard</div>
+              <div class="complexity-desc">Typical residential job, normal access</div>
+            </div>
+            <div class="complexity-mult">Base rate</div>
+          </div>
+          <div class="complexity-tile" onclick="selectComplexity(this, 1.35)">
+            <div class="complexity-left">
+              <div class="complexity-name">Complex</div>
+              <div class="complexity-desc">Difficult access, old pipework, multi-fixture or urgent</div>
+            </div>
+            <div class="complexity-mult">+35%</div>
+          </div>
+        </div>
+        <div class="step-nav">
+          <button class="step-back" onclick="goStep(1)">← Back</button>
+          <button class="step-next" id="step2Next" onclick="goStep(3)" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONTACT -->
+      <div class="step" id="qStep3">
+        <div class="step-title">Step 3 of 3 — Your details</div>
+        <form class="quote-form" id="quoteForm" onsubmit="submitQuote(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="Quote Request — Smith Plumbing (Joondalup)">
+          <input type="hidden" name="from_name" value="Smith Plumbing iTabs Quote Widget">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Smith Plumbing">
+          <input type="hidden" name="trade" value="Plumber">
+          <input type="hidden" id="qServiceField" name="service_selected" value="">
+          <input type="hidden" id="qComplexityField" name="complexity" value="">
+          <input type="hidden" id="qPriceField" name="estimated_range" value="">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Your phone number" required>
+          <input type="email" name="email" placeholder="Your email address" required>
+          <textarea name="message" placeholder="Any extra details about the job?"></textarea>
+          <div class="step-nav">
+            <button type="button" class="step-back" onclick="goStep(2)">← Back</button>
+            <button type="submit" class="step-next">Send Quote Request →</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- QUOTE SUCCESS -->
+      <div class="quote-success" id="quoteSuccess">
+        <div class="tick">🎉</div>
+        <h3>Quote request sent!</h3>
+        <p>Smith Plumbing will review your details and be in touch shortly with a confirmed quote.<br><br>
+        Want to talk straight away?<br><a href="tel:0412555333">📞 0412 555 333</a></p>
+      </div>
+
+    </div><!-- end quote-steps -->
+  </div><!-- end quote-sheet -->
+</div><!-- end quote-panel -->
+
+<script>
+  // ── CARD SLIDER ──────────────────────────────────────────────
+  const TOTAL = 6;
+  let current = 0;
+
+  function buildProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-seg' + (i < current ? ' viewed' : i === current ? ' active' : '');
+      bar.appendChild(seg);
+    }
+  }
+
+  function updateCards(dir) {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((c, i) => {
+      c.classList.remove('active', 'prev');
+      if (i === current) c.classList.add('active');
+      else if (i < current) c.classList.add('prev');
+    });
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === TOTAL - 1;
+    document.getElementById('cardCounter').textContent = (current + 1) + ' / ' + TOTAL;
+    buildProgress();
+  }
+
+  function goCard(dir) {
+    const next = current + dir;
+    if (next < 0 || next >= TOTAL) return;
+    current = next;
+    updateCards(dir);
+  }
+
+  // keyboard
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('quotePanel').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') goCard(1);
+    if (e.key === 'ArrowLeft') goCard(-1);
+  });
+
+  // touch swipe
+  (function() {
+    const wrapper = document.getElementById('cardWrapper');
+    let startX = 0, startY = 0;
+    wrapper.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    wrapper.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+        goCard(dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+  })();
+
+  // i-panel toggle
+  function togglePanel(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  // init
+  buildProgress();
+  updateCards(0);
+
+  // ── LEAD FORM ────────────────────────────────────────────────
+  async function submitLead(e) {
+    e.preventDefault();
+    const form = document.getElementById('leadForm');
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const data = new FormData(form);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('leadSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  }
+
+  // ── QUOTE PANEL ──────────────────────────────────────────────
+  let qLow = 0, qHigh = 0, qMultiplier = 1, qService = '', qComplexityLabel = '';
+
+  function openQuote() {
+    document.getElementById('quotePanel').classList.add('open');
+  }
+  function closeQuote() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  function updatePrice() {
+    if (!qService) { document.getElementById('priceDisplay').textContent = 'Select a service'; return; }
+    const lo = Math.round(qLow * qMultiplier / 10) * 10;
+    const hi = Math.round(qHigh * qMultiplier / 10) * 10;
+    document.getElementById('priceDisplay').textContent = '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString();
+    document.getElementById('qPriceField').value = '$' + lo + ' – $' + hi;
+  }
+
+  function selectService(el, low, high, label) {
+    document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    qLow = low; qHigh = high; qService = label;
+    document.getElementById('qServiceField').value = label;
+    document.getElementById('step1Next').disabled = false;
+    updatePrice();
+  }
+
+  function selectComplexity(el, mult) {
+    document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    qMultiplier = mult;
+    qComplexityLabel = el.querySelector('.complexity-name').textContent;
+    document.getElementById('qComplexityField').value = qComplexityLabel;
+    document.getElementById('step2Next').disabled = false;
+    updatePrice();
+  }
+
+  function goStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('qStep' + n) && document.getElementById('qStep' + n).classList.add('active');
+  }
+
+  async function submitQuote(e) {
+    e.preventDefault();
+    const form = document.getElementById('quoteForm');
+    const btn = form.querySelector('[type=submit]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    try {
+      const data = new FormData(form);
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('qStep3').querySelector('.step-title').style.display = 'none';
+        document.getElementById('quoteSuccess').style.display = 'block';
+      } else {
+        btn.textContent = 'Try again';
+        btn.disabled = false;
+      }
+    } catch {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
