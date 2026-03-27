@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smith Plumbing — Joondalup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg-primary:#0a0a0f;
+--bg-secondary:#12121a;
+--bg-tertiary:#1e1e2e;
+--text-primary:#ffffff;
+--text-secondary:#9090b0;
+--accent:#7c3aed;
+--i-button:#f59e0b;
+}
+html,body{
+height:100%;width:100%;overflow:hidden;
+font-family:'Inter',sans-serif;
+background:var(--bg-primary);
+color:var(--text-primary);
+display:flex;justify-content:center;align-items:center;
+}
+.widget-shell{
+width:100%;max-width:430px;height:100dvh;
+display:flex;flex-direction:column;
+background:var(--bg-primary);
+position:relative;overflow:hidden;
+}
+
+/* PROGRESS BAR */
+.progress-bar{
+display:flex;gap:3px;padding:10px 14px 8px;
+background:var(--bg-primary);z-index:10;flex-shrink:0;
+}
+.prog-seg{
+height:3px;flex:1;border-radius:2px;
+background:#2a2a3e;transition:background 0.3s;
+}
+.prog-seg.viewed{background:#ffffff55;}
+.prog-seg.active{background:var(--accent);}
+
+/* CARD DECK */
+.deck-wrapper{
+flex:1;position:relative;overflow:hidden;
+}
+.card{
+position:absolute;inset:0;
+display:flex;flex-direction:column;
+opacity:0;pointer-events:none;
+transform:translateX(100%);
+transition:transform 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.38s;
+}
+.card.active{opacity:1;pointer-events:all;transform:translateX(0);}
+.card.prev{opacity:0;transform:translateX(-100%);}
+
+/* HERO */
+.card-hero{
+position:relative;height:220px;flex-shrink:0;overflow:hidden;
+}
+.card-hero img{
+position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+}
+.card-hero-overlay{
+position:absolute;inset:0;
+background:linear-gradient(to top,rgba(0,0,0,0.82) 0%,rgba(0,0,0,0.25) 100%);
+}
+.hero-default .card-hero{background:linear-gradient(135deg,#1e293b,#0f172a);}
+.hero-purple .card-hero{background:linear-gradient(135deg,#4c1d95,#1e1b4b);}
+.hero-cyan .card-hero{background:linear-gradient(135deg,#164e63,#0c4a6e);}
+.hero-amber .card-hero{background:linear-gradient(135deg,#78350f,#431407);}
+.hero-green .card-hero{background:linear-gradient(135deg,#14532d,#052e16);}
+
+/* CARD CONTENT */
+.card-body{
+flex:1;background:var(--bg-secondary);
+display:flex;flex-direction:column;
+padding:20px 20px 16px;overflow-y:auto;
+}
+.card-tag{
+font-size:10px;font-weight:700;letter-spacing:2px;
+color:var(--text-secondary);text-transform:uppercase;margin-bottom:8px;
+}
+.card-headline{
+font-size:22px;font-weight:800;line-height:1.25;
+color:var(--text-primary);margin-bottom:10px;
+}
+.card-headline em{color:var(--accent);font-style:normal;}
+.card-summary{
+font-size:13.5px;line-height:1.65;color:var(--text-secondary);
+flex:1;
+}
+
+/* I-BUTTON */
+.i-btn{
+display:inline-flex;align-items:center;gap:6px;
+background:var(--i-button);color:#000;
+border:none;border-radius:20px;
+padding:7px 14px;font-size:12px;font-weight:700;
+cursor:pointer;margin-top:14px;
+transition:opacity 0.2s,transform 0.15s;
+}
+.i-btn:hover{opacity:0.88;transform:scale(1.03);}
+.i-btn .i-icon{
+width:17px;height:17px;background:#000;color:var(--i-button);
+border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+font-size:10px;font-weight:900;
+}
+
+/* INFO OVERLAY */
+.info-overlay{
+position:fixed;inset:0;z-index:300;
+background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
+display:flex;align-items:flex-end;justify-content:center;
+opacity:0;pointer-events:none;transition:opacity 0.25s;
+}
+.info-overlay.open{opacity:1;pointer-events:all;}
+.info-box{
+width:100%;max-width:430px;background:var(--bg-tertiary);
+border-radius:20px 20px 0 0;padding:24px 22px 32px;
+transform:translateY(40px);transition:transform 0.3s;
+}
+.info-overlay.open .info-box{transform:translateY(0);}
+.info-box h3{font-size:17px;font-weight:800;margin-bottom:10px;}
+.info-box p{font-size:13.5px;line-height:1.7;color:var(--text-secondary);}
+.info-close{
+float:right;background:none;border:none;color:#fff;
+font-size:22px;cursor:pointer;line-height:1;margin-top:-4px;
+}
+
+/* NAV ARROWS */
+.card-nav{
+display:flex;align-items:center;justify-content:space-between;
+padding:10px 14px 10px;background:var(--bg-primary);flex-shrink:0;
+}
+.nav-btn{
+background:var(--bg-tertiary);border:1px solid #2a2a3e;
+color:#fff;border-radius:50%;width:38px;height:38px;
+display:flex;align-items:center;justify-content:center;
+font-size:16px;cursor:pointer;transition:background 0.2s;
+}
+.nav-btn:hover{background:var(--accent);}
+.nav-btn:disabled{opacity:0.25;cursor:default;}
+.nav-counter{font-size:12px;color:var(--text-secondary);font-weight:600;}
+
+/* FOOTER */
+.widget-footer{
+padding:5px 14px 8px;text-align:center;
+font-size:10px;color:#3a3a5a;background:var(--bg-primary);flex-shrink:0;
+}
+.widget-footer a{color:#5a5a8a;text-decoration:none;}
+
+/* FLOATING QUOTE BUTTON */
+.float-btn{
+position:fixed;bottom:76px;right:14px;z-index:150;
+background:var(--i-button);color:#000;
+border:none;border-radius:28px;
+padding:13px 18px;font-size:13px;font-weight:800;
+cursor:pointer;box-shadow:0 4px 24px rgba(245,158,11,0.45);
+animation:pulse-amber 2.2s infinite;
+display:flex;align-items:center;gap:7px;
+}
+@keyframes pulse-amber{
+0%,100%{box-shadow:0 4px 24px rgba(245,158,11,0.45);}
+50%{box-shadow:0 4px 36px rgba(245,158,11,0.75),0 0 0 8px rgba(245,158,11,0.12);}
+}
+
+/* QUOTE PANEL */
+.quote-panel{
+position:fixed;inset:0;z-index:200;
+display:flex;flex-direction:column;justify-content:flex-end;
+pointer-events:none;
+}
+.quote-backdrop{
+position:absolute;inset:0;background:rgba(0,0,0,0.65);
+opacity:0;transition:opacity 0.35s;backdrop-filter:blur(3px);
+}
+.quote-sheet{
+position:relative;
+width:100%;max-width:430px;margin:0 auto;
+background:var(--bg-secondary);
+border-radius:24px 24px 0 0;
+max-height:88dvh;overflow-y:auto;
+transform:translateY(100%);
+transition:transform 0.38s cubic-bezier(0.4,0,0.2,1);
+padding-bottom:24px;
+}
+.quote-panel.open{pointer-events:all;}
+.quote-panel.open .quote-backdrop{opacity:1;}
+.quote-panel.open .quote-sheet{transform:translateY(0);}
+
+.quote-handle{
+width:40px;height:4px;background:#3a3a5a;border-radius:2px;
+margin:12px auto 0;
+}
+.quote-header{
+padding:16px 20px 0;display:flex;align-items:center;justify-content:space-between;
+}
+.quote-header h2{font-size:17px;font-weight:800;}
+.quote-close{
+background:var(--bg-tertiary);border:none;color:#fff;
+border-radius:50%;width:32px;height:32px;
+display:flex;align-items:center;justify-content:center;
+font-size:18px;cursor:pointer;
+}
+
+/* PRICE STRIP */
+.price-strip{
+margin:14px 20px 0;
+background:linear-gradient(135deg,#1d4ed8,#1e40af);
+border-radius:12px;padding:12px 16px;
+display:flex;align-items:center;justify-content:space-between;
+}
+.price-label{font-size:11px;color:#93c5fd;font-weight:600;}
+.price-val{font-size:22px;font-weight:900;color:#fff;}
+
+/* STEPS */
+.quote-steps{padding:0 20px;}
+.step{display:none;}
+.step.active{display:block;}
+.step-title{
+font-size:13px;font-weight:700;color:var(--text-secondary);
+text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 12px;
+}
+
+/* SERVICE GRID */
+.svc-grid{
+display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.svc-card{
+background:var(--bg-tertiary);border:2px solid #2a2a3e;
+border-radius:14px;padding:14px 12px;
+cursor:pointer;transition:border-color 0.2s,background 0.2s;
+text-align:center;
+}
+.svc-card:hover,.svc-card.selected{
+border-color:var(--accent);background:#1e1e3a;
+}
+.svc-card .svc-emoji{font-size:26px;display:block;margin-bottom:6px;}
+.svc-card .svc-name{font-size:12.5px;font-weight:700;display:block;}
+.svc-card .svc-range{font-size:11px;color:var(--text-secondary);display:block;margin-top:3px;}
+
+/* COMPLEXITY */
+.complexity-list{display:flex;flex-direction:column;gap:10px;}
+.cplx-card{
+background:var(--bg-tertiary);border:2px solid #2a2a3e;
+border-radius:14px;padding:14px 16px;
+cursor:pointer;transition:border-color 0.2s,background 0.2s;
+display:flex;align-items:center;justify-content:space-between;
+}
+.cplx-card:hover,.cplx-card.selected{
+border-color:var(--accent);background:#1e1e3a;
+}
+.cplx-info .cplx-name{font-size:14px;font-weight:700;}
+.cplx-info .cplx-desc{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.cplx-mult{font-size:13px;font-weight:700;color:var(--accent);}
+
+/* QUOTE FORM */
+.q-field{margin-bottom:12px;}
+.q-field label{font-size:11.5px;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:5px;}
+.q-field input,.q-field textarea{
+width:100%;background:var(--bg-tertiary);
+border:1.5px solid #2a2a3e;border-radius:10px;
+color:#fff;font-family:'Inter',sans-serif;font-size:14px;
+padding:11px 13px;outline:none;
+transition:border-color 0.2s;
+}
+.q-field input:focus,.q-field textarea:focus{border-color:var(--accent);}
+.q-field textarea{resize:none;height:80px;}
+.q-selected-summary{
+background:var(--bg-tertiary);border-radius:10px;padding:10px 14px;
+font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;
+}
+.q-selected-summary span{color:#fff;font-weight:600;}
+
+/* BUTTONS */
+.btn-primary{
+width:100%;background:var(--accent);color:#fff;
+border:none;border-radius:12px;padding:14px;
+font-size:15px;font-weight:700;cursor:pointer;
+transition:opacity 0.2s,transform 0.15s;margin-top:6px;
+}
+.btn-primary:hover{opacity:0.88;transform:scale(1.01);}
+.btn-back{
+background:none;border:none;color:var(--text-secondary);
+font-size:13px;font-weight:600;cursor:pointer;
+display:flex;align-items:center;gap:5px;margin-top:12px;
+padding:0;
+}
+
+/* LEAD FORM CARD */
+.lead-form .q-field input,.lead-form .q-field textarea{
+background:#0f1f16;border-color:#1a3a27;
+}
+.lead-form .q-field input:focus,.lead-form .q-field textarea:focus{
+border-color:#22c55e;
+}
+.lead-submit{
+width:100%;background:linear-gradient(135deg,#16a34a,#15803d);
+color:#fff;border:none;border-radius:12px;
+padding:14px;font-size:15px;font-weight:700;
+cursor:pointer;transition:opacity 0.2s;margin-top:4px;
+}
+.lead-submit:hover{opacity:0.88;}
+
+.success-msg{
+text-align:center;padding:24px 16px;
+}
+.success-msg .tick{font-size:48px;margin-bottom:12px;}
+.success-msg h3{font-size:19px;font-weight:800;margin-bottom:8px;}
+.success-msg p{font-size:13.5px;color:var(--text-secondary);line-height:1.6;}
+.success-msg a{color:var(--i-button);font-weight:700;text-decoration:none;}
+
+/* STEP INDICATOR IN QUOTE */
+.step-dots{
+display:flex;gap:6px;justify-content:center;padding:14px 0 0;
+}
+.step-dot{
+width:7px;height:7px;border-radius:50%;background:#2a2a3e;
+transition:background 0.25s;
+}
+.step-dot.active{background:var(--accent);}
+.step-dot.done{background:#5a5a8a;}
+
+@media(min-height:700px){
+.card-hero{height:240px;}
+}
+</style>
+</head>
+<body>
+
+<div class="widget-shell" id="widgetShell">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="deck-wrapper" id="deckWrapper">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card hero-default active" data-index="0">
+      <div class="card-hero">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Plumbing" loading="eager">
+        <div class="card-hero-overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">01 / Smith Plumbing</div>
+        <div class="card-headline">Smith Plumbing — Joondalup's trusted plumber, on time every time</div>
+        <div class="card-summary">
+          Smith Plumbing has been keeping Joondalup homes and businesses flowing smoothly for years. Whether it's an urgent blocked drain, a failing hot water system, or a gas leak that can't wait — we show up fast, fix it right, and leave the place cleaner than we found it. Local knowledge, honest pricing, no call-out surprises.
+        </div>
+        <button class="i-btn" onclick="openInfo('about')">
+          <span class="i-icon">i</span> About Smith Plumbing
+        </button>
+      </div>
+    </div>
+
+    <!-- CARD 1: BLOCKED DRAINS -->
+    <div class="card hero-cyan" data-index="1">
+      <div class="card-hero">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Blocked Drains" loading="lazy">
+        <div class="card-hero-overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">02 / Service</div>
+        <div class="card-headline"><em>Blocked Drains</em></div>
+        <div class="card-summary">
+          Joondalup's older suburbs are notorious for tree root intrusion in ageing clay sewer lines — Smith Plumbing handles it all with high-pressure water jetting and CCTV drain cameras. We clear kitchen sinks, bathroom drains, stormwater systems and main sewers fast, with same-day availability for urgent blockages. No drainage job is too messy for our crew.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: HOT WATER SYSTEMS -->
+    <div class="card hero-amber" data-index="2">
+      <div class="card-hero">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Hot Water Systems" loading="lazy">
+        <div class="card-hero-overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">03 / Service</div>
+        <div class="card-headline"><em>Hot Water Systems</em></div>
+        <div class="card-summary">
+          Perth's hard water is tough on hot water systems, and when yours gives out in winter it's no fun. Smith Plumbing supplies and installs electric, gas, heat pump and solar hot water units across Joondalup and the northern suburbs. We stock leading brands and can often replace your unit the same day you call — no cold showers, no waiting weeks for parts.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: GAS LEAKS -->
+    <div class="card hero-purple" data-index="3">
+      <div class="card-hero">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Gas Leaks" loading="lazy">
+        <div class="card-hero-overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">04 / Service</div>
+        <div class="card-headline"><em>Gas Leaks</em></div>
+        <div class="card-summary">
+          A gas leak is always an emergency — and Smith Plumbing is licenced and equipped to respond fast across Joondalup. We use electronic gas detectors to pinpoint leaks in supply lines, appliance connections and metres, then repair or replace the affected section on the spot. We're fully compliant with WA gas safety regulations and work with Alinta Energy for meter isolation when required.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4: LEAKING TAPS -->
+    <div class="card hero-default" data-index="4">
+      <div class="card-hero">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Leaking Taps" loading="lazy">
+        <div class="card-hero-overlay"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-tag">05 / Service</div>
+        <div class="card-headline"><em>Leaking Taps</em></div>
+        <div class="card-summary">
+          A dripping tap wastes thousands of litres of Perth's precious water every year and will send your Water Corporation bill through the roof. Smith Plumbing regrinding taps, replacing washers, ceramic cartridges and entire mixer sets for kitchens, bathrooms and laundries across Joondalup. Quick fix visits are affordable and we carry most parts on the van — usually done in one visit.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 5: LEAD CAPTURE -->
+    <div class="card hero-green" data-index="5">
+      <div class="card-hero" style="background:linear-gradient(135deg,#14532d,#052e16);">
+        <img src="https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=860&q=80&auto=format&fit=crop" alt="Get a Quote" loading="lazy">
+        <div class="card-hero-overlay"></div>
+      </div>
+      <div class="card-body lead-form">
+        <div class="card-tag">Get a Quote</div>
+        <div class="card-headline">Get your free <em>quote</em> today</div>
+        <div id="leadFormWrap">
+          <form id="leadForm" style="margin-top:4px;">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Lead — Smith Plumbing (Joondalup)">
+            <input type="hidden" name="from_name" value="Smith Plumbing iTabs Widget">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Smith Plumbing">
+            <input type="hidden" name="trade" value="Plumber">
+            <input type="hidden" name="suburb" value="Joondalup">
+            <div class="q-field">
+              <label>Your Name</label>
+              <input type="text" name="name" placeholder="e.g. Sarah Williams" required>
+            </div>
+            <div class="q-field">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" placeholder="e.g. 0412 345 678" required>
+            </div>
+            <div class="q-field">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="e.g. sarah@email.com" required>
+            </div>
+            <div class="q-field">
+              <label>Brief Job Description</label>
+              <textarea name="message" placeholder="e.g. Blocked kitchen sink, water draining slowly for a week…" required></textarea>
+            </div>
+            <button type="submit" class="lead-submit">Send my enquiry →</button>
+          </form>
+        </div>
+        <div id="leadSuccess" class="success-msg" style="display:none;">
+          <div class="tick">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks — Smith Plumbing will be in touch shortly. For urgent jobs call us direct:<br><br>
+            <a href="tel:0412555333">📞 0412 555 333</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /deck-wrapper -->
+
+  <!-- NAV ARROWS -->
+  <div class="card-nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="nav-counter" id="navCounter">1 / 6</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="widget-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-shell -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuote()">💰 Get a Quote</button>
+
+<!-- INFO OVERLAY -->
+<div class="info-overlay" id="infoOverlay" onclick="closeInfo(event)">
+  <div class="info-box">
+    <button class="info-close" onclick="closeInfo(null,true)">✕</button>
+    <h3 id="infoTitle"></h3>
+    <p id="infoText"></p>
+  </div>
+</div>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuote()"></div>
+  <div class="quote-sheet">
+    <div class="quote-handle"></div>
+    <div class="quote-header">
+      <h2>💰 Smith Plumbing — Quote</h2>
+      <button class="quote-close" onclick="closeQuote()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="price-label">ESTIMATED RANGE</div>
+        <div class="price-val" id="priceDisplay">Select a service</div>
+      </div>
+      <div style="font-size:28px;">🔧</div>
+    </div>
+
+    <!-- STEP DOTS -->
+    <div class="step-dots">
+      <div class="step-dot active" id="dot0"></div>
+      <div class="step-dot" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
+
+    <div class="quote-steps">
+
+      <!-- STEP 1: SERVICE TYPE -->
+      <div class="step active" id="qStep1">
+        <div class="step-title">What do you need?</div>
+        <div class="svc-grid">
+          <div class="svc-card" onclick="selectService(this,'Blocked Drain',180,320)">
+            <span class="svc-emoji">🚿</span>
+            <span class="svc-name">Blocked Drain</span>
+            <span class="svc-range">$180 – $320</span>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Hot Water System',900,1800)">
+            <span class="svc-emoji">🔥</span>
+            <span class="svc-name">Hot Water System</span>
+            <span class="svc-range">$900 – $1,800</span>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Gas Leak',220,480)">
+            <span class="svc-emoji">💨</span>
+            <span class="svc-name">Gas Leak</span>
+            <span class="svc-range">$220 – $480</span>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Leaking Tap',180,280)">
+            <span class="svc-emoji">🚰</span>
+            <span class="svc-name">Leaking Tap</span>
+            <span class="svc-range">$180 – $280</span>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'General Plumbing',150,350)">
+            <span class="svc-emoji">🔩</span>
+            <span class="svc-name">General Plumbing</span>
+            <span class="svc-range">$150 – $350</span>
+          </div>
+          <div class="svc-card" onclick="selectService(this,'Emergency Call-Out',280,550)">
+            <span class="svc-emoji">🚨</span>
+            <span class="svc-name">Emergency Call-Out</span>
+            <span class="svc-range">$280 – $550</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: COMPLEXITY -->
+      <div class="step" id="qStep2">
+        <div class="step-title">Job complexity</div>
+        <div class="complexity-list">
+          <div class="cplx-card" onclick="selectComplexity(this,'Basic','Quick fix, straightforward access',0.85)">
+            <div class="cplx-info">
+              <div class="cplx-name">Basic</div>
+              <div class="cplx-desc">Quick fix, straightforward access</div>
+            </div>
+            <div class="cplx-mult">× 0.85</div>
+          </div>
+          <div class="cplx-card" onclick="selectComplexity(this,'Standard','Typical job, some work involved',1.0)">
+            <div class="cplx-info">
+              <div class="cplx-name">Standard</div>
+              <div class="cplx-desc">Typical job, some work involved</div>
+            </div>
+            <div class="cplx-mult">× 1.0</div>
+          </div>
+          <div class="cplx-card" onclick="selectComplexity(this,'Complex','Major work, difficult access or old pipes',1.35)">
+            <div class="cplx-info">
+              <div class="cplx-name">Complex</div>
+              <div class="cplx-desc">Major work, difficult access or old pipes</div>
+            </div>
+            <div class="cplx-mult">× 1.35</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: CONTACT FORM -->
+      <div class="step" id="qStep3">
+        <div class="step-title">Your details</div>
+        <div class="q-selected-summary" id="qSummary">—</div>
+        <div id="qFormWrap">
+          <form id="quoteForm">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Quote Request — Smith Plumbing (Joondalup)">
+            <input type="hidden" name="from_name" value="Smith Plumbing iTabs Quote Widget">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="business" value="Smith Plumbing">
+            <input type="hidden" name="trade" value="Plumber">
+            <input type="hidden" name="selected_service" id="hiddenService">
+            <input type="hidden" name="complexity" id="hiddenComplexity">
+            <input type="hidden" name="estimate" id="hiddenEstimate">
+            <div class="q-field">
+              <label>Your Name</label>
+              <input type="text" name="name" placeholder="e.g. John Smith" required>
+            </div>
+            <div class="q-field">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" placeholder="e.g. 0412 345 678" required>
+            </div>
+            <div class="q-field">
+              <label>Email Address</label>
+              <input type="email" name="email" placeholder="e.g. john@email.com" required>
+            </div>
+            <div class="q-field">
+              <label>Any extra details?</label>
+              <textarea name="message" placeholder="e.g. Drain blocks every week, in the main bathroom…"></textarea>
+            </div>
+            <button type="submit" class="btn-primary">Send quote request →</button>
+            <button type="button" class="btn-back" onclick="goQStep(2)">← Back</button>
+          </form>
+        </div>
+        <div id="qSuccess" class="success-msg" style="display:none;">
+          <div class="tick">🎉</div>
+          <h3>Quote request sent!</h3>
+          <p>We'll be in touch with your personalised quote shortly. Need us urgently?<br><br>
+            <a href="tel:0412555333">📞 0412 555 333</a>
+          </p>
+        </div>
+      </div>
+
+    </div><!-- /quote-steps -->
+  </div><!-- /quote-sheet -->
+</div><!-- /quote-panel -->
+
+<script>
+// ─── CARD NAVIGATION ─────────────────────────────────────────────────────────
+const TOTAL = 6;
+let current = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+let isSwiping = false;
+
+const cards = document.querySelectorAll('.card');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const navCounter = document.getElementById('navCounter');
+
+function buildProgress(){
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const seg = document.createElement('div');
+    seg.className = 'prog-seg';
+    bar.appendChild(seg);
+  }
+}
+buildProgress();
+
+function updateUI(){
+  cards.forEach((c,i)=>{
+    c.classList.remove('active','prev');
+    if(i===current) c.classList.add('active');
+    else if(i<current) c.classList.add('prev');
+  });
+  const segs = document.querySelectorAll('.prog-seg');
+  segs.forEach((s,i)=>{
+    s.classList.remove('active','viewed');
+    if(i===current) s.classList.add('active');
+    else if(i<current) s.classList.add('viewed');
+  });
+  prevBtn.disabled = current===0;
+  nextBtn.disabled = current===TOTAL-1;
+  navCounter.textContent = (current+1)+' / '+TOTAL;
+}
+updateUI();
+
+function navigate(dir){
+  const next = current+dir;
+  if(next<0||next>=TOTAL) return;
+  current = next;
+  updateUI();
+}
+
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('quotePanel').classList.contains('open')) return;
+  if(e.key==='ArrowRight') navigate(1);
+  if(e.key==='ArrowLeft') navigate(-1);
+});
+
+// Touch swipe
+const dw = document.getElementById('deckWrapper');
+dw.addEventListener('touchstart',e=>{
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  isSwiping = false;
+},{passive:true});
+dw.addEventListener('touchmove',e=>{
+  const dx = e.touches[0].clientX - touchStartX;
+  const dy = e.touches[0].clientY - touchStartY;
+  if(!isSwiping && Math.abs(dx)>Math.abs(dy)) isSwiping=true;
+},{passive:true});
+dw.addEventListener('touchend',e=>{
+  if(!isSwiping) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if(Math.abs(dx)>45){
+    navigate(dx<0?1:-1);
+  }
+},{passive:true});
+
+// ─── INFO OVERLAY ─────────────────────────────────────────────────────────────
+const infoData = {
+  about:{
+    title:'About Smith Plumbing',
+    text:"Smith Plumbing is a family-run plumbing business proudly serving Joondalup and Perth's northern suburbs. We're fully licenced, police-cleared and carry full public liability insurance — so you can have confidence from the moment we arrive. Our tradie team believes in straight-up communication: we explain the problem, give you a clear price, and get it sorted with minimal fuss."
+  }
+};
+
+function openInfo(key){
+  const d = infoData[key];
+  if(!d) return;
+  document.getElementById('infoTitle').textContent = d.title;
+  document.getElementById('infoText').textContent = d.text;
+  document.getElementById('infoOverlay').classList.add('open');
+}
+function closeInfo(e, force){
+  if(force || (e && e.target===document.getElementById('infoOverlay'))){
+    document.getElementById('infoOverlay').classList.remove('open');
+  }
+}
+
+// ─── QUOTE PANEL ──────────────────────────────────────────────────────────────
+let selectedService = null;
+let baseMin = 0, baseMax = 0;
+let selectedComplexity = null;
+let complexityMult = 1.0;
+let currentQStep = 1;
+
+function openQuote(){
+  document.getElementById('quotePanel').classList.add('open');
+}
+function closeQuote(){
+  document.getElementById('quotePanel').classList.remove('open');
+}
+
+function goQStep(n){
+  document.getElementById('qStep'+currentQStep).classList.remove('active');
+  currentQStep = n;
+  document.getElementById('qStep'+currentQStep).classList.add('active');
+  updateDots();
+}
+
+function updateDots(){
+  for(let i=0;i<3;i++){
+    const dot = document.getElementById('dot'+i);
+    dot.classList.remove('active','done');
+    if(i+1===currentQStep) dot.classList.add('active');
+    else if(i+1<currentQStep) dot.classList.add('done');
+  }
+}
+
+function updatePrice(){
+  if(!selectedService){
+    document.getElementById('priceDisplay').textContent='Select a service';
+    return;
+  }
+  const lo = Math.round(baseMin * complexityMult / 10)*10;
+  const hi = Math.round(baseMax * complexityMult / 10)*10;
+  document.getElementById('priceDisplay').textContent='$'+lo.toLocaleString()+' – $'+hi.toLocaleString();
+  document.getElementById('hiddenEstimate').value='$'+lo.toLocaleString()+' – $'+hi.toLocaleString();
+}
+
+function selectService(el, name, min, max){
+  document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedService = name;
+  baseMin = min;
+  baseMax = max;
+  updatePrice();
+  setTimeout(()=>goQStep(2), 280);
+}
+
+function selectComplexity(el, name, desc, mult){
+  document.querySelectorAll('.cplx-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedComplexity = name;
+  complexityMult = mult;
+  updatePrice();
+  // Update summary
+  const lo = Math.round(baseMin * complexityMult / 10)*10;
+  const hi = Math.round(baseMax * complexityMult / 10)*10;
+  document.getElementById('qSummary').innerHTML =
+    '<span>'+selectedService+'</span> · <span>'+name+'</span> · <span>$'+lo.toLocaleString()+' – $'+hi.toLocaleString()+'</span>';
+  document.getElementById('hiddenService').value = selectedService;
+  document.getElementById('hiddenComplexity').value = name;
+  setTimeout(()=>goQStep(3), 280);
+}
+
+// Quote form submit
+document.getElementById('quoteForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = this.querySelector('button[type=submit]');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  const data = new FormData(this);
+  try{
+    const res = await fetch('https://api.web3forms.com/submit',{method:'POST',body:data});
+    const json = await res.json();
+    if(json.success){
+      document.getElementById('qFormWrap').style.display='none';
+      document.getElementById('qSuccess').style.display='block';
+    } else {
+      btn.textContent='Try again →';
+      btn.disabled=false;
+    }
+  } catch(err){
+    btn.textContent='Try again →';
+    btn.disabled=false;
+  }
+});
+
+// Lead card form submit
+document.getElementById('leadForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = this.querySelector('button[type=submit]');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  const data = new FormData(this);
+  try{
+    const res = await fetch('https://api.web3forms.com/submit',{method:'POST',body:data});
+    const json = await res.json();
+    if(json.success){
+      document.getElementById('leadFormWrap').style.display='none';
+      document.getElementById('leadSuccess').style.display='block';
+    } else {
+      btn.textContent='Try again →';
+      btn.disabled=false;
+    }
+  } catch(err){
+    btn.textContent='Try again →';
+    btn.disabled=false;
+  }
+});
+</script>
+</body>
+</html>
