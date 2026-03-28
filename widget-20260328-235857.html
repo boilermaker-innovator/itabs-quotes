@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>iTabs | Pete's Plumbing</title>
+  <meta name="description" content="Pete's Plumbing — Baldivis' trusted local plumber for blocked drains, hot water systems and gas fitting.">
+  <meta property="og:title" content="Pete's Plumbing — Baldivis">
+  <meta property="og:description" content="Pete's Plumbing — Baldivis' trusted local plumber for blocked drains, hot water systems and gas fitting.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=1200&q=80">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Pete's Plumbing — Baldivis">
+  <meta name="twitter:description" content="Pete's Plumbing — Baldivis' trusted local plumber for blocked drains, hot water systems and gas fitting.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=1200&q=80">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-tertiary: #1e1e2e;
+      --text-primary: #ffffff; --text-secondary: #9090b0;
+      --accent: #1d4ed8; --accent2: #38bdf8; --i-button: #38bdf8;
+      --card-radius: 16px; --transition: 0.2s ease;
+    }
+    html, body { height: 100%; overflow: hidden; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+    .container { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; position: relative; }
+    .progress-container { display: flex; gap: 4px; padding: 12px 16px 8px; position: absolute; top: 0; left: 0; right: 0; z-index: 100; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent); }
+    .progress-segment { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; transition: background var(--transition); }
+    .progress-segment.viewed { background: rgba(255,255,255,0.6); }
+    .progress-segment.active { background: var(--accent2); }
+    .cards-wrapper { flex: 1; position: relative; overflow: hidden; }
+    .card { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; pointer-events: none; }
+    .card.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+    .card.prev { opacity: 0; transform: translateX(-100%); }
+    .card-hero { padding: 52px 20px 20px; min-height: 38%; display: flex; flex-direction: column; justify-content: flex-end; }
+    .hero-default { background: linear-gradient(135deg, #1e3a5f 0%, #0c1f3a 100%); }
+    .hero-blue1   { background: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%); }
+    .hero-blue2   { background: linear-gradient(135deg, #0c4a6e 0%, #082f49 100%); }
+    .hero-blue3   { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); }
+    .hero-blue4   { background: linear-gradient(135deg, #164e63 0%, #0c2d48 100%); }
+    .card-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; }
+    .tag-blue1 { color: #93c5fd; } .tag-blue2 { color: #38bdf8; } .tag-blue3 { color: #7dd3fc; } .tag-blue4 { color: #67e8f9; } .tag-blue5 { color: #bae6fd; }
+    .card-headline { font-size: clamp(20px, 5vw, 26px); font-weight: 700; line-height: 1.25; }
+    .hero-default em { color: #93c5fd; font-style: normal; }
+    .hero-blue1 em   { color: #93c5fd; font-style: normal; }
+    .hero-blue2 em   { color: #38bdf8; font-style: normal; }
+    .hero-blue3 em   { color: #bfdbfe; font-style: normal; }
+    .hero-blue4 em   { color: #67e8f9; font-style: normal; }
+    .card-body { flex: 1; padding: 20px; background: var(--bg-secondary); overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .card-summary { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+    .action-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .action-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 20px; color: var(--text-primary); font-size: 13px; font-weight: 600; text-decoration: none; transition: all var(--transition); }
+    .action-btn:hover { background: rgba(255,255,255,0.12); }
+    .i-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .i-button { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(56,189,248,0.10); border: 1px solid rgba(56,189,248,0.3); border-radius: 20px; color: #38bdf8; font-size: 13px; font-weight: 600; cursor: pointer; transition: all var(--transition); }
+    .i-button:hover { background: rgba(56,189,248,0.2); }
+    .i-dot { width: 18px; height: 18px; background: #38bdf8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0; }
+    .lead-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .lead-form input, .lead-form textarea { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-primary); font-size: 14px; font-family: inherit; outline: none; }
+    .lead-form input::placeholder, .lead-form textarea::placeholder { color: var(--text-secondary); }
+    .lead-form textarea { min-height: 80px; resize: none; }
+    .lead-form input:focus, .lead-form textarea:focus { border-color: rgba(56,189,248,0.5); }
+    .submit-btn { padding: 14px; background: #1d4ed8; border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .submit-btn:hover { background: #1e40af; }
+    .whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: #25d366; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; margin-top: 4px; }
+    .whatsapp-btn:hover { background: #1fb855; }
+    .divider { display: flex; align-items: center; gap: 10px; color: var(--text-secondary); font-size: 12px; margin: 4px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+    .success-msg { display: none; text-align: center; padding: 20px; color: #6ee7b7; font-weight: 600; }
+    .nav-area { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--bg-secondary); border-top: 1px solid rgba(255,255,255,0.06); }
+    .nav-btn { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.08); border: none; color: var(--text-primary); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background var(--transition); }
+    .nav-btn:hover:not(:disabled) { background: rgba(255,255,255,0.15); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+    .card-counter { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .footer-link { text-align: center; padding: 8px; font-size: 11px; color: rgba(255,255,255,0.2); }
+    .footer-link a { color: inherit; text-decoration: none; }
+    .float-btn { position: fixed; bottom: 72px; right: 16px; background: #1d4ed8; border: none; border-radius: 24px; padding: 12px 20px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(29,78,216,0.5); z-index: 200; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity var(--transition); }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-sheet { width: 100%; max-width: 430px; margin: 0 auto; background: var(--bg-tertiary); border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
+    .modal-overlay.active .modal-sheet { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px; }
+    .modal-term { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .modal-type { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #38bdf8; margin-bottom: 12px; }
+    .modal-content { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+    .modal-close { margin-top: 20px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="progress-container" id="progress"></div>
+  <div class="cards-wrapper" id="cardsWrapper"></div>
+  <div class="nav-area">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">←</button>
+    <span class="card-counter" id="counter">1 / 6</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">→</button>
+  </div>
+</div>
+<button class="float-btn" onclick="jumpToCard(5)">🔧 Get a Quote</button>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-term" id="modalTerm"></div>
+    <div class="modal-type" id="modalType"></div>
+    <div class="modal-content" id="modalContent"></div>
+    <button class="modal-close" onclick="closeModal()">Close</button>
+  </div>
+</div>
+<script>
+const BUSINESS_NAME = "Pete's Plumbing";
+const cards = [
+  {
+    tag: "01 / PETE'S PLUMBING",
+    tagClass: "tag-blue1",
+    headline: "Baldivis' <em>trusted</em> local plumber",
+    heroClass: "hero-default",
+    summary: "Pete's Plumbing has been keeping Baldivis homes and businesses running smoothly for years. From burst pipes at midnight to hot water systems that call it quits on a cold morning — Pete and his team are the crew locals call first. Fully licensed, upfront pricing, no hidden costs.",
+    iButtons: [
+      {
+        label: "ℹ️ About Pete's Plumbing",
+        term: "About Pete's Plumbing",
+        type: "context",
+        content: "Pete's Plumbing is a locally owned and operated plumbing business based in Baldivis, serving the southern suburbs of Perth. Pete brings years of hands-on experience across residential and light commercial plumbing — from new builds in Baldivis Estate to heritage homes in the surrounding Rockingham area. All work is carried out by a fully licensed plumber and backed by a quality workmanship guarantee. Pete's straight-talking, prompt, and won't leave your driveway without the job done right."
+      }
+    ],
+    actionButtons: [
+      { label: "📞 Call Pete", href: "tel:0412555999" }
+    ],
+    form: null,
+    whatsappBtn: null
+  },
+  {
+    tag: "02 / BLOCKED DRAINS",
+    tagClass: "tag-blue2",
+    headline: "<em>Blocked drains</em> cleared fast",
+    heroClass: "hero-blue2",
+    summary: "Gurgling sinks, slow showers, overflowing toilets — Pete clears blocked drains in Baldivis same day.",
+    iButtons: [
+      {
+        label: "ℹ️ About Blocked Drains",
+        term: "Blocked Drains",
+        type: "context",
+        content: "Blocked drains are one of the most common plumbing calls Pete gets across Baldivis and the Rockingham corridor — and for good reason. Sandy soils, tree roots from native verge plantings, and ageing PVC can all cause serious blockages fast. Pete uses high-pressure water jetting and CCTV drain inspection to locate and clear the problem at the source, not just mask it. Most residential blockages are cleared within the same visit, with no dig required. Don't wait until it backs up into the house — call Pete at the first sign."
+      }
+    ],
+    actionButtons: [],
+    form: null,
+    whatsappBtn: null
+  },
+  {
+    tag: "03 / HOT WATER",
+    tagClass: "tag-blue3",
+    headline: "<em>Hot water</em> systems sorted",
+    heroClass: "hero-blue3",
+    summary: "Cold shower this morning? Pete replaces and repairs hot water systems across Baldivis — fast.",
+    iButtons: [
+      {
+        label: "ℹ️ About Hot Water Systems",
+        term: "Hot Water Systems",
+        type: "context",
+        content: "Whether your storage tank has given up the ghost or your continuous flow unit is playing up, Pete's Plumbing handles all major hot water system brands and types — electric, gas, solar, and heat pump. Baldivis homes often run on natural gas supplied by ATCO, and Pete is fully licensed to install and commission gas hot water units safely. He'll advise you on the most energy-efficient option for your household size and water usage, with supply and installation completed in a single visit where possible. Weekend callouts available."
+      }
+    ],
+    actionButtons: [],
+    form: null,
+    whatsappBtn: null
+  },
+  {
+    tag: "04 / GAS FITTING",
+    tagClass: "tag-blue4",
+    headline: "<em>Gas fitting</em> you can trust",
+    heroClass: "hero-blue4",
+    summary: "New BBQ points, gas appliances or leak checks — Pete is fully licensed for gas fitting in Baldivis.",
+    iButtons: [
+      {
+        label: "ℹ️ About Gas Fitting",
+        term: "Gas Fitting",
+        type: "context",
+        content: "Gas fitting is a licensed trade in Western Australia — don't risk letting an unlicensed person touch your gas lines. Pete holds a current gas fitting licence and regularly works across Baldivis, Safety Bay, and Waikiki installing new gas bayonet points, connecting cooktops, ovens, and outdoor BBQ points, as well as conducting gas leak detection and pressure testing. If you smell gas or suspect a leak, switch off your gas meter and call Pete immediately. All gas work is completed to AS/NZS standards and certified on completion."
+      }
+    ],
+    actionButtons: [],
+    form: null,
+    whatsappBtn: null
+  },
+  {
+    tag: "05 / WHY PETE",
+    tagClass: "tag-blue5",
+    headline: "The plumber <em>Baldivis</em> recommends",
+    heroClass: "hero-blue2",
+    summary: "Upfront pricing, same-day availability, and a guarantee on every job — that's the Pete's Plumbing difference.",
+    iButtons: [
+      {
+        label: "ℹ️ Why Choose Pete",
+        term: "Why Choose Pete's Plumbing",
+        type: "context",
+        content: "Pete's Plumbing has built its reputation in Baldivis the old-fashioned way — by showing up on time, quoting honestly, and doing quality work. Pete provides written quotes before starting any job, so there are no bill shocks at the end. He services all of Baldivis including Baldivis Estate, Rivergums, and nearby suburbs including Karnup, Settlers Hills, and Secret Harbour. All work is guaranteed, fully insured, and Pete is always reachable by phone — no call centre, no runaround. Just your local plumber who knows the area and stands behind his work."
+      }
+    ],
+    actionButtons: [],
+    form: null,
+    whatsappBtn: null
+  },
+  {
+    tag: "GET A QUOTE",
+    tagClass: "tag-blue1",
+    headline: "Get your free <em>quote</em> today",
+    heroClass: "hero-default",
+    summary: "We'll come to you anywhere in Baldivis — free measure, no obligation.",
+    iButtons: [],
+    actionButtons: [],
+    form: true,
+    whatsappBtn: null
+  }
+];
+let currentCard = 0;
+const totalCards = cards.length;
+const modalOverlay = document.getElementById('modalOverlay');
+function init() {
+  const progress = document.getElementById('progress');
+  const wrapper = document.getElementById('cardsWrapper');
+  cards.forEach((card, i) => {
+    const seg = document.createElement('div');
+    seg.className = 'progress-segment' + (i === 0 ? ' active' : '');
+    progress.appendChild(seg);
+    wrapper.appendChild(buildCard(card, i));
+  });
+  document.getElementById('counter').textContent = `1 / ${totalCards}`;
+  document.getElementById('prevBtn').disabled = true;
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+    if (e.key === 'Escape') closeModal();
+  });
+  let startX = 0;
+  const cw = document.getElementById('cardsWrapper');
+  cw.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+  cw.addEventListener('touchend', e => {
+    const diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) navigate(diff > 0 ? 1 : -1);
+  });
+}
+function buildCard(card, index) {
+  const el = document.createElement('div');
+  el.className = 'card' + (index === 0 ? ' active' : '');
+  const iButtonsHTML = card.iButtons.length
+    ? `<div class="i-buttons">${card.iButtons.map(b => `<button class="i-button" data-term="${b.term}" data-type="${b.type}" data-content="${encodeURIComponent(b.content)}"><span class="i-dot">i</span>${b.label}</button>`).join('')}</div>`
+    : '';
+  const actionButtonsHTML = card.actionButtons && card.actionButtons.length
+    ? `<div class="action-buttons">${card.actionButtons.map(b => `<a class="action-btn" href="${b.href}" target="_blank">${b.label}</a>`).join('')}</div>`
+    : '';
+  const whatsappHTML = card.whatsappBtn
+    ? `<div class="divider">or</div><a href="${card.whatsappBtn}" target="_blank" class="whatsapp-btn">💬 Message us on WhatsApp</a>`
+    : '';
+  const formHTML = card.form
+    ? `<form class="lead-form" onsubmit="submitForm(event)">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject" value="New iTabs Quote Request — Pete's Plumbing">
+        <input type="text" name="name" placeholder="Your name" required>
+        <input type="tel" name="phone" placeholder="Phone number" required>
+        <input type="email" name="email" placeholder="Email address" required>
+        <textarea name="message" placeholder="Brief job description — e.g. blocked drain in kitchen, no hot water"></textarea>
+        <button type="submit" class="submit-btn">Get a Quote →</button>
+      </form>
+      <div class="success-msg" id="successMsg">✅ Quote request sent!<br><small>Pete will be in touch shortly.</small></div>
+      ${whatsappHTML}`
+    : '';
+  el.innerHTML = `
+    <div class="card-hero ${card.heroClass}">
+      <div class="card-tag ${card.tagClass}">${card.tag}</div>
+      <h2 class="card-headline">${card.headline}</h2>
+    </div>
+    <div class="card-body">
+      <p class="card-summary">${card.summary}</p>
+      ${iButtonsHTML}
+      ${actionButtonsHTML}
+      ${formHTML}
+    </div>
+    <div class="footer-link"><a href="https://itabs.ai">Powered by iTabs — itabs.ai</a></div>
+  `;
+  el.querySelectorAll('.i-button').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      openModal(btn.dataset.term, btn.dataset.type, decodeURIComponent(btn.dataset.content));
+    });
+  });
+  return el;
+}
+function navigate(direction) {
+  const next = currentCard + direction;
+  if (next >= 0 && next < totalCards) updateCard(next);
+}
+function jumpToCard(index) { updateCard(index); }
+function updateCard(index) {
+  document.querySelectorAll('.card').forEach((c, i) => {
+    c.classList.remove('active', 'prev');
+    if (i === index) c.classList.add('active');
+    else if (i < index) c.classList.add('prev');
+  });
+  document.querySelectorAll('.progress-segment').forEach((s, i) => {
+    s.classList.remove('active', 'viewed');
+    if (i === index) s.classList.add('active');
+    else if (i < index) s.classList.add('viewed');
+  });
+  currentCard = index;
+  document.getElementById('counter').textContent = `${index + 1} / ${totalCards}`;
+  document.getElementById('prevBtn').disabled = index === 0;
+  document.getElementById('nextBtn').disabled = index === totalCards - 1;
+}
+function openModal(term, type, content) {
+  const typeLabels = { 'definition': 'Definition', 'context': 'More Info', 'why-it-matters': 'Why It Matters', 'related': 'Related' };
+  document.getElementById('modalTerm').textContent = term;
+  document.getElementById('modalType').textContent = typeLabels[type] || type;
+  document.getElementById('modalContent').textContent = content;
+  modalOverlay.classList.add('active');
+}
+function closeModal() { modalOverlay.classList.remove('active'); }
+async function submitForm(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    }
+  } catch(err) {
+    alert('Something went wrong. Please call Pete directly on 0412 555 999.');
+  }
+}
+init();
+</script>
+</body>
+</html>
