@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#0a0a0f;
+  --bg-secondary:#12121a;
+  --bg-tertiary:#1e1e2e;
+  --text-primary:#ffffff;
+  --text-secondary:#9090b0;
+  --accent:#7c3aed;
+  --i-button:#f59e0b;
+}
+html,body{
+  height:100%;width:100%;overflow:hidden;
+  font-family:'Inter',sans-serif;
+  background:var(--bg-primary);
+  color:var(--text-primary);
+}
+.widget-shell{
+  max-width:430px;
+  width:100%;
+  height:100vh;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  background:var(--bg-primary);
+}
+
+/* PROGRESS BAR */
+.progress-bar{
+  display:flex;
+  gap:3px;
+  padding:10px 14px 8px;
+  flex-shrink:0;
+  background:var(--bg-primary);
+  z-index:10;
+}
+.pb-seg{
+  height:3px;
+  flex:1;
+  border-radius:2px;
+  background:#333355;
+  transition:background .3s;
+}
+.pb-seg.viewed{background:#ffffff55}
+.pb-seg.active{background:var(--accent)}
+
+/* CARD DECK */
+.card-deck{
+  flex:1;
+  position:relative;
+  overflow:hidden;
+  touch-action:pan-y;
+}
+.card{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  border-radius:16px;
+  overflow:hidden;
+  opacity:0;
+  pointer-events:none;
+  transform:translateX(60px);
+  transition:opacity .35s ease, transform .35s ease;
+}
+.card.active{
+  opacity:1;
+  pointer-events:all;
+  transform:translateX(0);
+}
+.card.prev{
+  opacity:0;
+  transform:translateX(-60px);
+  pointer-events:none;
+}
+
+/* HERO */
+.hero{
+  position:relative;
+  height:220px;
+  flex-shrink:0;
+  overflow:hidden;
+}
+.hero img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.hero-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+}
+.hero-content{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:16px;
+}
+.card-tag{
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--i-button);
+  margin-bottom:6px;
+}
+.hero h2{
+  font-size:22px;
+  font-weight:800;
+  line-height:1.2;
+  color:#fff;
+}
+.hero h2 em{
+  font-style:normal;
+  color:#a78bfa;
+}
+
+/* CARD BODY */
+.card-body{
+  flex:1;
+  background:var(--bg-secondary);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  overflow-y:auto;
+}
+.card-body p{
+  font-size:14px;
+  line-height:1.6;
+  color:var(--text-secondary);
+}
+.i-btn{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  background:rgba(245,158,11,0.15);
+  border:1px solid rgba(245,158,11,0.35);
+  color:var(--i-button);
+  border-radius:20px;
+  padding:7px 14px;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  width:fit-content;
+  transition:background .2s;
+}
+.i-btn:hover{background:rgba(245,158,11,0.25)}
+.i-dot{
+  width:16px;height:16px;
+  background:var(--i-button);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:900;color:#000;flex-shrink:0;
+}
+
+/* LEAD CAPTURE CARD */
+.card-form{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.form-field{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.form-field label{
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-secondary);
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.form-field input,
+.form-field textarea{
+  background:var(--bg-tertiary);
+  border:1px solid #2a2a3e;
+  border-radius:8px;
+  padding:10px 12px;
+  color:#fff;
+  font-size:14px;
+  font-family:'Inter',sans-serif;
+  outline:none;
+  transition:border-color .2s;
+}
+.form-field input:focus,
+.form-field textarea:focus{border-color:var(--accent)}
+.form-field textarea{resize:none;height:72px}
+.submit-btn{
+  background:linear-gradient(135deg,#7c3aed,#5b21b6);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:13px;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+  transition:opacity .2s;
+}
+.submit-btn:hover{opacity:.9}
+.success-msg{
+  display:none;
+  background:rgba(16,185,129,0.15);
+  border:1px solid rgba(16,185,129,0.35);
+  border-radius:10px;
+  padding:16px;
+  text-align:center;
+  color:#6ee7b7;
+  font-size:14px;
+  line-height:1.6;
+}
+.success-msg a{color:#34d399;font-weight:700}
+
+/* NAV ARROWS */
+.nav-arrows{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:8px 14px 10px;
+  flex-shrink:0;
+  background:var(--bg-primary);
+}
+.nav-btn{
+  width:40px;height:40px;
+  border-radius:50%;
+  border:1px solid #2a2a3e;
+  background:var(--bg-tertiary);
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.nav-btn:hover{background:#2a2a3e}
+.nav-btn:disabled{opacity:0.3;cursor:default}
+.card-counter{
+  font-size:12px;
+  color:var(--text-secondary);
+  font-weight:600;
+}
+
+/* FLOATING QUOTE BUTTON */
+.float-btn{
+  position:fixed;
+  bottom:76px;
+  right:14px;
+  z-index:150;
+  background:var(--i-button);
+  color:#000;
+  border:none;
+  border-radius:28px;
+  padding:12px 18px;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  box-shadow:0 4px 20px rgba(245,158,11,0.5);
+  animation:pulse-amber 2.5s ease-in-out infinite;
+}
+@keyframes pulse-amber{
+  0%,100%{box-shadow:0 4px 20px rgba(245,158,11,0.5)}
+  50%{box-shadow:0 4px 32px rgba(245,158,11,0.85),0 0 0 8px rgba(245,158,11,0.12)}
+}
+
+/* QUOTE PANEL */
+.quote-panel{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  pointer-events:none;
+}
+.quote-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  opacity:0;
+  transition:opacity .35s;
+}
+.quote-sheet{
+  position:relative;
+  background:var(--bg-secondary);
+  border-radius:20px 20px 0 0;
+  max-height:88vh;
+  overflow-y:auto;
+  transform:translateY(100%);
+  transition:transform .4s cubic-bezier(.32,0,.67,0);
+  padding-bottom:24px;
+}
+.quote-panel.open{pointer-events:all}
+.quote-panel.open .quote-backdrop{opacity:1}
+.quote-panel.open .quote-sheet{transform:translateY(0);transition:transform .4s cubic-bezier(.33,1,.68,1)}
+
+.quote-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 18px 10px;
+  border-bottom:1px solid #1e1e2e;
+  position:sticky;
+  top:0;
+  background:var(--bg-secondary);
+  z-index:5;
+}
+.quote-header h3{
+  font-size:16px;
+  font-weight:800;
+  color:#fff;
+}
+.close-btn{
+  width:30px;height:30px;
+  border-radius:50%;
+  border:1px solid #2a2a3e;
+  background:var(--bg-tertiary);
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+.price-strip{
+  background:linear-gradient(135deg,#1e3a5f,#0f2744);
+  border-bottom:1px solid #1e3a5f;
+  padding:12px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.price-label{font-size:11px;color:#7ab3ef;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.price-value{font-size:22px;font-weight:900;color:#60a5fa}
+
+.quote-body{padding:16px 18px}
+.step{display:none}
+.step.active{display:block}
+.step-title{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+
+/* SERVICE GRID */
+.svc-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-bottom:4px;
+}
+.svc-tile{
+  background:var(--bg-tertiary);
+  border:2px solid transparent;
+  border-radius:10px;
+  padding:12px 10px;
+  cursor:pointer;
+  text-align:center;
+  transition:border-color .2s, background .2s;
+}
+.svc-tile:hover{background:#252535}
+.svc-tile.selected{border-color:var(--accent);background:rgba(124,58,237,0.15)}
+.svc-emoji{font-size:22px;display:block;margin-bottom:5px}
+.svc-name{font-size:12px;font-weight:700;color:#fff;display:block}
+.svc-range{font-size:10px;color:var(--text-secondary);display:block;margin-top:2px}
+
+/* COMPLEXITY */
+.complexity-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.cx-tile{
+  background:var(--bg-tertiary);
+  border:2px solid transparent;
+  border-radius:10px;
+  padding:12px 14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition:border-color .2s, background .2s;
+}
+.cx-tile:hover{background:#252535}
+.cx-tile.selected{border-color:var(--accent);background:rgba(124,58,237,0.15)}
+.cx-icon{font-size:20px;flex-shrink:0}
+.cx-label{font-size:13px;font-weight:700;color:#fff}
+.cx-desc{font-size:11px;color:var(--text-secondary);margin-top:1px}
+
+/* QUOTE FORM */
+.quote-form{display:flex;flex-direction:column;gap:10px}
+.qf-field{display:flex;flex-direction:column;gap:4px}
+.qf-field label{font-size:11px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:1px}
+.qf-field input,.qf-field textarea{
+  background:var(--bg-tertiary);border:1px solid #2a2a3e;border-radius:8px;
+  padding:10px 12px;color:#fff;font-size:14px;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .2s;
+}
+.qf-field input:focus,.qf-field textarea:focus{border-color:var(--accent)}
+.qf-field textarea{resize:none;height:64px}
+.next-btn,.send-btn{
+  background:linear-gradient(135deg,#7c3aed,#5b21b6);
+  color:#fff;border:none;border-radius:10px;
+  padding:13px;font-size:15px;font-weight:700;cursor:pointer;
+  width:100%;margin-top:4px;transition:opacity .2s;
+}
+.next-btn:hover,.send-btn:hover{opacity:.9}
+.back-link{
+  text-align:center;font-size:12px;color:var(--text-secondary);
+  cursor:pointer;margin-top:4px;text-decoration:underline;
+}
+.q-success{
+  display:none;text-align:center;padding:20px 10px;
+}
+.q-success .check{font-size:40px;margin-bottom:10px}
+.q-success h4{font-size:18px;font-weight:800;color:#fff;margin-bottom:6px}
+.q-success p{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.q-success a{color:#34d399;font-weight:700}
+
+/* MODAL (i-button popup) */
+.modal-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,0.75);
+  display:none;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--bg-secondary);
+  border-radius:16px;
+  padding:24px;
+  max-width:380px;
+  width:100%;
+  position:relative;
+}
+.modal-box h4{font-size:16px;font-weight:800;color:#fff;margin-bottom:10px}
+.modal-box p{font-size:14px;color:var(--text-secondary);line-height:1.7}
+.modal-close{
+  position:absolute;top:12px;right:12px;
+  width:28px;height:28px;border-radius:50%;
+  border:1px solid #2a2a3e;background:var(--bg-tertiary);
+  color:#fff;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* FOOTER */
+.footer{
+  text-align:center;
+  padding:6px 14px 8px;
+  font-size:10px;
+  color:#444466;
+  flex-shrink:0;
+  background:var(--bg-primary);
+}
+.footer a{color:#6655aa;text-decoration:none}
+
+/* HERO THEMES */
+.hero-default{background:linear-gradient(135deg,#1e293b,#0f172a)}
+.hero-purple{background:linear-gradient(135deg,#4c1d95,#1e1b4b)}
+.hero-cyan{background:linear-gradient(135deg,#164e63,#0c4a6e)}
+.hero-amber{background:linear-gradient(135deg,#78350f,#431407)}
+.hero-green{background:linear-gradient(135deg,#14532d,#052e16)}
+</style>
+</head>
+<body>
+
+<div class="widget-shell">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Trades hero" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / YOUR TRADE</div>
+          <h2>Your Business — <em>Quality Work in Your Suburb</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Welcome! This widget is ready to be customised with your business details. Simply provide your business name, trade, suburb, phone, email and services — and a fully branded quote widget will be built for you.</p>
+        <p>Tap the <strong style="color:var(--i-button)">💰 Get a Quote</strong> button below to see the interactive quote flow in action.</p>
+        <button class="i-btn" onclick="openModal('about')">
+          <span class="i-dot">i</span> About This Widget
+        </button>
+      </div>
+    </div>
+
+    <!-- CARD 1: SERVICE EXAMPLE 1 -->
+    <div class="card" data-index="1">
+      <div class="hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1504327651254-35680f356dfd?w=860&q=80&auto=format&fit=crop" alt="Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / SERVICE</div>
+          <h2>Your First <em>Service</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>This card will be replaced with a detailed description of your first service — tailored to your trade, your suburb, and what Perth customers actually need to know before they book.</p>
+        <p>Real pricing, real context, and copy written specifically for your business. No generic filler.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: SERVICE EXAMPLE 2 -->
+    <div class="card" data-index="2">
+      <div class="hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1558618047-f4e860a8c4b1?w=860&q=80&auto=format&fit=crop" alt="Service 2" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / SERVICE</div>
+          <h2>Your Second <em>Service</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Each service you offer gets its own dedicated card with Perth-specific copy, real pricing context, and a clear call to action — all feeding into the live quote panel.</p>
+        <p>Add as many services as you need. The widget adjusts automatically.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: SERVICE EXAMPLE 3 -->
+    <div class="card" data-index="3">
+      <div class="hero hero-default">
+        <img src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=860&q=80&auto=format&fit=crop" alt="Service 3" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / SERVICE</div>
+          <h2>Your Third <em>Service</em></h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>This placeholder card shows how additional services appear in the slider. Your final widget will only include the services you actually offer — nothing generic.</p>
+        <p>Perth customers expect straight answers. Your widget delivers them.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: LEAD CAPTURE -->
+    <div class="card" data-index="4">
+      <div class="hero hero-green">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Get a quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">GET A QUOTE</div>
+          <h2>Get your free <em>quote</em> today</h2>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-form" id="leadForm">
+          <div class="form-field">
+            <label>Your Name</label>
+            <input type="text" id="lf-name" placeholder="e.g. Sarah Johnson" autocomplete="name">
+          </div>
+          <div class="form-field">
+            <label>Phone</label>
+            <input type="tel" id="lf-phone" placeholder="e.g. 0412 345 678" autocomplete="tel">
+          </div>
+          <div class="form-field">
+            <label>Email</label>
+            <input type="email" id="lf-email" placeholder="you@email.com" autocomplete="email">
+          </div>
+          <div class="form-field">
+            <label>Brief Job Description</label>
+            <textarea id="lf-desc" placeholder="Tell us what you need done..."></textarea>
+          </div>
+          <button class="submit-btn" onclick="submitLead()">Send my enquiry →</button>
+        </div>
+        <div class="success-msg" id="leadSuccess">
+          <div style="font-size:32px;margin-bottom:8px">✅</div>
+          <strong style="color:#6ee7b7;font-size:16px">Enquiry sent!</strong>
+          <p style="margin-top:8px">Thanks! Your tradie will be in touch shortly.<br>
+          Questions? Call <a href="tel:0400000000">0400 000 000</a></p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- NAV ARROWS -->
+  <div class="nav-arrows">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="card-counter" id="cardCounter">1 / 5</span>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-shell -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <h3>💰 Your Business — Quote</h3>
+      <button class="close-btn" onclick="closeQuotePanel()">✕</button>
+    </div>
+    <div class="price-strip">
+      <span class="price-label">Estimated Range</span>
+      <span class="price-value" id="priceDisplay">Select a service</span>
+    </div>
+    <div class="quote-body">
+
+      <!-- STEP 1: SERVICE -->
+      <div class="step active" id="qStep1">
+        <div class="step-title">What do you need done?</div>
+        <div class="svc-grid">
+          <div class="svc-tile" onclick="selectService(this,'Service A',300,600)">
+            <span class="svc-emoji">🔧</span>
+            <span class="svc-name">Service A</span>
+            <span class="svc-range">$300 – $600</span>
+          </div>
+          <div class="svc-tile" onclick="selectService(this,'Service B',500,900)">
+            <span class="svc-emoji">🏗️</span>
+            <span class="svc-name">Service B</span>
+            <span class="svc-range">$500 – $900</span>
+          </div>
+          <div class="svc-tile" onclick="selectService(this,'Service C',800,1500)">
+            <span class="svc-emoji">⚡</span>
+            <span class="svc-name">Service C</span>
+            <span class="svc-range">$800 – $1,500</span>
+          </div>
+          <div class="svc-tile" onclick="selectService(this,'Service D',1200,2400)">
+            <span class="svc-emoji">🏠</span>
+            <span class="svc-name">Service D</span>
+            <span class="svc-range">$1,200 – $2,400</span>
+          </div>
+          <div class="svc-tile" onclick="selectService(this,'Service E',200,450)">
+            <span class="svc-emoji">🪛</span>
+            <span class="svc-name">Service E</span>
+            <span class="svc-range">$200 – $450</span>
+          </div>
+          <div class="svc-tile" onclick="selectService(this,'Service F',600,1100)">
+            <span class="svc-emoji">🛠️</span>
+            <span class="svc-name">Service F</span>
+            <span class="svc-range">$600 – $1,100</span>
+          </div>
+        </div>
+        <button class="next-btn" id="q1Next" onclick="goStep(2)" style="opacity:0.4;pointer-events:none">Next →</button>
+      </div>
+
+      <!-- STEP 2: COMPLEXITY -->
+      <div class="step" id="qStep2">
+        <div class="step-title">How complex is the job?</div>
+        <div class="complexity-grid">
+          <div class="cx-tile" onclick="selectComplexity(this,'Basic',0.85)">
+            <span class="cx-icon">🟢</span>
+            <div>
+              <div class="cx-label">Basic</div>
+              <div class="cx-desc">Straightforward, easy access, small scope</div>
+            </div>
+          </div>
+          <div class="cx-tile" onclick="selectComplexity(this,'Standard',1.0)">
+            <span class="cx-icon">🟡</span>
+            <div>
+              <div class="cx-label">Standard</div>
+              <div class="cx-desc">Average job, typical conditions</div>
+            </div>
+          </div>
+          <div class="cx-tile" onclick="selectComplexity(this,'Complex',1.35)">
+            <span class="cx-icon">🔴</span>
+            <div>
+              <div class="cx-label">Complex</div>
+              <div class="cx-desc">Larger scope, tricky access, extra materials</div>
+            </div>
+          </div>
+        </div>
+        <button class="next-btn" id="q2Next" onclick="goStep(3)" style="opacity:0.4;pointer-events:none">Next →</button>
+        <div class="back-link" onclick="goStep(1)">← Back</div>
+      </div>
+
+      <!-- STEP 3: CONTACT -->
+      <div class="step" id="qStep3">
+        <div class="step-title">Lock in your free quote</div>
+        <div class="quote-form" id="quoteFormFields">
+          <div class="qf-field">
+            <label>Name</label>
+            <input type="text" id="q-name" placeholder="Your full name" autocomplete="name">
+          </div>
+          <div class="qf-field">
+            <label>Phone</label>
+            <input type="tel" id="q-phone" placeholder="0412 345 678" autocomplete="tel">
+          </div>
+          <div class="qf-field">
+            <label>Email</label>
+            <input type="email" id="q-email" placeholder="you@email.com" autocomplete="email">
+          </div>
+          <div class="qf-field">
+            <label>Extra details (optional)</label>
+            <textarea id="q-notes" placeholder="Any extra details about your job..."></textarea>
+          </div>
+          <button class="send-btn" onclick="submitQuote()">Send my quote request →</button>
+        </div>
+        <div class="q-success" id="qSuccess">
+          <div class="check">✅</div>
+          <h4>Quote request sent!</h4>
+          <p>We'll be in touch very soon with your personalised quote.<br>
+          Need to chat now? Call <a href="tel:0400000000">0400 000 000</a></p>
+        </div>
+        <div class="back-link" onclick="goStep(2)" id="q3Back">← Back</div>
+      </div>
+
+    </div><!-- /quote-body -->
+  </div><!-- /quote-sheet -->
+</div><!-- /quote-panel -->
+
+<!-- MODAL (i-button) -->
+<div class="modal-overlay" id="modal-about" onclick="closeModal('about')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('about')">✕</button>
+    <h4>About This Widget</h4>
+    <p>This is an iTabs quote widget — a swipeable, mobile-first tool designed for Australian tradies. It shows your services, gives customers a live price estimate, and captures leads directly into your inbox.<br><br>
+    To get your own branded widget, visit <strong style="color:#a78bfa">itabs.ai</strong> or contact us at responses@itabs.ai. Supply your business name, trade, suburb, phone, email and list of services — we'll build the rest.</p>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const TOTAL_CARDS = 5;
+let currentCard = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+// Quote state
+let selServiceName = '';
+let selServiceMin = 0;
+let selServiceMax = 0;
+let selComplexity = 1.0;
+
+// ─── PROGRESS BAR ────────────────────────────────────────
+function buildProgressBar(){
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for(let i=0;i<TOTAL_CARDS;i++){
+    const seg = document.createElement('div');
+    seg.className='pb-seg';
+    if(i===currentCard) seg.classList.add('active');
+    else if(i<currentCard) seg.classList.add('viewed');
+    bar.appendChild(seg);
+  }
+}
+
+// ─── NAVIGATE ────────────────────────────────────────────
+function navigate(dir){
+  const cards = document.querySelectorAll('.card');
+  const newIndex = currentCard + dir;
+  if(newIndex<0||newIndex>=TOTAL_CARDS) return;
+
+  cards[currentCard].classList.remove('active');
+  if(dir>0) cards[currentCard].classList.add('prev');
+  else cards[currentCard].classList.remove('prev');
+
+  currentCard = newIndex;
+  cards[currentCard].classList.remove('prev');
+  cards[currentCard].classList.add('active');
+
+  document.getElementById('prevBtn').disabled = currentCard===0;
+  document.getElementById('nextBtn').disabled = currentCard===TOTAL_CARDS-1;
+  document.getElementById('cardCounter').textContent = `${currentCard+1} / ${TOTAL_CARDS}`;
+  buildProgressBar();
+}
+
+// ─── SWIPE ───────────────────────────────────────────────
+const deck = document.getElementById('cardDeck');
+deck.addEventListener('touchstart', e=>{touchStartX=e.changedTouches[0].screenX},{passive:true});
+deck.addEventListener('touchend', e=>{
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if(Math.abs(diff)>40){navigate(diff>0?1:-1)}
+},{passive:true});
+
+// Keyboard
+document.addEventListener('keydown', e=>{
+  if(document.getElementById('quotePanel').classList.contains('open')) return;
+  if(e.key==='ArrowRight') navigate(1);
+  if(e.key==='ArrowLeft') navigate(-1);
+});
+
+// ─── QUOTE PANEL ─────────────────────────────────────────
+function openQuotePanel(){
+  document.getElementById('quotePanel').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeQuotePanel(){
+  document.getElementById('quotePanel').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+// ─── QUOTE STEPS ─────────────────────────────────────────
+function goStep(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('qStep'+n).classList.add('active');
+}
+
+function selectService(el,name,min,max){
+  document.querySelectorAll('.svc-tile').forEach(t=>t.classList.remove('selected'));
+  el.classList.add('selected');
+  selServiceName=name; selServiceMin=min; selServiceMax=max;
+  updatePrice();
+  const btn=document.getElementById('q1Next');
+  btn.style.opacity='1'; btn.style.pointerEvents='all';
+}
+
+function selectComplexity(el,label,mult){
+  document.querySelectorAll('.cx-tile').forEach(t=>t.classList.remove('selected'));
+  el.classList.add('selected');
+  selComplexity=mult;
+  updatePrice();
+  const btn=document.getElementById('q2Next');
+  btn.style.opacity='1'; btn.style.pointerEvents='all';
+}
+
+function updatePrice(){
+  if(!selServiceMin){
+    document.getElementById('priceDisplay').textContent='Select a service';
+    return;
+  }
+  const lo=Math.round(selServiceMin*selComplexity/50)*50;
+  const hi=Math.round(selServiceMax*selComplexity/50)*50;
+  document.getElementById('priceDisplay').textContent=
+    `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+}
+
+// ─── SUBMIT QUOTE ─────────────────────────────────────────
+async function submitQuote(){
+  const name=document.getElementById('q-name').value.trim();
+  const phone=document.getElementById('q-phone').value.trim();
+  const email=document.getElementById('q-email').value.trim();
+  const notes=document.getElementById('q-notes').value.trim();
+
+  if(!name||!phone){alert('Please enter your name and phone number.');return;}
+
+  const lo=Math.round(selServiceMin*selComplexity/50)*50;
+  const hi=Math.round(selServiceMax*selComplexity/50)*50;
+
+  const body=new FormData();
+  body.append('access_key','99a11c15-5c61-4765-99c5-673adec64b16');
+  body.append('subject','New Quote Request — iTabs Widget');
+  body.append('from_name','iTabs Widget');
+  body.append('Business','Your Business');
+  body.append('Trade','Your Trade');
+  body.append('Service Selected',selServiceName);
+  body.append('Complexity',`${selComplexity}x`);
+  body.append('Estimated Range',`$${lo} – $${hi}`);
+  body.append('Customer Name',name);
+  body.append('Customer Phone',phone);
+  body.append('Customer Email',email||'Not provided');
+  body.append('Notes',notes||'None');
+  body.append('Sent To','responses@itabs.ai');
+
+  try{
+    const res=await fetch('https://api.web3forms.com/submit',{method:'POST',body});
+    const data=await res.json();
+    if(data.success){
+      document.getElementById('quoteFormFields').style.display='none';
+      document.getElementById('q3Back').style.display='none';
+      document.getElementById('qSuccess').style.display='block';
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
+  } catch(e){
+    alert('Network error. Please try again.');
+  }
+}
+
+// ─── SUBMIT LEAD FORM ─────────────────────────────────────
+async function submitLead(){
+  const name=document.getElementById('lf-name').value.trim();
+  const phone=document.getElementById('lf-phone').value.trim();
+  const email=document.getElementById('lf-email').value.trim();
+  const desc=document.getElementById('lf-desc').value.trim();
+
+  if(!name||!phone){alert('Please enter your name and phone number.');return;}
+
+  const body=new FormData();
+  body.append('access_key','99a11c15-5c61-4765-99c5-673adec64b16');
+  body.append('subject','New Enquiry — iTabs Widget');
+  body.append('from_name','iTabs Widget');
+  body.append('Business','Your Business');
+  body.append('Trade','Your Trade');
+  body.append('Customer Name',name);
+  body.append('Customer Phone',phone);
+  body.append('Customer Email',email||'Not provided');
+  body.append('Job Description',desc||'Not provided');
+  body.append('Sent To','responses@itabs.ai');
+
+  try{
+    const res=await fetch('https://api.web3forms.com/submit',{method:'POST',body});
+    const data=await res.json();
+    if(data.success){
+      document.getElementById('leadForm').style.display='none';
+      document.getElementById('leadSuccess').style.display='block';
+    } else {
+      alert('Something went wrong. Please try again.');
+    }
+  } catch(e){
+    alert('Network error. Please try again.');
+  }
+}
+
+// ─── MODAL ────────────────────────────────────────────────
+function openModal(id){
+  document.getElementById('modal-'+id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById('modal-'+id).classList.remove('open');
+}
+
+// ─── INIT ────────────────────────────────────────────────
+buildProgressBar();
+document.getElementById('cardCounter').textContent=`1 / ${TOTAL_CARDS}`;
+</script>
+</body>
+</html>
