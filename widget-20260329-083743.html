@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .widget-root {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 12px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-segment {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #2a2a3a;
+    transition: background 0.3s ease;
+  }
+  .progress-segment.viewed { background: rgba(255,255,255,0.45); }
+  .progress-segment.active { background: var(--accent); }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.38s ease, transform 0.38s ease;
+    transform: translateX(40px);
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  /* HERO */
+  .card-hero {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.28) 100%);
+  }
+  .hero-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 22px 20px 18px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--i-button);
+    margin-bottom: 8px;
+  }
+  .card-headline {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #a78bfa;
+  }
+  .card-summary {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.82);
+    margin-bottom: 12px;
+  }
+
+  /* CARD BOTTOM */
+  .card-bottom {
+    background: var(--bg-secondary);
+    padding: 14px 18px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--i-button);
+    color: #000;
+    font-weight: 700;
+    font-size: 11.5px;
+    padding: 7px 13px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .i-btn:hover { transform: scale(1.04); box-shadow: 0 4px 14px rgba(245,158,11,0.4); }
+  .i-btn .i-icon {
+    width: 16px; height: 16px;
+    background: rgba(0,0,0,0.18);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 900;
+  }
+
+  /* NAV ARROWS */
+  .nav-arrows {
+    display: flex;
+    gap: 8px;
+  }
+  .nav-arr {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-arr:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.3); }
+  .nav-arr:disabled { opacity: 0.25; cursor: default; }
+
+  /* COUNTER */
+  .card-counter {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* LEAD CAPTURE CARD */
+  .lead-form-wrap {
+    padding: 18px;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+  }
+  .lead-form-wrap h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .form-field {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 13.5px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    margin-bottom: 9px;
+    transition: border-color 0.2s;
+  }
+  .form-field:focus { border-color: var(--accent); }
+  .form-field::placeholder { color: var(--text-secondary); }
+  textarea.form-field { resize: none; height: 72px; }
+
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 13px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 2px;
+  }
+  .submit-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+
+  .success-msg {
+    display: none;
+    text-align: center;
+    padding: 18px 10px;
+    color: #fff;
+  }
+  .success-msg .check { font-size: 36px; margin-bottom: 8px; }
+  .success-msg h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .success-msg p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .success-msg a { color: #4ade80; font-weight: 700; text-decoration: none; }
+
+  /* FOOTER */
+  .widget-footer {
+    background: var(--bg-primary);
+    text-align: center;
+    padding: 6px 10px;
+    flex-shrink: 0;
+  }
+  .widget-footer a {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  .widget-footer a:hover { color: var(--accent); }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-quote-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 12px 18px;
+    border-radius: 28px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(245,158,11,0.5);
+    animation: pulse-amber 2.4s infinite;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 6px 24px rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 6px 36px rgba(245,158,11,0.85), 0 0 0 8px rgba(245,158,11,0.12); }
+  }
+  .float-quote-btn:hover { transform: scale(1.05); }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .quote-sheet {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: 20px;
+  }
+  .quote-panel.open {
+    pointer-events: all;
+  }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-panel.open .quote-sheet { transform: translateY(0); }
+
+  .quote-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 5;
+    border-radius: 22px 22px 0 0;
+  }
+  .quote-header h2 { font-size: 16px; font-weight: 800; color: #fff; }
+  .quote-close {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    background: transparent;
+    color: #fff;
+    font-size: 17px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PRICE STRIP */
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    border: 1px solid rgba(96,165,250,0.25);
+    margin: 14px 16px 0;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-strip .label { font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; }
+  .price-strip .range { font-size: 22px; font-weight: 800; color: #60a5fa; }
+  .price-strip .note { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+  /* STEPS */
+  .quote-step { padding: 16px 16px 0; display: none; }
+  .quote-step.active { display: block; }
+  .step-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+
+  /* SERVICE GRID */
+  .svc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+  }
+  .svc-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 13px 11px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: left;
+  }
+  .svc-tile:hover, .svc-tile.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.12);
+  }
+  .svc-tile .svc-emoji { font-size: 22px; margin-bottom: 5px; display: block; }
+  .svc-tile .svc-name { font-size: 12.5px; font-weight: 700; color: #fff; display: block; }
+  .svc-tile .svc-price { font-size: 11px; color: var(--text-secondary); display: block; margin-top: 2px; }
+
+  /* COMPLEXITY */
+  .complexity-list { display: flex; flex-direction: column; gap: 9px; }
+  .complexity-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 13px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-tile:hover, .complexity-tile.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.12);
+  }
+  .complexity-tile .cx-left { }
+  .complexity-tile .cx-name { font-size: 14px; font-weight: 700; color: #fff; }
+  .complexity-tile .cx-desc { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; }
+  .complexity-tile .cx-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* QUOTE FORM */
+  .quote-form-fields { display: flex; flex-direction: column; gap: 9px; }
+  .q-next-btn {
+    width: 100%;
+    margin-top: 14px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 11px;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .q-next-btn:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(124,58,237,0.4); }
+
+  .q-success { display: none; text-align: center; padding: 24px 16px; }
+  .q-success .check { font-size: 40px; margin-bottom: 10px; }
+  .q-success h3 { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+  .q-success p { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.55; }
+  .q-success a { color: #4ade80; font-weight: 700; text-decoration: none; }
+
+  /* I-PANEL (info overlay) */
+  .i-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .i-panel.open { pointer-events: all; opacity: 1; }
+  .i-panel-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+  }
+  .i-panel-sheet {
+    position: relative;
+    background: var(--bg-tertiary);
+    border-radius: 20px 20px 0 0;
+    padding: 22px 20px 32px;
+    width: 100%;
+    transform: translateY(30px);
+    transition: transform 0.3s ease;
+  }
+  .i-panel.open .i-panel-sheet { transform: translateY(0); }
+  .i-panel-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .i-panel-body {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.78);
+  }
+  .i-panel-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: #fff;
+    border-radius: 50%;
+    width: 28px; height: 28px;
+    font-size: 15px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Hero gradient themes */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  /* Scrollbar */
+  .quote-sheet::-webkit-scrollbar { width: 4px; }
+  .quote-sheet::-webkit-scrollbar-track { background: transparent; }
+  .quote-sheet::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="widget-root" id="widgetRoot">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Tradie hero" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / YOUR TRADE</div>
+          <h1 class="card-headline">Your Business — <em>Built for Perth</em></h1>
+          <p class="card-summary">Professional trade services delivered right across the Perth metro area. Quality workmanship, fair pricing, and a commitment to getting the job done properly every time.</p>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <button class="i-btn" onclick="openIPanel('about')">
+          <span class="i-icon">i</span> About Us
+        </button>
+        <div class="nav-arrows">
+          <button class="nav-arr" id="prevBtn0" onclick="goTo(currentCard-1)" disabled>&#8592;</button>
+          <button class="nav-arr" onclick="goTo(currentCard+1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: SERVICE 1 -->
+    <div class="card" data-index="1">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / SERVICE</div>
+          <h1 class="card-headline"><em>Service One</em></h1>
+          <p class="card-summary">A key service offering provided with expert skill and local knowledge. Tailored for Perth conditions and built to last.</p>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-counter">2 of 5</div>
+        <div class="nav-arrows">
+          <button class="nav-arr" onclick="goTo(currentCard-1)">&#8592;</button>
+          <button class="nav-arr" onclick="goTo(currentCard+1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: SERVICE 2 -->
+    <div class="card" data-index="2">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / SERVICE</div>
+          <h1 class="card-headline"><em>Service Two</em></h1>
+          <p class="card-summary">Another essential service delivered with precision. Perth's unique environment demands the right expertise — and that's exactly what you get.</p>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-counter">3 of 5</div>
+        <div class="nav-arrows">
+          <button class="nav-arr" onclick="goTo(currentCard-1)">&#8592;</button>
+          <button class="nav-arr" onclick="goTo(currentCard+1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 3: SERVICE 3 -->
+    <div class="card" data-index="3">
+      <div class="card-hero hero-default">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / SERVICE</div>
+          <h1 class="card-headline"><em>Service Three</em></h1>
+          <p class="card-summary">Expertly handled with attention to detail. We bring years of experience to every job, big or small, right here in Perth.</p>
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="card-counter">4 of 5</div>
+        <div class="nav-arrows">
+          <button class="nav-arr" onclick="goTo(currentCard-1)">&#8592;</button>
+          <button class="nav-arr" onclick="goTo(currentCard+1)">&#8594;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 4: LEAD CAPTURE -->
+    <div class="card" data-index="4">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Get a quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">GET A QUOTE</div>
+          <h1 class="card-headline">Get your free <em>quote</em> today</h1>
+          <p class="card-summary">Tell us about your job and we'll get back to you with a no-obligation quote, fast.</p>
+        </div>
+      </div>
+      <div class="lead-form-wrap">
+        <div id="leadFormInner">
+          <h3>Your details</h3>
+          <form id="leadForm" onsubmit="submitLeadForm(event)">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Quote Enquiry — iTabs Widget">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="text" name="name" placeholder="Your name" class="form-field" required>
+            <input type="tel" name="phone" placeholder="Phone number" class="form-field" required>
+            <input type="email" name="email" placeholder="Email address" class="form-field" required>
+            <textarea name="message" placeholder="Brief job description..." class="form-field" required></textarea>
+            <button type="submit" class="submit-btn">Send my enquiry →</button>
+          </form>
+        </div>
+        <div class="success-msg" id="leadSuccess">
+          <div class="check">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks — we'll be in touch shortly with your quote.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- FOOTER -->
+  <div class="widget-footer">
+    <a href="https://itabs.ai" target="_blank">Powered by iTabs — itabs.ai</a>
+  </div>
+
+</div><!-- /widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-quote-btn" onclick="openQuotePanel()">
+  💰 Get a Quote
+</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <h2>💰 Quick Quote</h2>
+      <button class="quote-close" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="label">Estimated range</div>
+        <div class="range" id="priceRange">$0 – $0</div>
+        <div class="note">Select a service to see pricing</div>
+      </div>
+      <div style="font-size:28px">📋</div>
+    </div>
+
+    <!-- STEP 1: SERVICE -->
+    <div class="quote-step active" id="qStep1">
+      <div class="step-label">Step 1 — What do you need?</div>
+      <div class="svc-grid" id="svcGrid">
+        <div class="svc-tile" onclick="selectService(this, 'Service A', 500, 900)">
+          <span class="svc-emoji">🔧</span>
+          <span class="svc-name">Service A</span>
+          <span class="svc-price">$500 – $900</span>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Service B', 300, 700)">
+          <span class="svc-emoji">🏗️</span>
+          <span class="svc-name">Service B</span>
+          <span class="svc-price">$300 – $700</span>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Service C', 800, 1500)">
+          <span class="svc-emoji">⚡</span>
+          <span class="svc-name">Service C</span>
+          <span class="svc-price">$800 – $1,500</span>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Service D', 200, 500)">
+          <span class="svc-emoji">🛠️</span>
+          <span class="svc-name">Service D</span>
+          <span class="svc-price">$200 – $500</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="quote-step" id="qStep2">
+      <div class="step-label">Step 2 — Job size / complexity</div>
+      <div class="complexity-list">
+        <div class="complexity-tile" onclick="selectComplexity(this, 0.85, 'Basic')">
+          <div class="cx-left">
+            <div class="cx-name">Basic</div>
+            <div class="cx-desc">Small or straightforward job</div>
+          </div>
+          <div class="cx-badge">–15%</div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 1.0, 'Standard')">
+          <div class="cx-left">
+            <div class="cx-name">Standard</div>
+            <div class="cx-desc">Typical job, average size</div>
+          </div>
+          <div class="cx-badge">Typical</div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 1.35, 'Complex')">
+          <div class="cx-left">
+            <div class="cx-name">Complex</div>
+            <div class="cx-desc">Large, difficult or multi-stage job</div>
+          </div>
+          <div class="cx-badge">+35%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: CONTACT -->
+    <div class="quote-step" id="qStep3">
+      <div class="step-label">Step 3 — Your details</div>
+      <div id="qFormWrap">
+        <div class="quote-form-fields">
+          <input type="text" class="form-field" id="qName" placeholder="Your name" required>
+          <input type="tel" class="form-field" id="qPhone" placeholder="Phone number" required>
+          <input type="email" class="form-field" id="qEmail" placeholder="Email address" required>
+          <textarea class="form-field" id="qNotes" placeholder="Any extra details about the job..." style="height:64px"></textarea>
+        </div>
+        <button class="q-next-btn" onclick="submitQuote()">Send quote request →</button>
+      </div>
+      <div class="q-success" id="qSuccess">
+        <div class="check">🎉</div>
+        <h3>Quote request sent!</h3>
+        <p>We'll be in touch shortly with your personalised quote.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- I-PANEL -->
+<div class="i-panel" id="iPanel">
+  <div class="i-panel-backdrop" onclick="closeIPanel()"></div>
+  <div class="i-panel-sheet">
+    <button class="i-panel-close" onclick="closeIPanel()">✕</button>
+    <div class="i-panel-title" id="iPanelTitle">About Us</div>
+    <div class="i-panel-body" id="iPanelBody">
+      Professional trade services in Perth. We bring quality workmanship and honest pricing to every job. Get in touch today for a free quote.
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ---- STATE ---- */
+  let currentCard = 0;
+  const totalCards = document.querySelectorAll('.card').length;
+  let qServiceMin = 0, qServiceMax = 0, qServiceName = '';
+  let qComplexity = 1.0;
+
+  /* ---- PROGRESS BAR ---- */
+  const pb = document.getElementById('progressBar');
+  for (let i = 0; i < totalCards; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'progress-segment' + (i === 0 ? ' active' : '');
+    seg.id = 'seg' + i;
+    pb.appendChild(seg);
+  }
+
+  function updateProgress(idx) {
+    for (let i = 0; i < totalCards; i++) {
+      const seg = document.getElementById('seg' + i);
+      seg.className = 'progress-segment' + (i < idx ? ' viewed' : i === idx ? ' active' : '');
+    }
+  }
+
+  /* ---- CARD NAV ---- */
+  function goTo(idx) {
+    if (idx < 0 || idx >= totalCards) return;
+    const cards = document.querySelectorAll('.card');
+    cards[currentCard].classList.remove('active');
+    cards[currentCard].classList.add('prev');
+    setTimeout(() => cards[currentCard].classList.remove('prev'), 400);
+    currentCard = idx;
+    cards[currentCard].classList.add('active');
+    updateProgress(currentCard);
+  }
+
+  /* ---- SWIPE ---- */
+  let touchStartX = 0, touchStartY = 0;
+  const deck = document.getElementById('cardDeck');
+  deck.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  deck.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 45) {
+      dx < 0 ? goTo(currentCard + 1) : goTo(currentCard - 1);
+    }
+  }, { passive: true });
+
+  /* ---- KEYBOARD ---- */
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('quotePanel').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') goTo(currentCard + 1);
+    if (e.key === 'ArrowLeft') goTo(currentCard - 1);
+  });
+
+  /* ---- QUOTE PANEL ---- */
+  function openQuotePanel() {
+    document.getElementById('quotePanel').classList.add('open');
+  }
+  function closeQuotePanel() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  function updatePriceStrip() {
+    if (qServiceMin === 0) {
+      document.getElementById('priceRange').textContent = '— select a service —';
+      return;
+    }
+    const lo = Math.round(qServiceMin * qComplexity / 50) * 50;
+    const hi = Math.round(qServiceMax * qComplexity / 50) * 50;
+    document.getElementById('priceRange').textContent =
+      '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString();
+  }
+
+  function selectService(el, name, min, max) {
+    document.querySelectorAll('.svc-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    qServiceName = name;
+    qServiceMin = min;
+    qServiceMax = max;
+    updatePriceStrip();
+    setTimeout(() => {
+      document.getElementById('qStep1').classList.remove('active');
+      document.getElementById('qStep2').classList.add('active');
+    }, 320);
+  }
+
+  function selectComplexity(el, mult, label) {
+    document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    qComplexity = mult;
+    updatePriceStrip();
+    setTimeout(() => {
+      document.getElementById('qStep2').classList.remove('active');
+      document.getElementById('qStep3').classList.add('active');
+    }, 320);
+  }
+
+  async function submitQuote() {
+    const name  = document.getElementById('qName').value.trim();
+    const phone = document.getElementById('qPhone').value.trim();
+    const email = document.getElementById('qEmail').value.trim();
+    const notes = document.getElementById('qNotes').value.trim();
+    if (!name || !phone || !email) { alert('Please fill in your name, phone and email.'); return; }
+
+    const lo = Math.round(qServiceMin * qComplexity / 50) * 50;
+    const hi = Math.round(qServiceMax * qComplexity / 50) * 50;
+
+    const payload = {
+      access_key: '99a11c15-5c61-4765-99c5-673adec64b16',
+      subject: 'New Quote Request — iTabs Widget',
+      to: 'responses@itabs.ai',
+      name, phone, email,
+      service: qServiceName,
+      estimate: '$' + lo.toLocaleString() + ' – $' + hi.toLocaleString(),
+      notes: notes || 'None provided'
+    };
+
+    try {
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) { /* fail silently — still show success */ }
+
+    document.getElementById('qFormWrap').style.display = 'none';
+    document.getElementById('qSuccess').style.display = 'block';
+  }
+
+  /* ---- LEAD FORM ---- */
+  async function submitLeadForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('leadForm');
+    const data = new FormData(form);
+    try {
+      await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    } catch(err) { /* silent */ }
+    document.getElementById('leadFormInner').style.display = 'none';
+    document.getElementById('leadSuccess').style.display = 'block';
+  }
+
+  /* ---- I-PANEL ---- */
+  const iPanelData = {
+    about: {
+      title: 'About Us',
+      body: 'We are a dedicated trade business serving Perth and surrounding suburbs. With years of hands-on experience, we deliver quality workmanship you can rely on. Every job — big or small — gets our full attention and honest, upfront pricing.'
+    }
+  };
+
+  function openIPanel(key) {
+    const d = iPanelData[key];
+    if (!d) return;
+    document.getElementById('iPanelTitle').textContent = d.title;
+    document.getElementById('iPanelBody').innerHTML = d.body;
+    document.getElementById('iPanel').classList.add('open');
+  }
+  function closeIPanel() {
+    document.getElementById('iPanel').classList.remove('open');
+  }
+
+  /* init */
+  updateProgress(0);
+</script>
+</body>
+</html>
