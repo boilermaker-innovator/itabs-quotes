@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  .widget-root {
+    max-width: 430px;
+    margin: 0 auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-seg {
+    height: 3px;
+    border-radius: 2px;
+    flex: 1;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .progress-seg.viewed { background: rgba(255,255,255,0.45); }
+  .progress-seg.active { background: var(--accent); }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(60px);
+    transition: opacity 0.38s ease, transform 0.38s ease;
+    will-change: transform, opacity;
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* HERO */
+  .card-hero {
+    position: relative;
+    height: 52%;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px 18px 18px;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.22) 100%);
+    z-index: 1;
+  }
+  .hero-content { position: relative; z-index: 2; }
+
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--i-button);
+    margin-bottom: 8px;
+    display: block;
+  }
+  .card-title {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.18;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+  }
+  .card-title em { color: #a78bfa; font-style: normal; }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 18px 18px 80px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .card-summary strong { color: var(--text-primary); }
+
+  /* I-BUTTON */
+  .i-btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .i-btn {
+    background: rgba(245,158,11,0.13);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.24); }
+  .i-btn .i-circle {
+    width: 17px; height: 17px;
+    background: var(--i-button);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+  }
+
+  /* TOOLTIP */
+  .tooltip-box {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.35);
+    border-radius: 12px;
+    padding: 14px 15px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    display: none;
+  }
+  .tooltip-box.visible { display: block; }
+  .tooltip-box strong { color: var(--text-primary); display: block; margin-bottom: 4px; }
+
+  /* NAV ARROWS */
+  .card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .nav-arrow {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: var(--bg-tertiary);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .nav-arrow:hover { background: rgba(124,58,237,0.3); }
+  .nav-arrow:disabled { opacity: 0.3; cursor: default; }
+
+  .nav-dots { display: flex; gap: 6px; }
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #2a2a3a;
+    transition: background 0.3s, transform 0.3s;
+  }
+  .nav-dot.active { background: var(--accent); transform: scale(1.3); }
+
+  /* LEAD CAPTURE CARD */
+  .lead-form { display: flex; flex-direction: column; gap: 11px; }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .form-field label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  .form-field input,
+  .form-field textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-field input:focus,
+  .form-field textarea:focus { border-color: var(--accent); }
+  .form-field textarea { resize: none; height: 72px; }
+  .submit-btn {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+    margin-top: 2px;
+  }
+  .submit-btn:hover { opacity: 0.88; }
+
+  .success-msg {
+    background: rgba(20,83,45,0.5);
+    border: 1px solid rgba(34,197,94,0.35);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    display: none;
+  }
+  .success-msg.visible { display: block; }
+  .success-msg h3 { color: #4ade80; margin-bottom: 8px; }
+  .success-msg p { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+  .success-msg a { color: var(--i-button); }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-quote-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 13px 16px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.2s infinite;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50% { box-shadow: 0 4px 38px rgba(245,158,11,0.78); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    opacity: 0;
+    transition: opacity 0.35s;
+    cursor: pointer;
+  }
+  .quote-sheet {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    padding: 0 0 30px;
+    max-height: 92vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    max-width: 430px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .quote-panel.open { pointer-events: auto; }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-panel.open .quote-sheet { transform: translateY(0); }
+
+  .quote-header {
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 5;
+  }
+  .quote-header h2 { font-size: 16px; font-weight: 800; }
+  .quote-close {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .price-strip {
+    background: linear-gradient(135deg, #1e1b4b, #0f172a);
+    border-bottom: 1px solid rgba(124,58,237,0.25);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-strip .label { font-size: 11px; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+  .price-strip .amount { font-size: 22px; font-weight: 900; color: #a78bfa; }
+  .price-strip .amount span { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+  .quote-step { padding: 18px; display: none; }
+  .quote-step.active { display: block; }
+  .quote-step-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+  /* SERVICE GRID */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .service-opt {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 13px;
+    padding: 14px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .service-opt:hover, .service-opt.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.15);
+  }
+  .service-opt .svc-emoji { font-size: 24px; display: block; margin-bottom: 6px; }
+  .service-opt .svc-label { font-size: 12px; font-weight: 700; color: var(--text-primary); display: block; }
+  .service-opt .svc-price { font-size: 11px; color: var(--text-secondary); display: block; margin-top: 3px; }
+
+  /* COMPLEXITY */
+  .complexity-opts { display: flex; flex-direction: column; gap: 10px; }
+  .complexity-opt {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 13px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .complexity-opt:hover, .complexity-opt.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.15);
+  }
+  .complexity-opt .cx-label { font-size: 14px; font-weight: 700; color: var(--text-primary); }
+  .complexity-opt .cx-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .complexity-opt .cx-mult { font-size: 13px; font-weight: 700; color: #a78bfa; }
+
+  .quote-next-btn {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+  }
+  .quote-next-btn:hover { opacity: 0.88; }
+  .quote-next-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .quote-back-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 8px 0 0;
+    display: block;
+  }
+
+  .qform { display: flex; flex-direction: column; gap: 11px; }
+
+  /* POWERED BY */
+  .powered-by {
+    text-align: center;
+    font-size: 11px;
+    color: #3a3a5a;
+    padding: 7px 0 0;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+  }
+  .powered-by a { color: #5b5b8a; text-decoration: none; }
+
+  /* Hero themes */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  /* Step indicators */
+  .step-indicators {
+    display: flex;
+    gap: 6px;
+    padding: 12px 18px 0;
+  }
+  .step-ind {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .step-ind.done { background: var(--accent); }
+  .step-ind.active { background: #a78bfa; }
+</style>
+</head>
+<body>
+<div class="widget-root">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Trade work" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">01 / YOUR LOCAL TRADIE</span>
+          <h1 class="card-title">Your Local Tradie — <em>Quality work you can trust</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          We're your local trade specialists, delivering quality workmanship across Perth. Whether it's a small repair or a full installation, we bring expertise, reliability and fair pricing to every job. No shortcuts — just solid, lasting work done right the first time.
+        </p>
+        <div class="i-btn-row">
+          <button class="i-btn" onclick="toggleTooltip('tt-about')">
+            <span class="i-circle">i</span> About Us
+          </button>
+        </div>
+        <div class="tooltip-box" id="tt-about">
+          <strong>About Your Local Tradie</strong>
+          We're passionate about delivering exceptional trade services across the Perth metro area. Our team brings years of hands-on experience and a commitment to quality that keeps our customers coming back. We're fully licensed, insured and dedicated to making every job a great experience from first contact to final sign-off.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: SERVICE 1 -->
+    <div class="card" data-index="1">
+      <div class="card-hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">02 / SERVICE</span>
+          <h1 class="card-title"><em>General Trade Services</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          From repairs to full installations, we handle a wide range of trade services across Perth. Perth's climate and building codes mean jobs need to be done correctly — we know the local requirements inside out and deliver work built to last in WA conditions. Get in touch for a free assessment and honest quote.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 2: SERVICE 2 -->
+    <div class="card" data-index="2">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">03 / SERVICE</span>
+          <h1 class="card-title"><em>Repairs &amp; Maintenance</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">
+          Regular maintenance and timely repairs protect your property and save money long-term. We respond quickly to repair requests across the Perth metro area, diagnosing issues fast and fixing them properly. Don't let small problems become expensive ones — call us before they escalate.
+        </p>
+      </div>
+    </div>
+
+    <!-- CARD 3: LEAD CAPTURE -->
+    <div class="card" data-index="3">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Get a quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <span class="card-tag">GET A QUOTE</span>
+          <h1 class="card-title">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <form class="lead-form" id="leadForm" onsubmit="submitLeadForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Quote Enquiry — iTabs Widget">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="business" value="Your Local Tradie">
+          <div class="form-field">
+            <label>Your Name</label>
+            <input type="text" name="name" placeholder="e.g. Sarah Johnson" required>
+          </div>
+          <div class="form-field">
+            <label>Phone Number</label>
+            <input type="tel" name="phone" placeholder="04xx xxx xxx" required>
+          </div>
+          <div class="form-field">
+            <label>Email Address</label>
+            <input type="email" name="email" placeholder="you@email.com" required>
+          </div>
+          <div class="form-field">
+            <label>Describe your job</label>
+            <textarea name="message" placeholder="Tell us what you need done, where you're located, and any relevant details…" required></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Send my enquiry →</button>
+        </form>
+        <div class="success-msg" id="leadSuccess">
+          <h3>✅ Enquiry sent!</h3>
+          <p>Thanks! We'll be in touch shortly with your free quote. If you need us urgently, call us directly.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- NAV -->
+  <div class="card-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <div class="nav-dots" id="navDots"></div>
+    <button class="nav-arrow" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- POWERED BY -->
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-root -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-quote-btn" onclick="openQuotePanel()">
+  💰 Get a Quote
+</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+
+    <div class="quote-header">
+      <h2>💰 Your Local Tradie — Quote</h2>
+      <button class="quote-close" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="label">Estimated Range</div>
+        <div class="amount" id="priceDisplay">$0 <span>— select a service</span></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);text-align:right;max-width:110px;line-height:1.4;">Prices are indicative estimates only</div>
+    </div>
+
+    <!-- STEP INDICATORS -->
+    <div class="step-indicators">
+      <div class="step-ind active" id="si0"></div>
+      <div class="step-ind" id="si1"></div>
+      <div class="step-ind" id="si2"></div>
+    </div>
+
+    <!-- STEP 1: SERVICE TYPE -->
+    <div class="quote-step active" id="qstep1">
+      <div class="quote-step-title">Step 1 — What do you need done?</div>
+      <div class="service-grid" id="serviceGrid">
+        <div class="service-opt" onclick="selectService(this, 'General Work', 300, 800)">
+          <span class="svc-emoji">🔨</span>
+          <span class="svc-label">General Work</span>
+          <span class="svc-price">$300–$800</span>
+        </div>
+        <div class="service-opt" onclick="selectService(this, 'Repair', 180, 450)">
+          <span class="svc-emoji">🔧</span>
+          <span class="svc-label">Repair</span>
+          <span class="svc-price">$180–$450</span>
+        </div>
+        <div class="service-opt" onclick="selectService(this, 'Installation', 400, 1200)">
+          <span class="svc-emoji">⚙️</span>
+          <span class="svc-label">Installation</span>
+          <span class="svc-price">$400–$1,200</span>
+        </div>
+        <div class="service-opt" onclick="selectService(this, 'Maintenance', 150, 350)">
+          <span class="svc-emoji">🛠️</span>
+          <span class="svc-label">Maintenance</span>
+          <span class="svc-price">$150–$350</span>
+        </div>
+        <div class="service-opt" onclick="selectService(this, 'Consultation', 100, 250)">
+          <span class="svc-emoji">📋</span>
+          <span class="svc-label">Consultation</span>
+          <span class="svc-price">$100–$250</span>
+        </div>
+        <div class="service-opt" onclick="selectService(this, 'Other', 200, 600)">
+          <span class="svc-emoji">❓</span>
+          <span class="svc-label">Other</span>
+          <span class="svc-price">POA</span>
+        </div>
+      </div>
+      <button class="quote-next-btn" id="step1Next" onclick="goToQStep(2)" disabled>Next →</button>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="quote-step" id="qstep2">
+      <div class="quote-step-title">Step 2 — Job complexity</div>
+      <div class="complexity-opts">
+        <div class="complexity-opt" onclick="selectComplexity(this, 0.85)">
+          <div>
+            <div class="cx-label">Basic</div>
+            <div class="cx-desc">Straightforward, minimal prep needed</div>
+          </div>
+          <div class="cx-mult">−15%</div>
+        </div>
+        <div class="complexity-opt" onclick="selectComplexity(this, 1.0)">
+          <div>
+            <div class="cx-label">Standard</div>
+            <div class="cx-desc">Typical job, average complexity</div>
+          </div>
+          <div class="cx-mult">Std</div>
+        </div>
+        <div class="complexity-opt" onclick="selectComplexity(this, 1.35)">
+          <div>
+            <div class="cx-label">Complex</div>
+            <div class="cx-desc">Difficult access, extra materials or scope</div>
+          </div>
+          <div class="cx-mult">+35%</div>
+        </div>
+      </div>
+      <button class="quote-next-btn" id="step2Next" onclick="goToQStep(3)" disabled>Next →</button>
+      <button class="quote-back-btn" onclick="goToQStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: CONTACT -->
+    <div class="quote-step" id="qstep3">
+      <div class="quote-step-title">Step 3 — Your details</div>
+      <form class="qform" id="quoteForm" onsubmit="submitQuoteForm(event)">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject" value="New Quote Request — iTabs Widget">
+        <input type="hidden" name="to" value="responses@itabs.ai">
+        <input type="hidden" name="business" value="Your Local Tradie">
+        <input type="hidden" name="service_selected" id="hiddenService" value="">
+        <input type="hidden" name="complexity" id="hiddenComplexity" value="">
+        <input type="hidden" name="estimate" id="hiddenEstimate" value="">
+        <div class="form-field">
+          <label>Your Name</label>
+          <input type="text" name="name" placeholder="e.g. Sarah Johnson" required>
+        </div>
+        <div class="form-field">
+          <label>Phone Number</label>
+          <input type="tel" name="phone" placeholder="04xx xxx xxx" required>
+        </div>
+        <div class="form-field">
+          <label>Email Address</label>
+          <input type="email" name="email" placeholder="you@email.com" required>
+        </div>
+        <div class="form-field">
+          <label>Any extra details?</label>
+          <textarea name="message" placeholder="Suburb, timing, anything else we should know…"></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Send my quote request →</button>
+      </form>
+      <div class="success-msg" id="quoteSuccess">
+        <h3>✅ Quote request sent!</h3>
+        <p>Thanks! We'll review your details and be in touch shortly with a detailed quote. Need us sooner? Give us a call!</p>
+      </div>
+      <button class="quote-back-btn" onclick="goToQStep(2)" style="margin-top:8px">← Back</button>
+    </div>
+
+  </div><!-- /quote-sheet -->
+</div><!-- /quote-panel -->
+
+<script>
+// ===== CARD NAVIGATION =====
+const TOTAL_CARDS = 4;
+let currentCard = 0;
+let viewed = new Set([0]);
+
+function buildProgressBar() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < TOTAL_CARDS; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'progress-seg' + (i === currentCard ? ' active' : viewed.has(i) ? ' viewed' : '');
+    bar.appendChild(seg);
+  }
+}
+
+function buildDots() {
+  const dots = document.getElementById('navDots');
+  dots.innerHTML = '';
+  for (let i = 0; i < TOTAL_CARDS; i++) {
+    const d = document.createElement('div');
+    d.className = 'nav-dot' + (i === currentCard ? ' active' : '');
+    d.onclick = () => goToCard(i);
+    dots.appendChild(d);
+  }
+}
+
+function goToCard(n) {
+  if (n < 0 || n >= TOTAL_CARDS) return;
+  const cards = document.querySelectorAll('.card');
+  cards[currentCard].classList.remove('active');
+  cards[currentCard].classList.add(n > currentCard ? 'prev' : '');
+  cards[currentCard].classList.remove(n <= currentCard ? 'prev' : '');
+  if (n < currentCard) {
+    cards[currentCard].classList.remove('prev');
+  } else {
+    cards[currentCard].classList.add('prev');
+  }
+  currentCard = n;
+  viewed.add(n);
+  cards[currentCard].classList.remove('prev');
+  cards[currentCard].classList.add('active');
+  document.getElementById('prevBtn').disabled = n === 0;
+  document.getElementById('nextBtn').disabled = n === TOTAL_CARDS - 1;
+  buildProgressBar();
+  buildDots();
+}
+
+function navigate(dir) { goToCard(currentCard + dir); }
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quotePanel').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft') navigate(-1);
+});
+
+// Touch / swipe
+let tsX = null;
+const deck = document.getElementById('cardDeck');
+deck.addEventListener('touchstart', e => { tsX = e.touches[0].clientX; }, { passive: true });
+deck.addEventListener('touchend', e => {
+  if (tsX === null) return;
+  const dx = e.changedTouches[0].clientX - tsX;
+  if (Math.abs(dx) > 45) navigate(dx < 0 ? 1 : -1);
+  tsX = null;
+}, { passive: true });
+
+// ===== TOOLTIP TOGGLE =====
+function toggleTooltip(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('visible');
+}
+
+// ===== LEAD FORM =====
+async function submitLeadForm(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('.submit-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  try {
+    const data = new FormData(form);
+    const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      form.style.display = 'none';
+      document.getElementById('leadSuccess').classList.add('visible');
+    } else {
+      btn.textContent = 'Send my enquiry →';
+      btn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
+  } catch {
+    btn.textContent = 'Send my enquiry →';
+    btn.disabled = false;
+    alert('Network error. Please try again.');
+  }
+}
+
+// ===== QUOTE PANEL =====
+let selectedServiceLow = 0;
+let selectedServiceHigh = 0;
+let selectedServiceName = '';
+let selectedMultiplier = null;
+
+function openQuotePanel() {
+  document.getElementById('quotePanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeQuotePanel() {
+  document.getElementById('quotePanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function updatePriceDisplay() {
+  const el = document.getElementById('priceDisplay');
+  if (!selectedServiceName) {
+    el.innerHTML = '$0 <span>— select a service</span>';
+    return;
+  }
+  const mult = selectedMultiplier || 1.0;
+  const lo = Math.round(selectedServiceLow * mult / 10) * 10;
+  const hi = Math.round(selectedServiceHigh * mult / 10) * 10;
+  el.innerHTML = `$${lo.toLocaleString()} – $${hi.toLocaleString()} <span>est.</span>`;
+  document.getElementById('hiddenEstimate').value = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+}
+
+function selectService(el, name, low, high) {
+  document.querySelectorAll('.service-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedServiceName = name;
+  selectedServiceLow = low;
+  selectedServiceHigh = high;
+  document.getElementById('hiddenService').value = name;
+  document.getElementById('step1Next').disabled = false;
+  updatePriceDisplay();
+}
+
+function selectComplexity(el, mult) {
+  document.querySelectorAll('.complexity-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMultiplier = mult;
+  const labels = { 0.85: 'Basic (−15%)', 1.0: 'Standard', 1.35: 'Complex (+35%)' };
+  document.getElementById('hiddenComplexity').value = labels[mult] || 'Standard';
+  document.getElementById('step2Next').disabled = false;
+  updatePriceDisplay();
+}
+
+function goToQStep(n) {
+  document.querySelectorAll('.quote-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('qstep' + n).classList.add('active');
+  ['si0','si1','si2'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'step-ind';
+    if (i < n - 1) el.classList.add('done');
+    else if (i === n - 1) el.classList.add('active');
+  });
+}
+
+// ===== QUOTE FORM =====
+async function submitQuoteForm(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('.submit-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  try {
+    const data = new FormData(form);
+    const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      form.style.display = 'none';
+      document.getElementById('quoteSuccess').classList.add('visible');
+      document.querySelector('#qstep3 .quote-back-btn').style.display = 'none';
+    } else {
+      btn.textContent = 'Send my quote request →';
+      btn.disabled = false;
+      alert('Something went wrong. Please try again.');
+    }
+  } catch {
+    btn.textContent = 'Send my quote request →';
+    btn.disabled = false;
+    alert('Network error. Please try again.');
+  }
+}
+
+// ===== INIT =====
+buildProgressBar();
+buildDots();
+document.getElementById('prevBtn').disabled = true;
+</script>
+</body>
+</html>
