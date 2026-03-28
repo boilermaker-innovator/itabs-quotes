@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>John Gyinstein — Builder Willeton</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .widget-shell {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    max-height: 860px;
+    background: var(--bg-primary);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    background: var(--bg-primary);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  .progress-segment {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: #333350;
+    transition: background 0.3s;
+  }
+  .progress-segment.viewed { background: rgba(255,255,255,0.45); }
+  .progress-segment.active { background: var(--accent); }
+
+  /* CARD DECK */
+  .card-deck {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    transform: translateX(40px);
+  }
+  .card.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
+  .card.prev {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+
+  /* HERO */
+  .card-hero {
+    position: relative;
+    height: 210px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .card-hero .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 1;
+  }
+  .card-hero .hero-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 18px 14px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 6px;
+  }
+  .card-headline {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #c084fc;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 16px 18px 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--i-button);
+    width: fit-content;
+    transition: background 0.2s;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn .i-circle {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--i-button);
+    color: #000;
+    font-size: 11px;
+    font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* I-PANEL */
+  .i-panel {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    display: none;
+  }
+  .i-panel.open { display: block; }
+
+  /* NAV ARROWS */
+  .card-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px 12px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .nav-arrow {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .nav-arrow:hover { background: var(--accent); }
+  .nav-arrow:disabled { opacity: 0.3; cursor: default; }
+  .nav-counter {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* POWERED BY */
+  .powered-by {
+    text-align: center;
+    font-size: 10px;
+    color: #444466;
+    padding: 4px 0 6px;
+    background: var(--bg-primary);
+    flex-shrink: 0;
+  }
+  .powered-by a { color: #666688; text-decoration: none; }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-quote-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 16px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.5);
+    animation: pulse-amber 2.2s infinite;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 4px 20px rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 4px 32px rgba(245,158,11,0.85), 0 0 0 8px rgba(245,158,11,0.12); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-panel.open { pointer-events: all; }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-sheet {
+    position: relative;
+    z-index: 1;
+    background: var(--bg-secondary);
+    border-radius: 20px 20px 0 0;
+    padding: 0 0 24px;
+    transform: translateY(100%);
+    transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+    max-height: 88vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+  }
+  .quote-panel.open .quote-sheet { transform: translateY(0); }
+
+  .quote-header {
+    padding: 18px 18px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .quote-header-title {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .quote-close {
+    width: 30px; height: 30px;
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PRICE STRIP */
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a5f, #0c1e3a);
+    border: 1px solid rgba(99,179,237,0.25);
+    margin: 12px 16px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-label { font-size: 11px; color: #63b3ed; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+  .price-range { font-size: 20px; font-weight: 800; color: #fff; }
+
+  /* STEP */
+  .quote-step { display: none; padding: 0 16px; }
+  .quote-step.active { display: block; }
+  .step-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    margin-top: 4px;
+  }
+
+  /* SERVICE GRID */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+  .service-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: center;
+  }
+  .service-tile:hover, .service-tile.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.12);
+  }
+  .tile-emoji { font-size: 22px; margin-bottom: 5px; }
+  .tile-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .tile-price { font-size: 10px; color: var(--text-secondary); }
+
+  /* COMPLEXITY */
+  .complexity-grid {
+    display: flex;
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+  .complexity-tile {
+    flex: 1;
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-tile:hover, .complexity-tile.selected {
+    border-color: var(--accent);
+    background: rgba(124,58,237,0.12);
+  }
+  .complexity-name { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .complexity-desc { font-size: 10px; color: var(--text-secondary); }
+
+  /* FORM */
+  .qform-group { margin-bottom: 11px; }
+  .qform-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .qform-group input,
+  .qform-group textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .qform-group input:focus,
+  .qform-group textarea:focus { border-color: var(--accent); }
+  .qform-group textarea { resize: vertical; min-height: 72px; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 4px;
+  }
+  .btn-primary:hover { background: #6d28d9; }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    transition: border-color 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.35); }
+
+  /* SUCCESS */
+  .success-msg {
+    text-align: center;
+    padding: 24px 16px;
+    display: none;
+  }
+  .success-msg.show { display: block; }
+  .success-icon { font-size: 44px; margin-bottom: 12px; }
+  .success-title { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+  .success-sub { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+  .success-call {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.35);
+    color: #4ade80;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: 14px;
+  }
+
+  /* LEAD CAPTURE CARD FORM */
+  .lc-form { display: flex; flex-direction: column; gap: 10px; }
+  .lc-form input, .lc-form textarea {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 10px 12px;
+    outline: none;
+  }
+  .lc-form input:focus, .lc-form textarea:focus { border: 1px solid var(--accent); }
+  .lc-form textarea { resize: vertical; min-height: 68px; }
+  .lc-submit {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .lc-submit:hover { background: #15803d; }
+  .lc-success {
+    text-align: center;
+    padding: 10px 0;
+    display: none;
+  }
+  .lc-success.show { display: block; }
+  .lc-success p { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .lc-success span { font-size: 13px; color: var(--text-secondary); }
+
+  /* Hero themes */
+  .hero-default { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple  { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green   { background: linear-gradient(135deg, #14532d, #052e16); }
+</style>
+</head>
+<body>
+
+<div class="widget-shell" id="widgetShell">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="card-deck" id="cardDeck">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card active" data-index="0">
+      <div class="card-hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Builder Willeton" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / John Gyinstein Builder</div>
+          <div class="card-headline">John Gyinstein — <em>Willeton's trusted builder</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-summary">
+          John Gyinstein is a seasoned builder based in Willeton, delivering quality construction and flashing work across Perth's southern suburbs. With a hands-on approach and an eye for detail, John gets the job done right the first time — no shortcuts. From large-scale flashing installations to structural builds, he's the local name homeowners and developers trust.
+        </div>
+        <button class="i-btn" onclick="togglePanel('about-panel')">
+          <span class="i-circle">i</span> About John Gyinstein
+        </button>
+        <div class="i-panel" id="about-panel">
+          John Gyinstein has built a solid reputation across Willeton and surrounding Perth suburbs as a builder who takes pride in his craft. He specialises in large flashing installations and quality construction work that stands up to Perth's harsh sun, strong winds and occasional heavy downpours. When you hire John, you get a tradesman who shows up on time, communicates clearly and doesn't cut corners on materials or workmanship.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: MASSIVE FLASHING -->
+    <div class="card" data-index="1">
+      <div class="card-hero hero-amber">
+        <img src="https://images.unsplash.com/photo-1632823471565-1ecdf5c6da9d?w=860&q=80&auto=format&fit=crop" alt="Massive Flashing Willeton" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / Service</div>
+          <div class="card-headline"><em>Massive Flashing</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-summary">
+          Perth's intense UV, coastal winds and summer storm seasons make proper flashing one of the most critical elements of any building envelope. John Gyinstein specialises in large-scale flashing installations — covering rooflines, parapets, window surrounds and wall junctions to prevent costly water ingress. Whether you're building new or retrofitting an existing structure in Willeton, John uses top-grade materials and precision installation techniques to ensure a watertight, long-lasting result.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 2: LEAD CAPTURE -->
+    <div class="card" data-index="2">
+      <div class="card-hero hero-green">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Get a Quote Willeton Builder" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">Get a Quote</div>
+          <div class="card-headline">Get your free <em>quote</em> today</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="lc-success" id="lcSuccess">
+          <p>✅ Enquiry sent!</p>
+          <span>John will be in touch shortly. Need to talk now?</span><br>
+          <a class="success-call" href="tel:0455586044">📞 Call John — 0455 586 044</a>
+        </div>
+        <form class="lc-form" id="lcForm">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Lead — John Gyinstein Builder Willeton">
+          <input type="hidden" name="to" value="kristian.bell06@gmail.com">
+          <input type="hidden" name="business" value="John Gyinstein Builder">
+          <input type="hidden" name="trade" value="Builder">
+          <input type="hidden" name="suburb" value="Willeton">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Brief job description — e.g. large flashing installation on new build..."></textarea>
+          <button type="submit" class="lc-submit">Send my enquiry →</button>
+        </form>
+      </div>
+    </div>
+
+  </div><!-- /card-deck -->
+
+  <!-- NAV -->
+  <div class="card-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="navigate(-1)" disabled>&#8592;</button>
+    <span class="nav-counter" id="navCounter">1 / 3</span>
+    <button class="nav-arrow" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <div class="powered-by">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+</div>
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="float-quote-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+    <div class="quote-header">
+      <div class="quote-header-title">💰 John Gyinstein — Quote</div>
+      <button class="quote-close" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="price-label">Live Estimate</div>
+        <div class="price-range" id="priceRange">Select a service</div>
+      </div>
+      <div style="font-size:24px;">🏗️</div>
+    </div>
+
+    <!-- STEP 1: SERVICE TYPE -->
+    <div class="quote-step active" id="step1">
+      <div class="step-label">Step 1 — What do you need?</div>
+      <div class="service-grid">
+        <div class="service-tile" onclick="selectService(this, 'Parapet Flashing', 1800, 4500)">
+          <div class="tile-emoji">🏛️</div>
+          <div class="tile-label">Parapet Flashing</div>
+          <div class="tile-price">$1,800 – $4,500</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Roof Flashing', 1200, 3500)">
+          <div class="tile-emoji">🏠</div>
+          <div class="tile-label">Roof Flashing</div>
+          <div class="tile-price">$1,200 – $3,500</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Window Flashing', 800, 2200)">
+          <div class="tile-emoji">🪟</div>
+          <div class="tile-label">Window Flashing</div>
+          <div class="tile-price">$800 – $2,200</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Wall Junction Flashing', 1500, 4000)">
+          <div class="tile-emoji">🧱</div>
+          <div class="tile-label">Wall Junction Flashing</div>
+          <div class="tile-price">$1,500 – $4,000</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Full Building Envelope', 5000, 14000)">
+          <div class="tile-emoji">🏗️</div>
+          <div class="tile-label">Full Building Envelope</div>
+          <div class="tile-price">$5,000 – $14,000</div>
+        </div>
+        <div class="service-tile" onclick="selectService(this, 'Remedial / Repair', 600, 2000)">
+          <div class="tile-emoji">🔧</div>
+          <div class="tile-label">Remedial / Repair</div>
+          <div class="tile-price">$600 – $2,000</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="quote-step" id="step2">
+      <div class="step-label">Step 2 — Job complexity</div>
+      <div class="complexity-grid">
+        <div class="complexity-tile" onclick="selectComplexity(this, 0.85)">
+          <div class="complexity-name">Basic</div>
+          <div class="complexity-desc">Straightforward access, standard materials</div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 1.0)">
+          <div class="complexity-name">Standard</div>
+          <div class="complexity-desc">Typical job, moderate scope</div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 1.35)">
+          <div class="complexity-name">Complex</div>
+          <div class="complexity-desc">Large scale, difficult access, premium finish</div>
+        </div>
+      </div>
+      <button class="btn-secondary" onclick="goToStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: CONTACT -->
+    <div class="quote-step" id="step3">
+      <div class="step-label">Step 3 — Your details</div>
+      <div class="success-msg" id="qSuccess">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Enquiry sent!</div>
+        <div class="success-sub">John Gyinstein will be in touch shortly. Want to speak now?</div>
+        <a class="success-call" href="tel:0455586044">📞 0455 586 044</a>
+      </div>
+      <form id="qForm">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject" value="Quote Request — John Gyinstein Builder Willeton">
+        <input type="hidden" name="to" value="kristian.bell06@gmail.com">
+        <input type="hidden" name="business" value="John Gyinstein Builder">
+        <input type="hidden" name="trade" value="Builder">
+        <input type="hidden" id="qServiceField" name="service" value="">
+        <input type="hidden" id="qComplexityField" name="complexity" value="">
+        <input type="hidden" id="qEstimateField" name="estimate" value="">
+        <div class="qform-group">
+          <label>Your Name</label>
+          <input type="text" name="name" placeholder="e.g. Sarah Thompson" required>
+        </div>
+        <div class="qform-group">
+          <label>Phone</label>
+          <input type="tel" name="phone" placeholder="04XX XXX XXX" required>
+        </div>
+        <div class="qform-group">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="you@email.com" required>
+        </div>
+        <div class="qform-group">
+          <label>Job Details</label>
+          <textarea name="message" placeholder="Tell John a bit more — location in Willeton, size of job, any access issues..."></textarea>
+        </div>
+        <button type="submit" class="btn-primary">Send my enquiry →</button>
+        <button type="button" class="btn-secondary" onclick="goToStep(2)">← Back</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ---- CARD NAVIGATION ----
+  const totalCards = 3;
+  let current = 0;
+
+  function buildProgress() {
+    const bar = document.getElementById('progressBar');
+    bar.innerHTML = '';
+    for (let i = 0; i < totalCards; i++) {
+      const seg = document.createElement('div');
+      seg.className = 'progress-segment';
+      if (i < current) seg.classList.add('viewed');
+      else if (i === current) seg.classList.add('active');
+      bar.appendChild(seg);
+    }
+  }
+
+  function showCard(index) {
+    const cards = document.querySelectorAll('.card');
+    cards.forEach((c, i) => {
+      c.classList.remove('active', 'prev');
+      if (i === index) c.classList.add('active');
+      else if (i < index) c.classList.add('prev');
+    });
+    current = index;
+    document.getElementById('navCounter').textContent = `${current + 1} / ${totalCards}`;
+    document.getElementById('prevBtn').disabled = current === 0;
+    document.getElementById('nextBtn').disabled = current === totalCards - 1;
+    buildProgress();
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < totalCards) showCard(next);
+  }
+
+  buildProgress();
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  });
+
+  // Touch/swipe
+  let touchStartX = 0;
+  const deck = document.getElementById('cardDeck');
+  deck.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  deck.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 45) navigate(diff > 0 ? 1 : -1);
+  });
+
+  // ---- I-PANELS ----
+  function togglePanel(id) {
+    const panel = document.getElementById(id);
+    panel.classList.toggle('open');
+  }
+
+  // ---- LEAD CAPTURE FORM ----
+  document.getElementById('lcForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('lcSuccess').classList.add('show');
+      }
+    } catch (err) {
+      alert('Something went wrong. Please call John directly on 0455 586 044.');
+    }
+  });
+
+  // ---- QUOTE PANEL ----
+  let selectedServiceName = '';
+  let selectedLow = 0;
+  let selectedHigh = 0;
+  let selectedComplexity = 1.0;
+  let currentStep = 1;
+
+  function openQuotePanel() {
+    document.getElementById('quotePanel').classList.add('open');
+  }
+  function closeQuotePanel() {
+    document.getElementById('quotePanel').classList.remove('open');
+  }
+
+  function goToStep(n) {
+    document.querySelectorAll('.quote-step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    currentStep = n;
+  }
+
+  function formatPrice(n) {
+    return '$' + Math.round(n).toLocaleString('en-AU');
+  }
+
+  function updatePriceStrip() {
+    if (!selectedServiceName) {
+      document.getElementById('priceRange').textContent = 'Select a service';
+      return;
+    }
+    const low = Math.round(selectedLow * selectedComplexity);
+    const high = Math.round(selectedHigh * selectedComplexity);
+    document.getElementById('priceRange').textContent = `${formatPrice(low)} – ${formatPrice(high)}`;
+    document.getElementById('qEstimateField').value = `${formatPrice(low)} – ${formatPrice(high)}`;
+  }
+
+  function selectService(tile, name, low, high) {
+    document.querySelectorAll('.service-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    selectedServiceName = name;
+    selectedLow = low;
+    selectedHigh = high;
+    document.getElementById('qServiceField').value = name;
+    updatePriceStrip();
+    setTimeout(() => goToStep(2), 280);
+  }
+
+  function selectComplexity(tile, multiplier) {
+    document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    selectedComplexity = multiplier;
+    const label = multiplier === 0.85 ? 'Basic' : multiplier === 1.0 ? 'Standard' : 'Complex';
+    document.getElementById('qComplexityField').value = label;
+    updatePriceStrip();
+    setTimeout(() => goToStep(3), 280);
+  }
+
+  // Quote form submission
+  document.getElementById('qForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: data });
+      const json = await res.json();
+      if (json.success) {
+        form.style.display = 'none';
+        document.getElementById('qSuccess').classList.add('show');
+      }
+    } catch (err) {
+      alert('Something went wrong. Please call John directly on 0455 586 044.');
+    }
+  });
+</script>
+</body>
+</html>
