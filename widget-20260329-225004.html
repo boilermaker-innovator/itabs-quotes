@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── WIDGET SHELL ── */
+  .widget {
+    max-width: 430px;
+    width: 100%;
+    height: 100dvh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: var(--bg-primary);
+    overflow: hidden;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    display: flex;
+    gap: 3px;
+    padding: 10px 14px 8px;
+    flex-shrink: 0;
+    background: var(--bg-primary);
+    z-index: 10;
+  }
+  .progress-seg {
+    height: 3px;
+    flex: 1;
+    border-radius: 99px;
+    background: #2a2a3a;
+    transition: background 0.3s;
+  }
+  .progress-seg.viewed { background: rgba(255,255,255,0.4); }
+  .progress-seg.active { background: var(--accent); }
+
+  /* ── CARD DECK ── */
+  .deck-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.45s cubic-bezier(0.77,0,0.175,1), opacity 0.45s ease;
+    will-change: transform, opacity;
+  }
+  .card.state-current  { transform: translateX(0);     opacity: 1;   pointer-events: all; }
+  .card.state-prev     { transform: translateX(-110%);  opacity: 0;   pointer-events: none; }
+  .card.state-next     { transform: translateX(110%);   opacity: 0;   pointer-events: none; }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    height: 260px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hero img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.22) 100%);
+  }
+  .hero-content {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px 18px 16px;
+  }
+  .hero-tag {
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--i-button);
+    margin-bottom: 6px;
+  }
+  .hero-headline {
+    font-size: 22px; font-weight: 800; line-height: 1.2;
+    color: #fff; margin-bottom: 0;
+  }
+  .hero-headline em { color: var(--i-button); font-style: normal; }
+
+  /* ── CARD BODY ── */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 18px 18px 100px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card-body p {
+    font-size: 14px; line-height: 1.65;
+    color: var(--text-secondary); margin-bottom: 14px;
+  }
+
+  /* ── I-BUTTON ── */
+  .i-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    border-radius: 99px; padding: 7px 14px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 10px;
+    font-family: inherit;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn .i-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--i-button); color: #000;
+    font-size: 10px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip-box {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 14px; padding: 14px 16px;
+    margin-top: 4px; margin-bottom: 12px;
+    font-size: 13px; line-height: 1.6;
+    color: var(--text-secondary);
+    display: none;
+  }
+  .tooltip-box.open { display: block; }
+
+  /* ── NAV ARROWS ── */
+  .nav-row {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px 14px;
+    background: linear-gradient(to top, var(--bg-secondary) 80%, transparent);
+    z-index: 20;
+  }
+  .nav-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #fff; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s; font-family: inherit;
+  }
+  .nav-btn:hover { background: rgba(124,58,237,0.3); }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .nav-counter {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  /* ── LEAD CAPTURE FORM ── */
+  .lc-form { display: flex; flex-direction: column; gap: 10px; }
+  .lc-input {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 12px 14px;
+    color: #fff; font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color 0.2s;
+    width: 100%;
+  }
+  .lc-input:focus { border-color: var(--accent); }
+  .lc-input::placeholder { color: var(--text-secondary); }
+  textarea.lc-input { resize: none; min-height: 80px; }
+  .lc-submit {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 14px; font-size: 15px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: opacity 0.2s;
+  }
+  .lc-submit:hover { opacity: 0.88; }
+  .success-msg {
+    display: none; text-align: center; padding: 24px 0;
+  }
+  .success-msg .checkmark {
+    font-size: 48px; margin-bottom: 12px;
+  }
+  .success-msg h3 { font-size: 18px; margin-bottom: 8px; }
+  .success-msg p  { font-size: 14px; color: var(--text-secondary); }
+  .success-msg a  { color: var(--i-button); text-decoration: none; font-weight: 700; }
+
+  /* ── FLOATING QUOTE BUTTON ── */
+  .fab {
+    position: fixed; bottom: 76px; right: 14px; z-index: 150;
+    background: var(--i-button);
+    color: #000; font-weight: 800; font-size: 13px;
+    border: none; border-radius: 99px;
+    padding: 12px 18px; cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.5);
+    animation: pulse-fab 2.4s infinite;
+    display: flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  @keyframes pulse-fab {
+    0%,100% { box-shadow: 0 4px 20px rgba(245,158,11,0.5); }
+    50%      { box-shadow: 0 4px 32px rgba(245,158,11,0.85); }
+  }
+
+  /* ── QUOTE PANEL ── */
+  .quote-panel {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; flex-direction: column;
+    background: var(--bg-primary);
+    transform: translateY(100%);
+    transition: transform 0.42s cubic-bezier(0.77,0,0.175,1);
+    max-width: 430px;
+    margin: 0 auto;
+    left: 0; right: 0;
+  }
+  .quote-panel.open { transform: translateY(0); }
+
+  .qp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+  }
+  .qp-title { font-size: 15px; font-weight: 800; }
+  .qp-close {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--bg-tertiary); border: none; color: #fff;
+    font-size: 18px; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a5f, #0f2744);
+    padding: 12px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .price-strip .label { font-size: 11px; color: #7ab3e0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .price-strip .range { font-size: 20px; font-weight: 900; color: #fff; }
+
+  .qp-steps {
+    flex: 1; overflow-y: auto;
+    padding: 18px 18px 100px;
+  }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  .step-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-size: 17px; font-weight: 800; margin-bottom: 16px;
+  }
+
+  .service-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 18px;
+  }
+  .svc-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 14px 10px;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    text-align: center; font-family: inherit;
+    color: #fff;
+  }
+  .svc-tile:hover { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .svc-tile.selected { border-color: var(--i-button); background: rgba(245,158,11,0.1); }
+  .svc-tile .svc-emoji { font-size: 26px; margin-bottom: 6px; display: block; }
+  .svc-tile .svc-name  { font-size: 12px; font-weight: 700; margin-bottom: 3px; display: block; }
+  .svc-tile .svc-price { font-size: 11px; color: var(--text-secondary); display: block; }
+
+  .complexity-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+  .cplx-tile {
+    background: var(--bg-tertiary);
+    border: 2px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 14px 16px;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    font-family: inherit; color: #fff; text-align: left;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .cplx-tile:hover { border-color: var(--accent); background: rgba(124,58,237,0.12); }
+  .cplx-tile.selected { border-color: var(--i-button); background: rgba(245,158,11,0.1); }
+  .cplx-tile .cplx-icon { font-size: 22px; }
+  .cplx-tile .cplx-label { font-size: 14px; font-weight: 700; }
+  .cplx-tile .cplx-desc  { font-size: 12px; color: var(--text-secondary); }
+
+  .qp-next, .qp-back {
+    border: none; border-radius: 10px;
+    padding: 13px 20px; font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    transition: opacity 0.2s;
+  }
+  .qp-next { background: linear-gradient(135deg,#7c3aed,#5b21b6); color: #fff; width: 100%; margin-bottom: 8px; }
+  .qp-back { background: var(--bg-tertiary); color: var(--text-secondary); width: 100%; }
+  .qp-next:hover, .qp-back:hover { opacity: 0.85; }
+
+  .q-input {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; padding: 12px 14px;
+    color: #fff; font-size: 14px; font-family: inherit;
+    outline: none; transition: border-color 0.2s;
+    width: 100%; margin-bottom: 10px;
+  }
+  .q-input:focus { border-color: var(--accent); }
+  .q-input::placeholder { color: var(--text-secondary); }
+  textarea.q-input { resize: none; min-height: 70px; }
+
+  /* ── FOOTER ── */
+  .widget-footer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    max-width: 430px; margin: 0 auto;
+    background: var(--bg-primary);
+    text-align: center; padding: 10px 0;
+    font-size: 10px; color: var(--text-secondary);
+    z-index: 100; letter-spacing: 0.5px;
+  }
+  .widget-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+  /* ── HERO COLOUR THEMES (fallback bg) ── */
+  .hero-default { background: linear-gradient(135deg,#1e293b,#0f172a); }
+  .hero-purple  { background: linear-gradient(135deg,#4c1d95,#1e1b4b); }
+  .hero-cyan    { background: linear-gradient(135deg,#164e63,#0c4a6e); }
+  .hero-amber   { background: linear-gradient(135deg,#78350f,#431407); }
+  .hero-green   { background: linear-gradient(135deg,#14532d,#052e16); }
+</style>
+</head>
+<body>
+
+<div class="widget">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD DECK -->
+  <div class="deck-wrapper" id="deckWrapper">
+
+    <!-- ══ CARD 0 — INTRO ══ -->
+    <div class="card" data-index="0">
+      <div class="hero hero-purple">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Tradie at work" loading="eager">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">01 / Your Local Tradie</div>
+          <h1 class="hero-headline">Your Trusted Local Tradie — <em>Quality Work, Fair Price</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>We're a locally-owned trade business serving the Perth metro area. With years of hands-on experience across a range of services, we deliver quality workmanship and honest pricing every time.</p>
+        <p>Whether it's a small repair or a full project, we show up on time, do the job right, and leave your home cleaner than we found it. No surprises, no nonsense — just great trade work.</p>
+
+        <button class="i-btn" onclick="toggleTooltip('tt-about')">
+          <span class="i-dot">i</span> About Us
+        </button>
+        <div class="tooltip-box" id="tt-about">
+          We are a dedicated trade service operating across the Perth metro area. Our team is licensed, insured, and committed to delivering top-tier workmanship on every job. We pride ourselves on transparent pricing, prompt communication, and work that stands the test of time — because your home deserves the best.
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn" onclick="goTo(current-1)" id="prevBtn0">&#8592;</button>
+        <span class="nav-counter" id="counter0">1 of 3</span>
+        <button class="nav-btn" onclick="goTo(current+1)">&#8594;</button>
+      </div>
+    </div>
+
+    <!-- ══ CARD 1 — SERVICE 1 ══ -->
+    <div class="card" data-index="1">
+      <div class="hero hero-cyan">
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Trade service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">02 / SERVICE</div>
+          <h1 class="hero-headline"><em>Professional Services</em></h1>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>We offer a comprehensive range of professional trade services across the Perth metro area. Our team is experienced, licensed, and ready to tackle jobs of any size — from quick repairs to full installations.</p>
+        <p>Perth's climate and building conditions require a tradie who knows the local landscape. We use only quality materials suited to Western Australian conditions, ensuring every job lasts.</p>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn" onclick="goTo(current-1)">&#8592;</button>
+        <span class="nav-counter">2 of 3</span>
+        <button class="nav-btn" onclick="goTo(current+1)">&#8594;</button>
+      </div>
+    </div>
+
+    <!-- ══ CARD 2 — LEAD CAPTURE ══ -->
+    <div class="card" data-index="2">
+      <div class="hero hero-green">
+        <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=860&q=80&auto=format&fit=crop" alt="Get a quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="hero-tag">GET A QUOTE</div>
+          <h1 class="hero-headline">Get your free <em>quote</em> today</h1>
+        </div>
+      </div>
+      <div class="card-body">
+
+        <div id="lcSuccess" class="success-msg">
+          <div class="checkmark">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks for reaching out. We'll be in touch shortly.<br>
+            Need us sooner? Call us directly:<br>
+            <a href="tel:0400000000">0400 000 000</a>
+          </p>
+        </div>
+
+        <form class="lc-form" id="lcForm" onsubmit="submitLC(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Lead — iTabs Widget">
+          <input type="hidden" name="from_name" value="iTabs Widget">
+          <input type="hidden" name="business" value="Your Local Tradie">
+          <input type="hidden" name="redirect" value="false">
+
+          <input class="lc-input" type="text"  name="name"        placeholder="Your name"           required>
+          <input class="lc-input" type="tel"   name="phone"       placeholder="Phone number"        required>
+          <input class="lc-input" type="email" name="email"       placeholder="Email address"       required>
+          <textarea class="lc-input"            name="description" placeholder="Brief job description…" rows="3"></textarea>
+          <button type="submit" class="lc-submit">Send my enquiry →</button>
+        </form>
+
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn" onclick="goTo(current-1)">&#8592;</button>
+        <span class="nav-counter">3 of 3</span>
+        <button class="nav-btn" disabled>&#8594;</button>
+      </div>
+    </div>
+
+  </div><!-- /deck-wrapper -->
+</div><!-- /widget -->
+
+<!-- FLOATING QUOTE BUTTON -->
+<button class="fab" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- FOOTER -->
+<div class="widget-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+<!-- ══ QUOTE PANEL ══ -->
+<div class="quote-panel" id="quotePanel">
+  <div class="qp-header">
+    <span class="qp-title">💰 Your Local Tradie — Quote</span>
+    <button class="qp-close" onclick="closeQuotePanel()">✕</button>
+  </div>
+
+  <div class="price-strip">
+    <span class="label">Estimated Range</span>
+    <span class="range" id="priceRange">Select a service</span>
+  </div>
+
+  <div class="qp-steps">
+
+    <!-- STEP 1: SERVICE TYPE -->
+    <div class="step active" id="qStep1">
+      <div class="step-label">Step 1 of 3</div>
+      <div class="step-title">What service do you need?</div>
+      <div class="service-grid">
+
+        <button class="svc-tile" onclick="selectService(this, 'General Repair', 180, 350)">
+          <span class="svc-emoji">🔧</span>
+          <span class="svc-name">General Repair</span>
+          <span class="svc-price">$180 – $350</span>
+        </button>
+        <button class="svc-tile" onclick="selectService(this, 'Installation', 250, 600)">
+          <span class="svc-emoji">🏗️</span>
+          <span class="svc-name">Installation</span>
+          <span class="svc-price">$250 – $600</span>
+        </button>
+        <button class="svc-tile" onclick="selectService(this, 'Full Project', 800, 2500)">
+          <span class="svc-emoji">📋</span>
+          <span class="svc-name">Full Project</span>
+          <span class="svc-price">$800 – $2,500</span>
+        </button>
+        <button class="svc-tile" onclick="selectService(this, 'Consultation', 120, 200)">
+          <span class="svc-emoji">💬</span>
+          <span class="svc-name">Consultation</span>
+          <span class="svc-price">$120 – $200</span>
+        </button>
+        <button class="svc-tile" onclick="selectService(this, 'Maintenance', 150, 400)">
+          <span class="svc-emoji">🛠️</span>
+          <span class="svc-name">Maintenance</span>
+          <span class="svc-price">$150 – $400</span>
+        </button>
+        <button class="svc-tile" onclick="selectService(this, 'Emergency Call-Out', 280, 550)">
+          <span class="svc-emoji">🚨</span>
+          <span class="svc-name">Emergency</span>
+          <span class="svc-price">$280 – $550</span>
+        </button>
+
+      </div>
+      <button class="qp-next" onclick="goStep(2)">Next →</button>
+    </div>
+
+    <!-- STEP 2: COMPLEXITY -->
+    <div class="step" id="qStep2">
+      <div class="step-label">Step 2 of 3</div>
+      <div class="step-title">How complex is the job?</div>
+      <div class="complexity-grid">
+        <button class="cplx-tile" onclick="selectComplexity(this, 0.85)">
+          <span class="cplx-icon">🟢</span>
+          <div>
+            <div class="cplx-label">Basic</div>
+            <div class="cplx-desc">Straightforward, easy access, no surprises</div>
+          </div>
+        </button>
+        <button class="cplx-tile" onclick="selectComplexity(this, 1.0)">
+          <span class="cplx-icon">🟡</span>
+          <div>
+            <div class="cplx-label">Standard</div>
+            <div class="cplx-desc">Average job with typical complexity</div>
+          </div>
+        </button>
+        <button class="cplx-tile" onclick="selectComplexity(this, 1.35)">
+          <span class="cplx-icon">🔴</span>
+          <div>
+            <div class="cplx-label">Complex</div>
+            <div class="cplx-desc">Difficult access, custom work, or extra trades needed</div>
+          </div>
+        </button>
+      </div>
+      <button class="qp-next" onclick="goStep(3)">Next →</button>
+      <button class="qp-back" onclick="goStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: CONTACT -->
+    <div class="step" id="qStep3">
+      <div class="step-label">Step 3 of 3</div>
+      <div class="step-title">Your details for a free quote</div>
+
+      <div id="qSuccess" class="success-msg">
+        <div class="checkmark">✅</div>
+        <h3>Quote request sent!</h3>
+        <p>We'll get back to you ASAP with a detailed quote.<br>
+          Prefer to call? <a href="tel:0400000000">0400 000 000</a>
+        </p>
+      </div>
+
+      <form id="qForm" onsubmit="submitQuote(event)">
+        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+        <input type="hidden" name="subject" value="Quote Request — iTabs Widget">
+        <input type="hidden" name="from_name" value="iTabs Widget">
+        <input type="hidden" name="business" value="Your Local Tradie">
+        <input type="hidden" name="redirect" value="false">
+        <input type="hidden" name="selected_service" id="hiddenService" value="">
+        <input type="hidden" name="estimated_range" id="hiddenRange" value="">
+
+        <input class="q-input" type="text"  name="name"    placeholder="Your name"    required>
+        <input class="q-input" type="tel"   name="phone"   placeholder="Phone number" required>
+        <input class="q-input" type="email" name="email"   placeholder="Email address" required>
+        <textarea class="q-input"           name="notes"   placeholder="Any other details…" rows="3"></textarea>
+        <button type="submit" class="qp-next">Send Quote Request →</button>
+        <button type="button" class="qp-back" onclick="goStep(2)">← Back</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ─── STATE ─── */
+let current = 0;
+const TOTAL  = 3;
+let svcLow   = 0, svcHigh = 0, cplxMult = 1.0;
+let selectedSvc = '', qStepCurrent = 1;
+
+/* ─── CARDS & PROGRESS ─── */
+function buildProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const s = document.createElement('div');
+    s.className = 'progress-seg' + (i === current ? ' active' : i < current ? ' viewed' : '');
+    bar.appendChild(s);
+  }
+}
+
+function goTo(idx) {
+  if (idx < 0 || idx >= TOTAL) return;
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((c, i) => {
+    c.classList.remove('state-current','state-prev','state-next');
+    if (i === idx)        c.classList.add('state-current');
+    else if (i < idx)     c.classList.add('state-prev');
+    else                  c.classList.add('state-next');
+  });
+  current = idx;
+  buildProgress();
+}
+
+/* ─── SWIPE ─── */
+(function() {
+  const dw = document.getElementById('deckWrapper');
+  let x0 = null, y0 = null;
+  dw.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, {passive:true});
+  dw.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0;
+    const dy = e.changedTouches[0].clientY - y0;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) goTo(dx < 0 ? current+1 : current-1);
+    x0 = null; y0 = null;
+  }, {passive:true});
+})();
+
+/* ─── KEYBOARD ─── */
+document.addEventListener('keydown', e => {
+  if (document.getElementById('quotePanel').classList.contains('open')) return;
+  if (e.key === 'ArrowRight') goTo(current+1);
+  if (e.key === 'ArrowLeft')  goTo(current-1);
+});
+
+/* ─── TOOLTIP ─── */
+function toggleTooltip(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+/* ─── LEAD CAPTURE FORM ─── */
+async function submitLC(e) {
+  e.preventDefault();
+  const form = document.getElementById('lcForm');
+  const data = new FormData(form);
+  const btn  = form.querySelector('.lc-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', { method:'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      form.style.display = 'none';
+      document.getElementById('lcSuccess').style.display = 'block';
+    } else { btn.textContent = 'Try again'; btn.disabled = false; }
+  } catch { btn.textContent = 'Try again'; btn.disabled = false; }
+}
+
+/* ─── QUOTE PANEL ─── */
+function openQuotePanel()  { document.getElementById('quotePanel').classList.add('open'); }
+function closeQuotePanel() { document.getElementById('quotePanel').classList.remove('open'); }
+
+function updatePriceStrip() {
+  const el = document.getElementById('priceRange');
+  if (!svcLow) { el.textContent = 'Select a service'; return; }
+  const lo = Math.round(svcLow  * cplxMult);
+  const hi = Math.round(svcHigh * cplxMult);
+  el.textContent = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+  document.getElementById('hiddenRange').value = `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+}
+
+function selectService(el, name, low, high) {
+  document.querySelectorAll('.svc-tile').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedSvc = name; svcLow = low; svcHigh = high;
+  document.getElementById('hiddenService').value = name;
+  updatePriceStrip();
+}
+
+function selectComplexity(el, mult) {
+  document.querySelectorAll('.cplx-tile').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+  cplxMult = mult;
+  updatePriceStrip();
+}
+
+function goStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById('qStep'+n).classList.add('active');
+  qStepCurrent = n;
+}
+
+async function submitQuote(e) {
+  e.preventDefault();
+  const form = document.getElementById('qForm');
+  const data = new FormData(form);
+  const btn  = form.querySelector('[type=submit]');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  try {
+    const res  = await fetch('https://api.web3forms.com/submit', { method:'POST', body: data });
+    const json = await res.json();
+    if (json.success) {
+      form.style.display = 'none';
+      document.getElementById('qSuccess').style.display = 'block';
+    } else { btn.textContent = 'Try again'; btn.disabled = false; }
+  } catch { btn.textContent = 'Try again'; btn.disabled = false; }
+}
+
+/* ─── INIT ─── */
+goTo(0);
+</script>
+</body>
+</html>
