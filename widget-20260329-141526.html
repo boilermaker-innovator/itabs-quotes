@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sparky's Electrical Services | iTabs</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:16px}
+.widget{width:100%;max-width:430px;position:relative}
+.progress-bar{width:100%;height:4px;background:#1e1e2e;border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#ff6a00,#ff9a3c);border-radius:2px;transition:width 0.4s ease}
+.card-container{overflow:hidden;border-radius:18px}
+.cards-wrapper{display:flex;transition:transform 0.4s cubic-bezier(.4,0,.2,1)}
+.card{min-width:100%;background:#12121a;border-radius:18px;padding:28px 24px 24px;border:1px solid #1e1e2e;position:relative}
+.badge{display:inline-block;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:20px;margin-bottom:16px}
+.business-name{font-size:26px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:6px}
+.trade-tag{font-size:13px;color:#ff9a3c;font-weight:600;margin-bottom:4px}
+.suburb{font-size:13px;color:#888;margin-bottom:20px}
+.phone-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;text-decoration:none;font-size:16px;font-weight:700;padding:14px 28px;border-radius:12px;margin-bottom:12px;transition:opacity 0.2s}
+.phone-btn:hover{opacity:0.88}
+.phone-icon{font-size:18px}
+.welcome-sub{font-size:12px;color:#666;margin-top:8px}
+.service-icon{font-size:32px;margin-bottom:12px}
+.service-name{font-size:20px;font-weight:800;color:#fff;margin-bottom:6px}
+.price-range{font-size:14px;font-weight:700;color:#ff9a3c;margin-bottom:10px}
+.service-desc{font-size:13px;color:#aaa;line-height:1.6;margin-bottom:18px}
+.info-btn{display:inline-flex;align-items:center;gap:6px;background:#1e1e2e;border:1px solid #ff6a00;color:#ff9a3c;font-size:12px;font-weight:600;padding:8px 16px;border-radius:20px;cursor:pointer;transition:background 0.2s}
+.info-btn:hover{background:#2a1a00}
+.form-title{font-size:20px;font-weight:800;color:#fff;margin-bottom:6px}
+.form-sub{font-size:12px;color:#888;margin-bottom:20px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;color:#ff9a3c;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;outline:none;transition:border-color 0.2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#ff6a00}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-group select{appearance:none;cursor:pointer}
+.form-group select option{background:#12121a;color:#fff}
+.submit-btn{width:100%;background:linear-gradient(135deg,#ff6a00,#ff9a3c);color:#fff;border:none;border-radius:12px;padding:15px;font-size:16px;font-weight:700;cursor:pointer;transition:opacity 0.2s;margin-top:4px}
+.submit-btn:hover{opacity:0.88}
+.success-msg{display:none;text-align:center;padding:20px;color:#4caf50;font-size:14px;font-weight:600}
+.nav-area{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:0 4px}
+.nav-btn{background:#12121a;border:1px solid #1e1e2e;color:#ff9a3c;width:42px;height:42px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;flex-shrink:0}
+.nav-btn:hover{background:#1e1e2e}
+.nav-btn:disabled{opacity:0.3;cursor:default}
+.dots{display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:#1e1e2e;transition:all 0.3s}
+.dot.active{background:#ff6a00;width:22px;border-radius:4px}
+.footer{text-align:center;margin-top:14px;font-size:11px;color:#444}
+.footer a{color:#ff6a00;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;justify-content:center;align-items:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:#12121a;border:1px solid #ff6a00;border-radius:18px;padding:28px 24px;max-width:390px;width:100%;position:relative}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#888;font-size:22px;cursor:pointer;line-height:1}
+.modal-close:hover{color:#fff}
+.modal-title{font-size:17px;font-weight:800;color:#ff9a3c;margin-bottom:12px}
+.modal-body{font-size:13px;color:#bbb;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="card-container">
+    <div class="cards-wrapper" id="cardsWrapper">
+
+      <!-- Card 1: Welcome -->
+      <div class="card">
+        <div class="badge">⚡ Electrician</div>
+        <div class="business-name">Sparky's Electrical Services</div>
+        <div class="trade-tag">Licensed Electrician</div>
+        <div class="suburb">📍 Joondalup, Perth WA</div>
+        <a href="tel:0412000111" class="phone-btn"><span class="phone-icon">📞</span>0412 000 111</a>
+        <div class="welcome-sub">Tap to call — fast response, fair prices</div>
+        <div class="footer" style="margin-top:24px">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> — itabs.ai</div>
+      </div>
+
+      <!-- Card 2: Switchboard Upgrades -->
+      <div class="card">
+        <div class="badge">Service 1 of 4</div>
+        <div class="service-icon">⚡</div>
+        <div class="service-name">Switchboard Upgrades</div>
+        <div class="price-range">$800 – $2,500 Perth</div>
+        <div class="service-desc">Upgrade your old or unsafe switchboard to a modern safety switch–compliant panel. Essential for older homes and insurance compliance.</div>
+        <button class="info-btn" id="iBtn1">ℹ️ Why it matters</button>
+        <div class="footer" style="margin-top:24px">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> — itabs.ai</div>
+      </div>
+
+      <!-- Card 3: Power Points -->
+      <div class="card">
+        <div class="badge">Service 2 of 4</div>
+        <div class="service-icon">🔌</div>
+        <div class="service-name">Power Points</div>
+        <div class="price-range">$120 – $350 Perth</div>
+        <div class="service-desc">New power point installations, USB outlets, and double-socket upgrades anywhere in your home or office. Neat, safe, and code-compliant.</div>
+        <button class="info-btn" id="iBtn2">ℹ️ What's included</button>
+        <div class="footer" style="margin-top:24px">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> — itabs.ai</div>
+      </div>
+
+      <!-- Card 4: Downlights -->
+      <div class="card">
+        <div class="badge">Service 3 of 4</div>
+        <div class="service-icon">💡</div>
+        <div class="service-name">Downlights</div>
+        <div class="price-range">$80 – $160 per light Perth</div>
+        <div class="service-desc">LED downlight supply and install, replacements, and full room conversions. Reduce power bills and modernise your space with quality LED fittings.</div>
+        <button class="info-btn" id="iBtn3">ℹ️ LED benefits</button>
+        <div class="footer" style="margin-top:24px">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> — itabs.ai</div>
+      </div>
+
+      <!-- Card 5: Safety Inspections -->
+      <div class="card">
+        <div class="badge">Service 4 of 4</div>
+        <div class="service-icon">🔍</div>
+        <div class="service-name">Safety Inspections</div>
+        <div class="price-range">$180 – $350 Perth</div>
+        <div class="service-desc">Full residential electrical safety check including wiring, switchboard, smoke alarms, and safety switches. Written report provided.</div>
+        <button class="info-btn" id="iBtn4">ℹ️ What we check</button>
+        <div class="footer" style="margin-top:24px">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> — itabs.ai</div>
+      </div>
+
+      <!-- Card 6: Lead Form -->
+      <div class="card">
+        <div class="badge">📋 Free Quote</div>
+        <div class="form-title">Get Your Free Quote</div>
+        <div class="form-sub">We'll get back to you within 2 hours</div>
+        <form id="quoteForm">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" value="New Quote Request — Sparky's Electrical Services">
+          <input type="hidden" name="from_name" value="iTabs Quote Widget">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <div class="form-group">
+            <label>Your Name</label>
+            <input type="text" name="name" placeholder="Jane Smith" required>
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" name="phone" placeholder="04xx xxx xxx" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="jane@email.com" required>
+          </div>
+          <div class="form-group">
+            <label>Service Needed</label>
+            <select name="job">
+              <option value="">— Select a service —</option>
+              <option>Switchboard Upgrade</option>
+              <option>Power Points</option>
+              <option>Downlights</option>
+              <option>Safety Inspection</option>
+              <option>Other / Not Sure</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Job Details</label>
+            <textarea name="message" placeholder="Tell us a bit about your job…"></textarea>
+          </div>
+          <button type="submit" class="submit-btn">Send Quote Request ⚡</button>
+        </form>
+        <div class="success-msg" id="successMsg">✅ Thanks! We'll be in touch within 2 hours.</div>
+        <div class="footer" style="margin-top:20px">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> — itabs.ai</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-area">
+    <button class="nav-btn" id="prevBtn" disabled>&#8592;</button>
+    <div class="dots" id="dots"></div>
+    <button class="nav-btn" id="nextBtn">&#8594;</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">&#10005;</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const totalCards = 6;
+let current = 0;
+const wrapper = document.getElementById('cardsWrapper');
+const progressFill = document.getElementById('progressFill');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const dotsEl = document.getElementById('dots');
+const overlay = document.getElementById('modalOverlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+const modalClose = document.getElementById('modalClose');
+
+const modalData = {
+  iBtn1: {
+    title: 'Why Switchboard Upgrades Matter',
+    body: 'Old ceramic fuse boxes are a fire hazard and often uninsurable. Modern switchboards include safety switches (RCDs) that cut power in milliseconds if a fault is detected — protecting your family. Required for solar, EV chargers, and air conditioning upgrades. Prices vary by number of circuits and meter box condition.'
+  },
+  iBtn2: {
+    title: "What's Included in Power Point Installation",
+    body: 'Price includes supply and installation of a standard double power point. USB-A/C combo outlets, weatherproof outdoor points, and under-bench kitchen points are available. All work is tested, tagged, and a Certificate of Compliance is issued as required by WA law.'
+  },
+  iBtn3: {
+    title: 'Benefits of LED Downlights',
+    body: 'LED downlights use up to 75% less energy than halogen and last 5–10× longer. A typical lounge conversion pays for itself in 2–3 years. We supply quality dimmable LEDs with a 3-year warranty and handle all ceiling patching and wiring — one tidy job, no mess.'
+  },
+  iBtn4: {
+    title: 'What Our Safety Inspection Covers',
+    body: 'Our inspection includes: switchboard and wiring condition, safety switch (RCD) testing, smoke alarm compliance check, visible wiring faults, earthing verification, and outlet polarity tests. You receive a written report — ideal for landlords, buyers, and insurance requirements.'
+  }
+};
+
+function buildDots() {
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < totalCards; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === current ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  }
+}
+
+function goTo(n) {
+  current = Math.max(0, Math.min(totalCards - 1, n));
+  wrapper.style.transform = 'translateX(-' + (current * 100) + '%)';
+  progressFill.style.width = ((current + 1) / totalCards * 100) + '%';
+  prevBtn.disabled = current === 0;
+  nextBtn.disabled = current === totalCards - 1;
+  buildDots();
+}
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+
+// Touch swipe
+let touchStartX = 0;
+wrapper.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, {passive: true});
+wrapper.addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) goTo(current + (diff > 0 ? 1 : -1));
+}, {passive: true});
+
+// Modal
+Object.keys(modalData).forEach(id => {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const data = modalData[id];
+    modalTitle.textContent = data.title;
+    modalBody.innerHTML = encodeURIComponent(data.body).replace(/%20/g,' ').replace(/%2C/g,',').replace(/%27/g,"'").replace(/%2F/g,'/').replace(/%28/g,'(').replace(/%29/g,')').replace(/%E2%80%94/g,'—').replace(/%C3%97/g,'×').replace(/%25/g,'%');
+    modalBody.textContent = data.body;
+    overlay.classList.add('open');
+  });
+});
+modalClose.addEventListener('click', () => overlay.classList.remove('open'));
+overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+
+// Form
+document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.submit-btn');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  const data = new FormData(this);
+  try {
+    const res = await fetch('https://api.web3forms.com/submit', {method:'POST', body: data});
+    const json = await res.json();
+    if (json.success) {
+      this.style.display = 'none';
+      document.getElementById('successMsg').style.display = 'block';
+    } else {
+      btn.textContent = 'Try Again';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Try Again';
+    btn.disabled = false;
+  }
+});
+
+goTo(0);
+</script>
+</body>
+</html>
