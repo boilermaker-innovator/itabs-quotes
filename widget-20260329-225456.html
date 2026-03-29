@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iTabs Quote Widget</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --i-button: #f59e0b;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .widget-shell {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    max-height: 100vh;
+    background: var(--bg-primary);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* PROGRESS BAR */
+  .progress-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    height: 4px;
+    display: flex;
+    gap: 3px;
+    padding: 0 10px;
+    background: transparent;
+  }
+  .prog-seg {
+    flex: 1;
+    height: 4px;
+    border-radius: 2px;
+    background: #333;
+    transition: background 0.3s;
+  }
+  .prog-seg.viewed { background: rgba(255,255,255,0.5); }
+  .prog-seg.active { background: var(--accent); }
+
+  /* CARD DECK */
+  .card-viewport {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.45s;
+    will-change: transform;
+  }
+  .card.state-prev { transform: translateX(-100%); opacity: 0.4; }
+  .card.state-active { transform: translateX(0); opacity: 1; }
+  .card.state-next { transform: translateX(100%); opacity: 0.4; }
+  .card.state-hidden { transform: translateX(100%); opacity: 0; pointer-events: none; }
+
+  /* HERO */
+  .card-hero {
+    position: relative;
+    height: 52%;
+    min-height: 220px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .card-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 100%);
+    z-index: 2;
+  }
+  .hero-gradient-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+  .hero-default .hero-gradient-bg { background: linear-gradient(135deg, #1e293b, #0f172a); }
+  .hero-purple .hero-gradient-bg { background: linear-gradient(135deg, #4c1d95, #1e1b4b); }
+  .hero-cyan .hero-gradient-bg { background: linear-gradient(135deg, #164e63, #0c4a6e); }
+  .hero-amber .hero-gradient-bg { background: linear-gradient(135deg, #78350f, #431407); }
+  .hero-green .hero-gradient-bg { background: linear-gradient(135deg, #14532d, #052e16); }
+
+  .hero-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    z-index: 3;
+    padding: 18px 20px 16px;
+  }
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 7px;
+  }
+  .card-headline {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.18;
+    margin-bottom: 0;
+  }
+  .card-headline em {
+    font-style: normal;
+    color: #f59e0b;
+  }
+
+  /* CARD BODY */
+  .card-body {
+    flex: 1;
+    background: var(--bg-secondary);
+    padding: 18px 20px 80px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+
+  /* I-BUTTON */
+  .i-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.35);
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 10px;
+  }
+  .i-btn:hover { background: rgba(245,158,11,0.2); }
+  .i-btn .i-dot {
+    width: 16px; height: 16px;
+    background: var(--i-button);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800;
+  }
+
+  /* I-PANEL (tooltip popup) */
+  .i-panel {
+    display: none;
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .i-panel.open { display: block; }
+
+  /* ARROW NAV */
+  .card-nav {
+    position: absolute;
+    bottom: 18px;
+    left: 0; right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    z-index: 10;
+  }
+  .nav-arrow {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .nav-arrow:hover { background: rgba(255,255,255,0.14); }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    margin: auto 0;
+    transition: background 0.3s;
+  }
+  .nav-dot.active { background: var(--accent); }
+
+  /* LEAD CAPTURE FORM */
+  .lead-form { display: flex; flex-direction: column; gap: 11px; }
+  .lead-form input,
+  .lead-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .lead-form input:focus,
+  .lead-form textarea:focus { border-color: var(--accent); }
+  .lead-form textarea { resize: none; height: 80px; }
+  .lead-form input::placeholder,
+  .lead-form textarea::placeholder { color: var(--text-secondary); }
+  .submit-btn {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .submit-btn:hover { opacity: 0.88; }
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .form-success .success-icon { font-size: 40px; margin-bottom: 10px; }
+  .form-success h3 { color: #fff; font-size: 18px; margin-bottom: 8px; }
+  .form-success p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+  .form-success a { color: var(--i-button); text-decoration: none; }
+
+  /* FLOATING QUOTE BUTTON */
+  .float-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 150;
+    background: var(--i-button);
+    color: #000;
+    border: none;
+    border-radius: 28px;
+    padding: 13px 20px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-shadow: 0 4px 24px rgba(245,158,11,0.45);
+    animation: pulse-amber 2.2s infinite;
+    font-family: 'Inter', sans-serif;
+  }
+  @keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 4px 24px rgba(245,158,11,0.45); }
+    50% { box-shadow: 0 4px 36px rgba(245,158,11,0.75), 0 0 0 8px rgba(245,158,11,0.1); }
+  }
+
+  /* QUOTE PANEL */
+  .quote-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+  .quote-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+  .quote-sheet {
+    position: relative;
+    background: var(--bg-secondary);
+    border-radius: 22px 22px 0 0;
+    max-height: 92vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    z-index: 1;
+    padding-bottom: 30px;
+  }
+  .quote-panel.open { pointer-events: all; }
+  .quote-panel.open .quote-backdrop { opacity: 1; }
+  .quote-panel.open .quote-sheet { transform: translateY(0); }
+
+  .quote-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    position: sticky;
+    top: 0;
+    background: var(--bg-secondary);
+    z-index: 2;
+  }
+  .quote-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .close-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* PRICE STRIP */
+  .price-strip {
+    background: linear-gradient(135deg, #1e3a5f, #0c2340);
+    border-bottom: 1px solid rgba(96,165,250,0.2);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .price-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+  .price-range { font-size: 20px; font-weight: 800; color: #60a5fa; }
+  .price-note { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+  /* QUOTE STEPS */
+  .quote-step { padding: 18px 20px; display: none; }
+  .quote-step.active { display: block; }
+  .step-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+
+  /* SERVICE GRID */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .svc-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    text-align: left;
+  }
+  .svc-tile:hover { border-color: var(--accent); background: rgba(124,58,237,0.08); }
+  .svc-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.15); }
+  .svc-emoji { font-size: 22px; margin-bottom: 6px; display: block; }
+  .svc-name { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .svc-range { font-size: 11px; color: var(--text-secondary); }
+
+  /* COMPLEXITY */
+  .complexity-list { display: flex; flex-direction: column; gap: 10px; }
+  .complexity-tile {
+    background: var(--bg-tertiary);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .complexity-tile:hover { border-color: var(--accent); background: rgba(124,58,237,0.08); }
+  .complexity-tile.selected { border-color: var(--accent); background: rgba(124,58,237,0.15); }
+  .complexity-left { display: flex; flex-direction: column; gap: 3px; }
+  .complexity-name { font-size: 14px; font-weight: 600; color: #fff; }
+  .complexity-desc { font-size: 12px; color: var(--text-secondary); }
+  .complexity-mult {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(124,58,237,0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* QUOTE CONTACT FORM */
+  .quote-form { display: flex; flex-direction: column; gap: 11px; }
+  .quote-form input,
+  .quote-form textarea {
+    background: var(--bg-tertiary);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .quote-form input:focus,
+  .quote-form textarea:focus { border-color: var(--accent); }
+  .quote-form textarea { resize: none; height: 70px; }
+  .quote-form input::placeholder,
+  .quote-form textarea::placeholder { color: var(--text-secondary); }
+  .quote-submit {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: opacity 0.2s;
+  }
+  .quote-submit:hover { opacity: 0.88; }
+  .quote-success {
+    display: none;
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .quote-success .qs-icon { font-size: 44px; margin-bottom: 12px; }
+  .quote-success h3 { color: #fff; font-size: 19px; margin-bottom: 8px; }
+  .quote-success p { color: var(--text-secondary); font-size: 13px; line-height: 1.65; }
+  .quote-success a { color: var(--i-button); text-decoration: none; font-weight: 600; }
+
+  /* SUMMARY BAR (step 3) */
+  .quote-summary-bar {
+    background: rgba(124,58,237,0.12);
+    border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .qsb-item { font-size: 12px; color: var(--text-secondary); }
+  .qsb-item strong { color: #fff; font-weight: 600; display: block; font-size: 13px; }
+
+  /* FOOTER */
+  .itabs-footer {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    text-align: center;
+    padding: 8px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.2);
+    z-index: 20;
+    background: var(--bg-primary);
+  }
+  .itabs-footer a { color: rgba(255,255,255,0.3); text-decoration: none; }
+
+  /* STEP NAV BUTTONS */
+  .step-back {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text-secondary);
+    border-radius: 10px;
+    padding: 11px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    margin-top: 8px;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  .step-back:hover { border-color: rgba(255,255,255,0.3); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="widget-shell" id="widgetShell">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- CARD VIEWPORT -->
+  <div class="card-viewport" id="cardViewport">
+
+    <!-- CARD 0: INTRO -->
+    <div class="card state-active" data-index="0">
+      <div class="card-hero hero-default">
+        <div class="hero-gradient-bg"></div>
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Local Tradie" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">01 / LOCAL TRADIE</div>
+          <div class="card-headline">Your Local Tradie — <em>Quality Work You Can Trust</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">We're your local Perth tradies, delivering quality workmanship and honest pricing on every job. Whether it's a small repair or a full installation, we bring professionalism and expertise to every project across the Perth metro area.</p>
+        <p class="card-summary">Fully licensed and insured, with years of experience serving Perth homeowners and businesses. We show up on time, communicate clearly, and get the job done right the first time.</p>
+        <button class="i-btn" onclick="toggleIPanel('intro-panel')">
+          <span class="i-dot">i</span> About Us
+        </button>
+        <div class="i-panel" id="intro-panel">
+          We're a locally owned and operated trade business serving the Perth community with pride. Our team brings genuine expertise and a commitment to quality that bigger companies simply can't match. Every job we take on — big or small — gets the same level of care, precision, and respect for your home.
+        </div>
+      </div>
+    </div>
+
+    <!-- CARD 1: SERVICE 1 -->
+    <div class="card state-next" data-index="1">
+      <div class="card-hero hero-purple">
+        <div class="hero-gradient-bg"></div>
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Trade Service" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">02 / SERVICE</div>
+          <div class="card-headline"><em>General Trade Services</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth's climate and building conditions demand skilled tradespeople who understand local requirements. We bring hands-on experience with all types of residential and commercial trade work across the metro area.</p>
+        <p class="card-summary">From new builds in the northern suburbs to renovation work in established areas, we handle every job with the same level of care and expertise. All work meets current Australian standards and regulations.</p>
+      </div>
+    </div>
+
+    <!-- CARD 2: SERVICE 2 -->
+    <div class="card state-next" data-index="2">
+      <div class="card-hero hero-cyan">
+        <div class="hero-gradient-bg"></div>
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Repairs & Maintenance" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">03 / SERVICE</div>
+          <div class="card-headline"><em>Repairs & Maintenance</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Perth homes face unique maintenance challenges — from summer heat stress to winter storm damage. Our team responds quickly to repair and maintenance needs across the metro area, minimising disruption to your home or business.</p>
+        <p class="card-summary">We carry comprehensive insurance and all the right tools to tackle repairs of any scale. No job is too small and no problem is too complex — we'll give you a clear, upfront quote before any work begins.</p>
+      </div>
+    </div>
+
+    <!-- CARD 3: SERVICE 3 -->
+    <div class="card state-next" data-index="3">
+      <div class="card-hero hero-amber">
+        <div class="hero-gradient-bg"></div>
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Installations" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">04 / SERVICE</div>
+          <div class="card-headline"><em>Installations & New Work</em></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="card-summary">Planning something new for your Perth home or business? Our installation services cover everything from fresh builds to full room transformations. We work with the best materials suited to WA's climate conditions for lasting results.</p>
+        <p class="card-summary">We coordinate with other trades where needed and keep you informed every step of the way. Our work is backed by solid warranties and we don't consider a job done until you're completely satisfied.</p>
+      </div>
+    </div>
+
+    <!-- CARD 4: LEAD CAPTURE -->
+    <div class="card state-next" data-index="4">
+      <div class="card-hero hero-green">
+        <div class="hero-gradient-bg"></div>
+        <img src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=860&q=80&auto=format&fit=crop" alt="Get a Quote" loading="lazy">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <div class="card-tag">GET A QUOTE</div>
+          <div class="card-headline">Get your free <em>quote</em> today</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="leadFormWrap">
+          <form class="lead-form" id="leadForm" onsubmit="submitLeadForm(event)">
+            <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+            <input type="hidden" name="subject" value="New Quote Enquiry — iTabs Widget">
+            <input type="hidden" name="to" value="responses@itabs.ai">
+            <input type="hidden" name="from_name" value="iTabs Widget">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="tel" name="phone" placeholder="Phone number" required>
+            <input type="email" name="email" placeholder="Email address" required>
+            <textarea name="message" placeholder="Brief job description — what do you need done?"></textarea>
+            <button type="submit" class="submit-btn">Send my enquiry →</button>
+          </form>
+        </div>
+        <div class="form-success" id="leadSuccess">
+          <div class="success-icon">✅</div>
+          <h3>Enquiry sent!</h3>
+          <p>Thanks for reaching out. We'll be in touch shortly with your quote.<br><br>
+          Need to speak with us now? Give us a call directly.</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /card-viewport -->
+
+  <!-- NAV -->
+  <div class="card-nav">
+    <button class="nav-arrow" id="prevBtn" onclick="navigate(-1)">&#8592;</button>
+    <div id="navDots" style="display:flex;gap:7px;align-items:center;"></div>
+    <button class="nav-arrow" id="nextBtn" onclick="navigate(1)">&#8594;</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="itabs-footer">Powered by <a href="https://itabs.ai" target="_blank">iTabs — itabs.ai</a></div>
+
+</div><!-- /widget-shell -->
+
+<!-- FLOATING BUTTON -->
+<button class="float-btn" onclick="openQuotePanel()">💰 Get a Quote</button>
+
+<!-- QUOTE PANEL -->
+<div class="quote-panel" id="quotePanel">
+  <div class="quote-backdrop" onclick="closeQuotePanel()"></div>
+  <div class="quote-sheet">
+
+    <div class="quote-header">
+      <h2>💰 Local Tradie — Quote</h2>
+      <button class="close-btn" onclick="closeQuotePanel()">✕</button>
+    </div>
+
+    <!-- PRICE STRIP -->
+    <div class="price-strip">
+      <div>
+        <div class="price-label">Estimated range</div>
+        <div class="price-range" id="priceDisplay">Select a service</div>
+        <div class="price-note" id="priceNote">Based on standard Perth rates — final price confirmed on-site</div>
+      </div>
+      <div style="font-size:28px;">📋</div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="quote-step active" id="qStep1">
+      <div class="step-label">Step 1 of 3</div>
+      <div class="step-title">What service do you need?</div>
+      <div class="service-grid">
+        <div class="svc-tile" onclick="selectService(this, 'General Repairs', 180, 450)">
+          <span class="svc-emoji">🔧</span>
+          <div class="svc-name">General Repairs</div>
+          <div class="svc-range">$180 – $450</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'New Installation', 400, 1200)">
+          <span class="svc-emoji">🏗️</span>
+          <div class="svc-name">New Installation</div>
+          <div class="svc-range">$400 – $1,200</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Maintenance Service', 150, 380)">
+          <span class="svc-emoji">🛠️</span>
+          <div class="svc-name">Maintenance</div>
+          <div class="svc-range">$150 – $380</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Full Project', 1500, 6000)">
+          <span class="svc-emoji">📐</span>
+          <div class="svc-name">Full Project</div>
+          <div class="svc-range">$1,500 – $6,000</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Consultation & Quote', 0, 0)">
+          <span class="svc-emoji">💬</span>
+          <div class="svc-name">Consultation</div>
+          <div class="svc-range">Free quote</div>
+        </div>
+        <div class="svc-tile" onclick="selectService(this, 'Emergency / Urgent', 280, 700)">
+          <span class="svc-emoji">🚨</span>
+          <div class="svc-name">Emergency</div>
+          <div class="svc-range">$280 – $700</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="quote-step" id="qStep2">
+      <div class="step-label">Step 2 of 3</div>
+      <div class="step-title">How complex is the job?</div>
+      <div class="complexity-list">
+        <div class="complexity-tile" onclick="selectComplexity(this, 'Basic', 0.85)">
+          <div class="complexity-left">
+            <div class="complexity-name">Basic</div>
+            <div class="complexity-desc">Straightforward, standard scope</div>
+          </div>
+          <div class="complexity-mult">Save ~15%</div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 'Standard', 1.0)">
+          <div class="complexity-left">
+            <div class="complexity-name">Standard</div>
+            <div class="complexity-desc">Typical job, average complexity</div>
+          </div>
+          <div class="complexity-mult">Base rate</div>
+        </div>
+        <div class="complexity-tile" onclick="selectComplexity(this, 'Complex', 1.35)">
+          <div class="complexity-left">
+            <div class="complexity-name">Complex</div>
+            <div class="complexity-desc">Difficult access, extra scope, custom work</div>
+          </div>
+          <div class="complexity-mult">+35%</div>
+        </div>
+      </div>
+      <button class="step-back" onclick="goToStep(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="quote-step" id="qStep3">
+      <div class="step-label">Step 3 of 3</div>
+      <div class="step-title">Your contact details</div>
+      <div class="quote-summary-bar" id="quoteSummaryBar"></div>
+      <div id="quoteFormWrap">
+        <form class="quote-form" id="quoteForm" onsubmit="submitQuoteForm(event)">
+          <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+          <input type="hidden" name="subject" id="quoteSubject" value="New Quote Request — iTabs Widget">
+          <input type="hidden" name="to" value="responses@itabs.ai">
+          <input type="hidden" name="from_name" value="iTabs Widget">
+          <input type="hidden" name="service_selected" id="qServiceHidden">
+          <input type="hidden" name="complexity" id="qComplexityHidden">
+          <input type="hidden" name="estimate_range" id="qEstimateHidden">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="tel" name="phone" placeholder="Phone number" required>
+          <input type="email" name="email" placeholder="Email address" required>
+          <textarea name="message" placeholder="Any extra details about the job?"></textarea>
+          <button type="submit" class="quote-submit">Send quote request →</button>
+        </form>
+      </div>
+      <div class="quote-success" id="quoteSuccess">
+        <div class="qs-icon">🎉</div>
+        <h3>Quote request sent!</h3>
+        <p>We've received your details and will be in touch with a full quote shortly.<br><br>
+        Want to talk now? <a href="tel:">Call us directly</a></p>
+      </div>
+      <button class="step-back" onclick="goToStep(2)" id="step3BackBtn">← Back</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ===================== STATE =====================
+let currentCard = 0;
+const totalCards = 5;
+let touchStartX = 0;
+let touchStartY = 0;
+let isDragging = false;
+
+// Quote state
+let selectedService = null;
+let selectedComplexity = null;
+let baseLow = 0, baseHigh = 0;
+let currentQuoteStep = 1;
+
+// ===================== INIT =====================
+document.addEventListener('DOMContentLoaded', () => {
+  buildProgressBar();
+  buildNavDots();
+  updateUI();
+  setupSwipe();
+  setupKeyboard();
+});
+
+// ===================== PROGRESS BAR =====================
+function buildProgressBar() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < totalCards; i++) {
+    const seg = document.createElement('div');
+    seg.className = 'prog-seg';
+    seg.id = 'prog-' + i;
+    bar.appendChild(seg);
+  }
+}
+
+function updateProgressBar() {
+  for (let i = 0; i < totalCards; i++) {
+    const seg = document.getElementById('prog-' + i);
+    if (!seg) continue;
+    seg.className = 'prog-seg';
+    if (i === currentCard) seg.classList.add('active');
+    else if (i < currentCard) seg.classList.add('viewed');
+  }
+}
+
+// ===================== NAV DOTS =====================
+function buildNavDots() {
+  const wrap = document.getElementById('navDots');
+  wrap.innerHTML = '';
+  for (let i = 0; i < totalCards; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.id = 'dot-' + i;
+    dot.onclick = () => goToCard(i);
+    dot.style.cursor = 'pointer';
+    wrap.appendChild(dot);
+  }
+}
+
+function updateNavDots() {
+  for (let i = 0; i < totalCards; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (dot) {
+      dot.className = 'nav-dot' + (i === currentCard ? ' active' : '');
+    }
+  }
+}
+
+// ===================== CARD STATE =====================
+function updateUI() {
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card, i) => {
+    card.className = 'card';
+    if (i < currentCard) card.classList.add('state-prev');
+    else if (i === currentCard) card.classList.add('state-active');
+    else card.classList.add('state-next');
+  });
+  updateProgressBar();
+  updateNavDots();
+  document.getElementById('prevBtn').style.opacity = currentCard === 0 ? '0.3' : '1';
+  document.getElementById('nextBtn').style.opacity = currentCard === totalCards - 1 ? '0.3' : '1';
+}
+
+function navigate(dir) {
+  const newIndex = currentCard + dir;
+  if (newIndex < 0 || newIndex >= totalCards) return;
+  currentCard = newIndex;
+  updateUI();
+}
+
+function goToCard(index) {
+  if (index < 0 || index >= totalCards) return;
+  currentCard = index;
+  updateUI();
+}
+
+// ===================== SWIPE =====================
+function setupSwipe() {
+  const vp = document.getElementById('cardViewport');
+  vp.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+  vp.addEventListener('touchend', e => {
+    if (!isDragging) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      navigate(dx < 0 ? 1 : -1);
+    }
+    isDragging = false;
+  }, { passive: true });
+}
+
+// ===================== KEYBOARD =====================
+function setupKeyboard() {
+  document.addEventListener('keydown', e => {
+    if (document.getElementById('quotePanel').classList.contains('open')) return;
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft') navigate(-1);
+  });
+}
+
+// ===================== I-PANEL =====================
+function toggleIPanel(id) {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.toggle('open');
+}
+
+// ===================== QUOTE PANEL =====================
+function openQuotePanel() {
+  document.getElementById('quotePanel').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeQuotePanel() {
+  document.getElementById('quotePanel').classList.remove('open');
+}
+
+function goToStep(step) {
+  document.querySelectorAll('.quote-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('qStep' + step).classList.add('active');
+  currentQuoteStep = step;
+}
+
+// ===================== QUOTE LOGIC =====================
+function selectService(tile, name, low, high) {
+  document.querySelectorAll('.svc-tile').forEach(t => t.classList.remove('selected'));
+  tile.classList.add('selected');
+  selectedService = name;
+  baseLow = low;
+  baseHigh = high;
+  updatePriceDisplay(low, high);
+  setTimeout(() => goToStep(2), 280);
+}
+
+function selectComplexity(tile, name, mult) {
+  document.querySelectorAll('.complexity-tile').forEach(t => t.classList.remove('selected'));
+  tile.classList.add('selected');
+  selectedComplexity = name;
+  const low = Math.round(baseLow * mult / 10) * 10;
+  const high = Math.round(baseHigh * mult / 10) * 10;
+  updatePriceDisplay(low, high);
+
+  // Update summary bar
+  let rangeText = (low === 0 && high === 0) ? 'Free consultation' : '$' + low.toLocaleString() + ' – $' + high.toLocaleString();
+  document.getElementById('quoteSummaryBar').innerHTML =
+    '<div class="qsb-item"><strong>' + selectedService + '</strong>Service</div>' +
+    '<div class="qsb-item"><strong>' + name + '</strong>Complexity</div>' +
+    '<div class="qsb-item"><strong>' + rangeText + '</strong>Estimate</div>';
+
+  document.getElementById('qServiceHidden').value = selectedService;
+  document.getElementById('qComplexityHidden').value = name;
+  document.getElementById('qEstimateHidden').value = rangeText;
+  document.getElementById('quoteSubject').value = 'Quote Request: ' + selectedService + ' (' + name + ') — iTabs';
+
+  setTimeout(() => goToStep(3), 280);
+}
+
+function updatePriceDisplay(low, high) {
+  const display = document.getElementById('priceDisplay');
+  if (low === 0 && high === 0) {
+    display.textContent = 'Free quote';
+  } else {
+    display.textContent = '$' + low.toLocaleString() + ' – $' + high.toLocaleString();
+  }
+}
+
+// ===================== FORM SUBMISSIONS =====================
+async function submitLeadForm(e) {
+  e.preventDefault();
+  const form = document.getElementById('leadForm');
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+
+  try {
+    const data = new FormData(form);
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: data
+    });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('leadFormWrap').style.display = 'none';
+      document.getElementById('leadSuccess').style.display = 'block';
+    } else {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
+}
+
+async function submitQuoteForm(e) {
+  e.preventDefault();
+  const form = document.getElementById('quoteForm');
+  const btn = form.querySelector('button[type="submit"]');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+
+  try {
+    const data = new FormData(form);
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: data
+    });
+    const json = await res.json();
+    if (json.success) {
+      document.getElementById('quoteFormWrap').style.display = 'none';
+      document.getElementById('step3BackBtn').style.display = 'none';
+      document.getElementById('quoteSuccess').style.display = 'block';
+    } else {
+      btn.textContent = 'Try again';
+      btn.disabled = false;
+    }
+  } catch {
+    btn.textContent = 'Try again';
+    btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>
