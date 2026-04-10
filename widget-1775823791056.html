@@ -1,0 +1,476 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1a4a1a 0%, #2d7a2d 50%, #1a4a1a 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .widget-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* ── Header Card ── */
+  .header-card {
+    background: linear-gradient(145deg, #1b5e20, #2e7d32, #388e3c);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .header-card::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; left: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+
+  .logo-icon {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #76c442, #4caf50);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 30px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    position: relative;
+    z-index: 1;
+  }
+
+  .business-name {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  .business-trade {
+    color: #a5d6a7;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 5px 12px;
+    margin-top: 10px;
+    color: #e8f5e9;
+    font-size: 12px;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Tab Bar ── */
+  .tab-bar {
+    background: #1b2e1b;
+    display: flex;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+    z-index: 10;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 12px 4px 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: #5a8a5a;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color 0.25s;
+    position: relative;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .tab-btn .tab-icon {
+    font-size: 18px;
+    transition: transform 0.25s;
+  }
+
+  .tab-btn.active {
+    color: #76c442;
+  }
+
+  .tab-btn.active .tab-icon {
+    transform: scale(1.15);
+  }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #76c442, #4caf50);
+    border-radius: 3px 3px 0 0;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── Panels Container ── */
+  .panels-container {
+    background: #f0f7f0;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  }
+
+  .panels-track {
+    display: flex;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .panel {
+    min-width: 100%;
+    padding: 24px 20px 28px;
+  }
+
+  /* ── Panel Headings ── */
+  .panel-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1b5e20;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, #76c442 0%, transparent 100%);
+    border-radius: 2px;
+  }
+
+  /* ── Services Panel ── */
+  .service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .service-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 14px;
+    text-align: center;
+    border: 1.5px solid #c8e6c9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .service-card:active {
+    transform: scale(0.96);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+
+  .service-card .s-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .service-card .s-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2e7d32;
+    line-height: 1.3;
+  }
+
+  .service-card .s-desc {
+    font-size: 11px;
+    color: #7a9e7a;
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* ── About Panel ── */
+  .about-hero {
+    background: linear-gradient(135deg, #2e7d32, #388e3c);
+    border-radius: 14px;
+    padding: 20px;
+    color: #fff;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-hero::before {
+    content: '🌿';
+    position: absolute;
+    right: 12px; top: 10px;
+    font-size: 50px;
+    opacity: 0.2;
+  }
+
+  .about-hero h3 {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .about-hero p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #c8e6c9;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .info-row {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid #c8e6c9;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  }
+
+  .info-row .i-icon {
+    font-size: 20px;
+    width: 36px;
+    height: 36px;
+    background: #e8f5e9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .info-row .i-label {
+    font-size: 11px;
+    color: #7a9e7a;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .info-row .i-value {
+    font-size: 14px;
+    color: #1b5e20;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+
+  /* ── Contact Panel ── */
+  .contact-cta {
+    background: linear-gradient(135deg, #76c442, #4caf50);
+    border-radius: 16px;
+    padding: 22px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 16px rgba(76,175,80,0.35);
+  }
+
+  .contact-cta p {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 14px;
+    opacity: 0.9;
+    line-height: 1.5;
+  }
+
+  .call-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #fff;
+    color: #2e7d32;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 900;
+    padding: 14px 28px;
+    border-radius: 50px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .call-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .call-btn .phone-icon {
+    font-size: 22px;
+    animation: ring 2.5s infinite;
+  }
+
+  @keyframes ring {
+    0%, 90%, 100% { transform: rotate(0deg); }
+    92% { transform: rotate(-15deg); }
+    94% { transform: rotate(15deg); }
+    96% { transform: rotate(-10deg); }
+    98% { transform: rotate(10deg); }
+  }
+
+  .contact-alt {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .contact-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1.5px solid #c8e6c9;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  }
+
+  .contact-card .cc-icon {
+    font-size: 22px;
+    width: 40px;
+    height: 40px;
+    background: #e8f5e9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact-card .cc-label {
+    font-size: 11px;
+    color: #7a9e7a;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .contact-card .cc-value {
+    font-size: 14px;
+    color: #1b5e20;
+    font-weight: 700;
+  }
+
+  /* ── Hours Badge ── */
+  .hours-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e8f5e9;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #2e7d32;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+
+  .dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4caf50;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* ── Swipe hint ── */
+  .swipe-hint {
+    text-align: center;
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Scrollbar hide ── */
+  .panels-container::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+<div class="widget-wrapper">
+
+  <!-- Header -->
+  <div class="header-card">
+    <div class="logo-icon">🌿</div>
+    <div class="business-name">Rick's Lawn Care</div>
+    <div class="business-trade">Professional Landscaper</div>
+    <div class="location-badge">
+      📍 Baldivis, Perth WA
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-tab="0">
+      <span class="tab-icon">🌱</span>
