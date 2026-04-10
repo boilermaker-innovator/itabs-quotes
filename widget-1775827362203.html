@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1a4a1a 0%, #2d7a2d 50%, #1a4a1a 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .widget-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER CARD ── */
+  .header-card {
+    background: linear-gradient(145deg, #0f2d0f, #1e5c1e);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+
+  .header-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 150px; height: 150px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+
+  .header-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 50%;
+  }
+
+  .logo-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 36px;
+    box-shadow: 0 6px 20px rgba(76,175,80,0.4);
+    position: relative;
+    z-index: 1;
+  }
+
+  .biz-name {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .biz-name span {
+    color: #7ecf7e;
+  }
+
+  .biz-trade {
+    color: #a5d6a7;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .biz-location {
+    color: #81c784;
+    font-size: 13px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── TAB NAV ── */
+  .tab-nav {
+    background: #0d260d;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 14px 8px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .tab-btn .tab-icon {
+    font-size: 20px;
+    transition: transform 0.25s ease;
+  }
+
+  .tab-btn .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #5a8a5a;
+    transition: color 0.25s ease;
+    text-transform: uppercase;
+  }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 80%;
+    height: 3px;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 3px 3px 0 0;
+    transition: transform 0.25s ease;
+  }
+
+  .tab-btn.active .tab-label { color: #7ecf7e; }
+  .tab-btn.active .tab-icon { transform: translateY(-2px); }
+  .tab-btn.active::after { transform: translateX(-50%) scaleX(1); }
+
+  /* ── SWIPE CONTAINER ── */
+  .swipe-container {
+    background: #0f2d0f;
+    overflow: hidden;
+    position: relative;
+    min-height: 380px;
+  }
+
+  .panels-track {
+    display: flex;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .panel {
+    min-width: 100%;
+    padding: 24px 20px;
+  }
+
+  /* ── PANEL: HOME ── */
+  .home-hero {
+    background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(46,125,50,0.1));
+    border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .hero-emoji { font-size: 48px; margin-bottom: 10px; }
+
+  .hero-title {
+    color: #e8f5e9;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .hero-sub {
+    color: #81c784;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+
+  .stat-icon { font-size: 24px; margin-bottom: 4px; }
+  .stat-val {
+    color: #7ecf7e;
+    font-size: 16px;
+    font-weight: 800;
+  }
+  .stat-key {
+    color: #5a8a5a;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .call-btn-home {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 24px;
+    width: 100%;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(76,175,80,0.35);
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+  }
+
+  .call-btn-home:active {
+    transform: scale(0.97);
+    box-shadow: 0 3px 10px rgba(76,175,80,0.25);
+  }
+
+  /* ── PANEL: SERVICES ── */
+  .section-title {
+    color: #7ecf7e;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .service-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .service-card:active {
+    background: rgba(76,175,80,0.1);
+    border-color: rgba(76,175,80,0.3);
+  }
+
+  .service-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .service-card:nth-child(2) .service-icon-wrap { background: rgba(76,175,80,0.2); }
+  .service-card:nth-child(3) .service-icon-wrap { background: rgba(33,150,243,0.2); }
+  .service-card:nth-child(4) .service-icon-wrap { background: rgba(255,193,7,0.2); }
+  .service-card:nth-child(5) .service-icon-wrap { background: rgba(156,39,176,0.2); }
+
+  .service-info { flex: 1; }
+
+  .service-name {
+    color: #e8f5e9;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .service-desc {
+    color: #5a8a5a;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .service-badge {
+    background: rgba(76,175,80,0.2);
+    color: #7ecf7e;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    align-self: flex-start;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  /* ── PANEL: ABOUT ── */
+  .about-profile {
+    background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(46,125,50,0.05));
+    border: 1px solid rgba(76,175,80,0.15);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #4caf50, #1b5e20);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 16px rgba(76,175,80,0.3);
+  }
+
+  .profile-name {
+    color: #e8f5e9;
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  .profile-title {
+    color: #81c784;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .about-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 14px 12px;
+  }
+
+  .about-item-label {
+    color: #5a8a5a;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+  }
+
+  .about-item-val {
+    color: #e8f5e9;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .guarantee-bar {
+    background: rgba(76,175,80,0.12);
+    border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .guarantee-bar span:first-child { font-size: 24px; }
+
+  .guarantee-text {
+    color: #a5d6a7;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .guarantee-text strong { color: #7ecf7e; }
+
+  /* ── PANEL: CONTACT ── */
+  .contact-main {
+    background: linear-gradient(135deg, rgba(76,175,80,0.12), rgba(46,125,50,0.08));
+    border: 1px solid rgba(76,175,80,0.2);
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .contact-label {
+    color: #5a8a5a;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .contact-phone {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 16px;
+  }
+
+  .contact-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
