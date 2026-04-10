@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1a472a 0%, #2d6a4f 50%, #40916c 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .widget-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* ── Header Card ── */
+  .header-card {
+    background: linear-gradient(145deg, #1b5e20, #2e7d32);
+    border-radius: 24px 24px 0 0;
+    padding: 28px 24px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .header-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .header-card::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -30px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+
+  .logo-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(145deg, #4caf50, #81c784);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 34px;
+    box-shadow: 0 6px 20px rgba(76,175,80,0.4);
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-name {
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-sub {
+    font-size: 13px;
+    color: #a5d6a7;
+    margin-top: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 5px 14px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #c8e6c9;
+    font-weight: 500;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── iTabs Container ── */
+  .itabs-container {
+    background: #ffffff;
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    overflow: hidden;
+  }
+
+  /* ── Tab Nav ── */
+  .tab-nav {
+    display: flex;
+    background: #f5f5f5;
+    border-bottom: 2px solid #e0e0e0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-snap-type: x mandatory;
+  }
+
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 14px 8px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    transition: background 0.2s;
+    scroll-snap-align: start;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .tab-btn:active { background: #eeeeee; }
+
+  .tab-btn.active { background: #ffffff; }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; left: 0; right: 0;
+    height: 3px;
+    background: #2e7d32;
+    border-radius: 3px 3px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+  }
+
+  .tab-btn.active::after { transform: scaleX(1); }
+
+  .tab-icon {
+    font-size: 20px;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+
+  .tab-btn.active .tab-icon { transform: scale(1.15); }
+
+  .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #9e9e9e;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+
+  .tab-btn.active .tab-label { color: #2e7d32; }
+
+  /* ── Swipe Panel ── */
+  .panels-track {
+    display: flex;
+    overflow: hidden;
+    touch-action: pan-y;
+    position: relative;
+  }
+
+  .panels-inner {
+    display: flex;
+    width: 500%;
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  .panel {
+    width: 20%;
+    padding: 24px 20px 28px;
+    flex-shrink: 0;
+  }
+
+  /* ── Panel: Home ── */
+  .welcome-hero {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid #c8e6c9;
+  }
+
+  .welcome-hero .hero-emoji { font-size: 48px; display: block; margin-bottom: 10px; }
+
+  .welcome-hero h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1b5e20;
+    margin-bottom: 6px;
+  }
+
+  .welcome-hero p {
+    font-size: 13px;
+    color: #558b2f;
+    line-height: 1.5;
+  }
+
+  .quick-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: #f9f9f9;
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    border: 1px solid #eeeeee;
+  }
+
+  .stat-card .stat-num {
+    font-size: 26px;
+    font-weight: 800;
+    color: #2e7d32;
+    display: block;
+  }
+
+  .stat-card .stat-lbl {
+    font-size: 11px;
+    color: #757575;
+    font-weight: 600;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .call-btn-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: white;
+    text-decoration: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(46,125,50,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .call-btn-main:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(46,125,50,0.25);
+  }
+
+  /* ── Panel: Services ── */
+  .section-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1b5e20;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .service-card {
+    background: #ffffff;
+    border: 1.5px solid #e8f5e9;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .service-card:hover {
+    border-color: #81c784;
+    box-shadow: 0 4px 16px rgba(46,125,50,0.1);
+  }
+
+  .service-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .service-icon-box.green  { background: #e8f5e9; }
+  .service-icon-box.blue   { background: #e3f2fd; }
+  .service-icon-box.yellow { background: #fffde7; }
+  .service-icon-box.brown  { background: #fbe9e7; }
+
+  .service-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #212121;
+    margin-bottom: 4px;
+  }
+
+  .service-info p {
+    font-size: 12.5px;
+    color: #757575;
+    line-height: 1.5;
+  }
+
+  .service-tag {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  /* ── Panel: About ── */
+  .about-photo {
+    width: 100%;
+    height: 140px;
+    background: linear-gradient(135deg, #2e7d32, #66bb6a);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-photo::after {
+    content: 'Baldivis, Perth WA';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.45);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .about-text {
+    font-size: 13.5px;
+    color: #424242;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .about-text strong { color: #1b5e20; }
+
+  .feature-list { list-style: none; margin-bottom: 18px; }
+
+  .feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 13px;
+    color: #424242;
+  }
+
+  .feature-list li:last-child { border-bottom: none; }
+
+  .feature-list li span.chk {
+    width: 22px; height: 22px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ── Panel: Gallery ── */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .gallery-item {
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 36px;
+    font-weight: 700;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .gallery-item:active { transform: scale(0.96); }
+
+  .gallery-item .g-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    padding: 0 8px;
+    text-align: center;
+  }
+
+  .g1 { background: linear-gradient(145deg, #c8e6c9, #a5d6a7); color: #1b5e20; }
+  .g2 { background: linear-gradient(145deg, #bbdefb, #90caf9); color: #0d47a1; }
+  .g3 { background: linear-gradient(145deg, #fff9c4, #fff176); color: #f57f17; }
+  .g4 { background: linear-gradient(145deg, #ffccbc, #ffab91); color: #bf360c; }
+
+  .gallery-tip {
+    background: #f5f5f5;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #757575;
+    text-align: center;
+    line-height: 1.5;
