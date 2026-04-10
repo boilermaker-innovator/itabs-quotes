@@ -1,0 +1,471 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  .widget-wrapper {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  .widget-header {
+    background: linear-gradient(135deg, #2d6a2d 0%, #4caf50 60%, #81c784 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(45,106,45,0.35);
+  }
+
+  .widget-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .widget-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -30px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .header-logo {
+    font-size: 48px;
+    line-height: 1;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-title {
+    color: #fff;
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .header-subtitle {
+    color: rgba(255,255,255,0.88);
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+    border: 1px solid rgba(255,255,255,0.35);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Tab bar ── */
+  .tab-bar {
+    display: flex;
+    background: #1b4d1b;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 13px 6px 11px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: background 0.2s;
+    position: relative;
+    outline: none;
+  }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 70%;
+    height: 3px;
+    background: #81c784;
+    border-radius: 3px 3px 0 0;
+    transition: transform 0.25s ease;
+  }
+
+  .tab-btn.active::after { transform: translateX(-50%) scaleX(1); }
+
+  .tab-btn.active { background: rgba(255,255,255,0.07); }
+
+  .tab-icon {
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+
+  .tab-label {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active .tab-label { color: #81c784; }
+
+  /* ── Swipe container ── */
+  .swipe-container {
+    overflow: hidden;
+    background: #fff;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  }
+
+  .panels-track {
+    display: flex;
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .panel {
+    min-width: 100%;
+    padding: 24px 20px 28px;
+  }
+
+  /* ── Panel: Home ── */
+  .home-hero {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-radius: 14px;
+    padding: 22px 18px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid #c8e6c9;
+  }
+
+  .home-hero-emoji { font-size: 3.5rem; margin-bottom: 8px; }
+
+  .home-hero h2 {
+    color: #2d6a2d;
+    font-size: 1.2rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .home-hero p {
+    color: #555;
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .home-card {
+    background: #f8fdf8;
+    border: 1px solid #dcedc8;
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+    cursor: default;
+  }
+
+  .home-card:active { transform: scale(0.97); }
+
+  .home-card-icon { font-size: 1.8rem; margin-bottom: 6px; }
+
+  .home-card-title {
+    color: #2d6a2d;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .cta-call {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #2d6a2d, #4caf50);
+    color: #fff;
+    text-decoration: none;
+    padding: 16px 20px;
+    border-radius: 14px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(76,175,80,0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .cta-call:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(76,175,80,0.3);
+  }
+
+  .cta-call span { font-size: 1.3rem; }
+
+  /* ── Panel: Services ── */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #2d6a2d;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, #c8e6c9, transparent);
+    border-radius: 2px;
+  }
+
+  .service-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #f8fdf8;
+    border: 1px solid #dcedc8;
+    border-radius: 14px;
+    padding: 16px 14px;
+    margin-bottom: 12px;
+    transition: transform 0.15s;
+  }
+
+  .service-card:active { transform: scale(0.98); }
+
+  .service-icon-wrap {
+    width: 50px; height: 50px;
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(76,175,80,0.15);
+  }
+
+  .service-info h3 {
+    color: #1b4d1b;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .service-info p {
+    color: #666;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .service-tag {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #2d6a2d;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+    border: 1px solid #c8e6c9;
+  }
+
+  /* ── Panel: About ── */
+  .about-profile {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin-bottom: 20px;
+    border: 1px solid #c8e6c9;
+  }
+
+  .profile-avatar {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, #2d6a2d, #4caf50);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(76,175,80,0.35);
+    border: 3px solid #fff;
+  }
+
+  .profile-info h3 {
+    color: #1b4d1b;
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .profile-info .profile-trade {
+    color: #4caf50;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+
+  .profile-info .profile-location {
+    color: #777;
+    font-size: 0.8rem;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .info-list { margin-bottom: 20px; }
+
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .info-item:last-child { border-bottom: none; }
+
+  .info-dot {
+    width: 36px; height: 36px;
+    background: #e8f5e9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .info-text strong {
+    display: block;
+    color: #333;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .info-text span {
+    color: #666;
+    font-size: 0.85rem;
+  }
+
+  .about-blurb {
+    background: #f9f9f9;
+    border-left: 4px solid #4caf50;
+    border-radius: 0 12px 12px 0;
+    padding: 14px 16px;
+    color: #555;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    font-style: italic;
+  }
+
+  /* ── Panel: Contact ── */
+  .contact-card {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border: 1px solid #c8e6c9;
+    border-radius: 14px;
+    padding: 20px 16px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .contact-card .contact-icon { font-size: 2.2rem; margin-bottom: 8px; }
+
+  .contact-card h3 {
+    color: #1b4d1b;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .contact-card .contact-value {
+    color: #2d6a2d;
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .contact-card .contact-value.small {
+    font-size: 0.95rem;
+    word-break: break-all;
+  }
+
+  .btn-call {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #2d6a2d, #4caf50);
+    color: #fff;
+    text-decoration: none;
