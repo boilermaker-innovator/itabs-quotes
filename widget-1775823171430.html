@@ -1,0 +1,467 @@
+# Rick's Lawn Care - iTabs Widget
+
+Here's a mobile-first swipeable iTabs widget for Rick's Lawn Care:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f0f4f0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .widget-container {
+    width: 100%;
+    max-width: 480px;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  }
+
+  /* ── HEADER ── */
+  .widget-header {
+    background: linear-gradient(135deg, #2d7a2d 0%, #4caf50 60%, #81c784 100%);
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .widget-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .widget-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+
+  .logo-icon {
+    font-size: 42px;
+    display: block;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    animation: sway 3s ease-in-out infinite;
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-3deg); }
+    50%       { transform: rotate(3deg); }
+  }
+
+  .business-name {
+    color: #ffffff;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+
+  .business-sub {
+    color: rgba(255,255,255,0.88);
+    font-size: 13px;
+    margin-top: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .call-btn-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    background: rgba(255,255,255,0.22);
+    border: 2px solid rgba(255,255,255,0.55);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 9px 22px;
+    border-radius: 50px;
+    text-decoration: none;
+    backdrop-filter: blur(4px);
+    transition: background 0.2s, transform 0.15s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .call-btn-header:active {
+    transform: scale(0.96);
+    background: rgba(255,255,255,0.35);
+  }
+
+  /* ── TAB NAV ── */
+  .tab-nav {
+    display: flex;
+    background: #1b5e20;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 70px;
+    padding: 12px 6px 10px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s, background 0.2s;
+    position: relative;
+    letter-spacing: 0.2px;
+  }
+
+  .tab-btn .tab-icon { font-size: 20px; }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 15%; right: 15%;
+    height: 3px;
+    background: #76ff03;
+    border-radius: 3px 3px 0 0;
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+  }
+
+  .tab-btn.active {
+    color: #ffffff;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .tab-btn.active::after { transform: scaleX(1); }
+
+  /* ── SWIPE PANEL ── */
+  .panels-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+
+  .panels-track {
+    display: flex;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+  }
+
+  .panel {
+    min-width: 100%;
+    padding: 22px 20px 26px;
+  }
+
+  /* ── PANEL CONTENT STYLES ── */
+  .panel-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #1b5e20;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* HOME panel */
+  .hero-blurb {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-left: 4px solid #4caf50;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #2e5226;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .badge {
+    background: #e8f5e9;
+    color: #2d7a2d;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .info-card {
+    background: #f9fbe7;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .info-card .ic-icon { font-size: 24px; flex-shrink: 0; }
+
+  .info-card .ic-text { font-size: 13px; color: #424242; }
+  .info-card .ic-text strong { color: #1b5e20; display: block; margin-bottom: 1px; }
+
+  /* SERVICES panel */
+  .service-card {
+    background: #fff;
+    border: 1.5px solid #c8e6c9;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(76,175,80,0.08);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .service-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 4px rgba(76,175,80,0.1);
+  }
+
+  .service-emoji {
+    font-size: 32px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .service-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1b5e20;
+    margin-bottom: 4px;
+  }
+
+  .service-info p {
+    font-size: 13px;
+    color: #616161;
+    line-height: 1.5;
+  }
+
+  /* GALLERY panel */
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .gallery-item {
+    border-radius: 12px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 36px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .gallery-item span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1b5e20;
+    text-align: center;
+    padding: 0 8px;
+    line-height: 1.3;
+  }
+
+  .gallery-item .gi-label {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(27,94,32,0.75);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    padding: 5px 4px;
+  }
+
+  /* CONTACT panel */
+  .contact-block {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
+  .contact-block .phone-number {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1b5e20;
+    letter-spacing: 0.5px;
+    margin: 8px 0;
+  }
+
+  .cta-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    width: 100%;
+    padding: 15px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s, filter 0.15s;
+    margin-bottom: 10px;
+  }
+
+  .cta-btn:active { transform: scale(0.97); filter: brightness(0.92); }
+
+  .cta-call {
+    background: linear-gradient(135deg, #2d7a2d, #4caf50);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(76,175,80,0.4);
+  }
+
+  .cta-sms {
+    background: #e8f5e9;
+    color: #1b5e20;
+    border: 2px solid #a5d6a7;
+  }
+
+  .area-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff;
+    border: 1.5px solid #c8e6c9;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #2d7a2d;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  /* ── SWIPE HINT ── */
+  .swipe-hint {
+    text-align: center;
+    padding: 8px 0 14px;
+    font-size: 11px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .dot-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 0 14px;
+  }
+
+  .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #c8e6c9;
+    transition: background 0.25s, transform 0.25s;
+  }
+
+  .dot.active {
+    background: #2d7a2d;
+    transform: scale(1.4);
+  }
+
+  /* ── FOOTER ── */
+  .widget-footer {
+    background: #1b5e20;
+    color: rgba(255,255,255,0.65);
+    font-size: 11px;
+    text-align: center;
+    padding: 10px;
+    letter-spacing: 0.3px;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="widget-container">
+
+  <!-- HEADER -->
+  <div class="widget-header">
+    <span class="logo-icon">🌿</span>
+    <div class="business-name">Rick's Lawn Care</div>
+    <div class="business-sub">🌏 Baldivis, Perth WA &nbsp;|&nbsp; Landscaper</div>
+    <a class="call-btn-header" href="tel:0412999888">
+      📞 Call 0412 999 888
+    </a>
+  </div>
+
+  <!-- TAB NAV -->
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="0">
+      <span class="tab-icon">🏡</span> Home
+    </button>
+    <button class="tab-btn" data-tab="1">
+      <span class="tab-icon">🛠️</span> Services
+    </button>
+    <button class="tab-btn" data-tab="2">
+      <span class="tab-icon">📸</span> Gallery
+    </button>
+    <button class="tab-btn" data-tab="3">
+      <span class="tab-icon">📞</span> Contact
+    </button>
+  </nav>
+
+  <!-- PANELS -->
+  <div class="panels-wrapper" id="panelsWrapper">
+    <div class="panels-track" id="panelsTrack">
+
+      <!-- 0: HOME -->
+      <div class="panel">
+        <div class="panel-title">🌱 Welcome to Rick's</div>
+        <div class="hero-blurb">
+          Your local Baldivis landscaper delivering <strong>immaculate lawns</strong> and beautiful gardens across Perth's southern suburbs. Rick brings years of hands-on expertise and a genuine pride in every job.
+        </div>
+        <div class="badge-
