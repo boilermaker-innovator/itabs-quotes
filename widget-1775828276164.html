@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#f0f4f0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:10px}
+  .widget{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.13);max-width:420px;width:100%;overflow:hidden}
+  .header{background:linear-gradient(135deg,#2d7a2d,#56c156);color:#fff;padding:22px 18px 16px;text-align:center}
+  .header h1{font-size:1.35rem;font-weight:700;letter-spacing:0.5px}
+  .header p{font-size:0.82rem;opacity:0.88;margin-top:3px}
+  .logo-icon{font-size:2.2rem;margin-bottom:4px}
+  .tabs{display:flex;background:#1e5e1e;overflow:hidden}
+  .tab-btn{flex:1;padding:11px 4px;font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.7);background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:0.4px;transition:all 0.2s;border-bottom:3px solid transparent}
+  .tab-btn.active{color:#fff;border-bottom:3px solid #7ef07e;background:rgba(255,255,255,0.08)}
+  .tab-btn:hover{color:#fff;background:rgba(255,255,255,0.05)}
+  .slider-wrap{overflow:hidden;position:relative}
+  .slider{display:flex;transition:transform 0.35s cubic-bezier(.4,0,.2,1)}
+  .panel{min-width:100%;padding:22px 18px 24px;background:#fff}
+  .panel h2{font-size:1rem;color:#2d7a2d;margin-bottom:12px;font-weight:700;display:flex;align-items:center;gap:7px}
+  .panel p{font-size:0.88rem;color:#444;line-height:1.6}
+  .service-list{list-style:none;margin-top:8px}
+  .service-list li{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:8px;background:#f3fbf3;border-radius:10px;border-left:4px solid #2d7a2d;font-size:0.88rem;color:#333;font-weight:500}
+  .service-list li span.icon{font-size:1.2rem}
+  .info-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid #eef4ee}
+  .info-row:last-child{border-bottom:none}
+  .info-row .ico{font-size:1.3rem;width:28px;text-align:center;flex-shrink:0}
+  .info-row .txt{font-size:0.86rem;color:#444;line-height:1.5}
+  .info-row .txt strong{display:block;color:#222;font-size:0.9rem}
+  .cta-btn{display:block;width:100%;margin-top:18px;padding:14px;background:linear-gradient(135deg,#2d7a2d,#56c156);color:#fff;font-size:1rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;text-align:center;text-decoration:none;letter-spacing:0.5px;transition:opacity 0.2s;box-shadow:0 3px 10px rgba(45,122,45,0.3)}
+  .cta-btn:hover{opacity:0.9}
+  .badge{display:inline-block;background:#e8f8e8;color:#2d7a2d;font-size:0.74rem;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle}
+  .stars{color:#f5a623;font-size:1rem;letter-spacing:1px}
+  .review-box{background:#f9fdf9;border-radius:10px;padding:12px;margin-top:10px;font-size:0.84rem;color:#555;font-style:italic;border-left:4px solid #56c156}
+  .review-box strong{display:block;color:#333;font-style:normal;margin-top:6px;font-size:0.82rem}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="header">
+    <div class="logo-icon">🌿</div>
+    <h1>Rick's Lawn Care</h1>
+    <p>Professional Landscaping · Baldivis, Perth</p>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="goTo(0)">Home</button>
+    <button class="tab-btn" onclick="goTo(1)">Services</button>
+    <button class="tab-btn" onclick="goTo(2)">About</button>
+    <button class="tab-btn" onclick="goTo(3)">Contact</button>
+  </div>
+  <div class="slider-wrap">
+    <div class="slider" id="slider">
+
+      <div class="panel">
+        <h2>🏡 Welcome</h2>
+        <p>Rick's Lawn Care delivers top-quality landscaping services to homes and businesses across <strong>Baldivis and Perth's southern suburbs</strong>. Reliable, affordable and locally trusted.</p>
+        <div class="review-box">
+          <span class="stars">★★★★★</span>
+          "Rick transformed our backyard completely — turf, reticulation and all. Absolutely brilliant work!"
+          <strong>— Sarah M., Baldivis</strong>
+        </div>
+        <a class="cta-btn" href="tel:0412999888">📞 Call Rick Now</a>
+      </div>
+
+      <div class="panel">
+        <h2>🛠 Our Services</h2>
+        <ul class="service-list">
+          <li><span class="icon">🌱</span> Lawn Mowing &amp; Edging <span class="badge">Popular</span></li>
+          <li><span class="icon">💧</span> Reticulation Install &amp; Repair</li>
+          <li><span class="icon">🍂</span> Garden Cleanup &amp; Rubbish Removal</li>
+          <li><span class="icon">🟩</span> Turf Laying &amp; Preparation</li>
+        </ul>
+        <a class="cta-btn" href="tel:0412999888">📞 Get a Free Quote</a>
+      </div>
+
+      <div class="panel">
+        <h2>👤 About Rick</h2>
+        <p>Rick is a fully experienced local landscaper with years of hands-on work across Baldivis and surrounding Perth suburbs. Passionate about clean, green outdoor spaces, Rick prides himself on punctuality, quality workmanship and honest pricing.</p>
+        <div style="margin-top:14px">
+          <div class="info-row">
+            <div class="ico">📍</div>
+            <div class="txt"><strong>Service Area</strong>Baldivis &amp; Perth Southern Suburbs</div>
+          </div>
+          <div class="info-row">
+            <div class="ico">🏅</div>
+            <div class="txt"><strong>Trade</strong>Licensed Landscaper</div>
+          </div>
+          <div class="info-row">
+            <div class="ico">✅</div>
+            <div class="txt"><strong>Fully Insured</strong>Residential &amp; Commercial</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>📬 Contact Us</h2>
+        <div class="info-row">
+          <div class="ico">📞</div>
+          <div class="txt"><strong>Phone</strong>0412 999 888</div>
+        </div>
+        <div class="info-row">
+          <div class="ico">📍</div>
+          <div class="txt"><strong>Location</strong>Baldivis, Perth WA</div>
+        </div>
+        <div class="info-row">
+          <div class="ico">🕒</div>
+          <div class="txt"><strong>Hours</strong>Mon–Sat: 7am – 6pm</div>
+        </div>
+        <div class="info-row">
+          <div class="ico">💬</div>
+          <div class="txt"><strong>Free Quotes</strong>Call or SMS anytime</div>
+        </div>
+        <a class="cta-btn" href="tel:0412999888">📞 0412 999 888</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+  var cur=0,startX=0,slider=document.getElementById('slider'),btns=document.querySelectorAll('.tab-btn');
+  function goTo(n){cur=n;slider.style.transform='translateX(-'+n*100+'%)';btns.forEach(function(b,i){b.classList.toggle('active',i===n)})}
+  slider.addEventListener('touchstart',function(e){startX=e.touches[0].clientX},false);
+  slider.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>40){if(dx<0&&cur<3)goTo(cur+1);else if(dx>0&&cur>0)goTo(cur-1)}},false);
+</script>
+</body>
+</html>
