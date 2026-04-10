@@ -1,0 +1,468 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1a472a 0%, #2d6a4f 50%, #1b4332 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .widget-wrapper {
+    width: 100%;
+    max-width: 420px;
+    filter: drop-shadow(0 20px 60px rgba(0,0,0,0.5));
+  }
+
+  /* ── Header Card ── */
+  .header-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f0faf4 100%);
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(45,106,79,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .logo-circle {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.4);
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  .biz-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1b4332;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .biz-trade {
+    display: inline-block;
+    margin-top: 6px;
+    background: linear-gradient(135deg, #40916c, #2d6a4f);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+  }
+
+  .biz-location {
+    margin-top: 8px;
+    color: #52796f;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  /* ── Tab Bar ── */
+  .tab-bar {
+    background: #1b4332;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+  }
+
+  .tab-bar::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 14px 8px 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .tab-btn:hover { background: rgba(255,255,255,0.06); }
+
+  .tab-btn .tab-icon {
+    font-size: 20px;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  .tab-btn .tab-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active .tab-label { color: #95d5b2; }
+  .tab-btn.active .tab-icon { transform: scale(1.2); }
+
+  .tab-indicator {
+    position: absolute;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #74c69d, #40916c);
+    border-radius: 3px 3px 0 0;
+    transition: left 0.35s cubic-bezier(0.4,0,0.2,1), width 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── Panel Container ── */
+  .panel-container {
+    background: #fff;
+    overflow: hidden;
+    position: relative;
+    border-radius: 0 0 24px 24px;
+    touch-action: pan-y;
+  }
+
+  .panels-track {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+  }
+
+  .panel {
+    min-width: 100%;
+    padding: 24px 20px 28px;
+  }
+
+  /* ── Panel: Home ── */
+  .home-panel .welcome-text {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1b4332;
+    margin-bottom: 6px;
+  }
+
+  .home-panel .tagline {
+    font-size: 13px;
+    color: #52796f;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #f0faf4, #d8f3dc);
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+    border: 1px solid rgba(45,106,79,0.12);
+  }
+
+  .stat-card .stat-num {
+    font-size: 26px;
+    font-weight: 800;
+    color: #2d6a4f;
+    line-height: 1;
+  }
+
+  .stat-card .stat-desc {
+    font-size: 11px;
+    color: #52796f;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  .area-badge {
+    background: linear-gradient(135deg, #2d6a4f, #1b4332);
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .area-badge .badge-icon { font-size: 28px; }
+
+  .area-badge .badge-text strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .area-badge .badge-text span {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+
+  /* ── Panel: Services ── */
+  .service-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .service-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f9fffe, #f0faf4);
+    border-radius: 16px;
+    border-left: 4px solid #40916c;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+
+  .service-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(45,106,79,0.15);
+  }
+
+  .service-emoji { font-size: 28px; flex-shrink: 0; }
+
+  .service-info .service-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1b4332;
+    margin-bottom: 3px;
+  }
+
+  .service-info .service-desc {
+    font-size: 12px;
+    color: #52796f;
+    line-height: 1.5;
+  }
+
+  /* ── Panel: Contact ── */
+  .contact-panel .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1b4332;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #d8f3dc;
+  }
+
+  .call-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #40916c, #2d6a4f);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 18px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 6px 24px rgba(45,106,79,0.45);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-bottom: 20px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .call-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 3px 12px rgba(45,106,79,0.35);
+  }
+
+  .call-btn .phone-icon { font-size: 24px; animation: ring 2s infinite; }
+
+  @keyframes ring {
+    0%, 90%, 100% { transform: rotate(0deg); }
+    92% { transform: rotate(-15deg); }
+    96% { transform: rotate(15deg); }
+  }
+
+  .contact-details { display: flex; flex-direction: column; gap: 10px; }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: #f7fffe;
+    border-radius: 14px;
+    border: 1px solid #d8f3dc;
+  }
+
+  .contact-row .c-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .contact-row .c-info strong {
+    display: block;
+    font-size: 12px;
+    color: #52796f;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 700;
+  }
+
+  .contact-row .c-info span {
+    font-size: 14px;
+    color: #1b4332;
+    font-weight: 600;
+  }
+
+  /* ── Panel: Quote ── */
+  .quote-panel .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1b4332;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #d8f3dc;
+  }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: #52796f;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #d8f3dc;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #1b4332;
+    background: #f9fffe;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: #40916c;
+    box-shadow: 0 0 0 4px rgba(64,145,108,0.12);
+    background: #fff;
+  }
+
+  .form-group textarea { resize: none; height: 80px; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #40916c, #2d6a4f);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .submit-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(45,106,79,0.25);
+  }
+
+  /* ── Swipe hint ── */
+  .swipe-hint {
+    text-align: center;
+    padding: 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.5px;
+    background: #1b4332;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .swipe-dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: background 0.3s, transform 0.3s;
+  }
+
+  .dot.active {
+    background: #74c69d;
+    transform: scale(1.4);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80
