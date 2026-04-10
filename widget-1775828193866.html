@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f7eb;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:10px}
+.widget{width:100%;max-width:420px;background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.15)}
+.header{background:linear-gradient(135deg,#2e7d32,#66bb6a);padding:24px 20px 16px;text-align:center;color:#fff}
+.logo{width:64px;height:64px;background:#fff;border-radius:50%;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.header h1{font-size:1.3rem;font-weight:700;letter-spacing:0.5px}
+.header p{font-size:0.8rem;opacity:0.9;margin-top:3px}
+.badge{display:inline-block;background:rgba(255,255,255,0.25);border-radius:20px;padding:3px 12px;font-size:0.72rem;margin-top:6px;letter-spacing:1px;text-transform:uppercase}
+.tabs{display:flex;background:#1b5e20}
+.tab{flex:1;padding:11px 4px;text-align:center;color:rgba(255,255,255,0.65);font-size:0.72rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.25s;user-select:none;text-transform:uppercase;letter-spacing:0.5px}
+.tab.active{color:#fff;border-bottom:3px solid #a5d6a7;background:rgba(255,255,255,0.08)}
+.tab:hover{color:#fff}
+.panels{overflow:hidden;position:relative}
+.slider{display:flex;transition:transform 0.35s cubic-bezier(.4,0,.2,1)}
+.panel{min-width:100%;padding:22px 20px 26px;background:#fff}
+.panel h2{font-size:1rem;color:#2e7d32;margin-bottom:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.panel h2 span{font-size:1.2rem}
+.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.service-card{background:linear-gradient(135deg,#f1f8e9,#e8f5e9);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid #c8e6c9}
+.service-card .icon{font-size:1.8rem;margin-bottom:6px}
+.service-card p{font-size:0.78rem;font-weight:600;color:#33691e}
+.info-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f1f1f1}
+.info-row:last-child{border-bottom:none}
+.info-icon{font-size:1.3rem;min-width:28px;text-align:center;margin-top:2px}
+.info-text strong{display:block;font-size:0.78rem;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px}
+.info-text span{font-size:0.92rem;color:#222;font-weight:600}
+.cta-wrap{padding:0 20px 22px;background:#fff}
+.cta{display:block;background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;text-align:center;padding:14px;border-radius:14px;font-size:1rem;font-weight:700;text-decoration:none;letter-spacing:0.5px;box-shadow:0 4px 14px rgba(46,125,50,0.35);transition:opacity 0.2s}
+.cta:hover{opacity:0.9}
+.cta span{display:block;font-size:0.72rem;font-weight:400;opacity:0.85;margin-top:2px}
+.quote-form{display:flex;flex-direction:column;gap:10px}
+.quote-form input,.quote-form textarea{border:1.5px solid #c8e6c9;border-radius:10px;padding:10px 12px;font-size:0.88rem;font-family:inherit;outline:none;transition:border 0.2s;resize:none}
+.quote-form input:focus,.quote-form textarea:focus{border-color:#2e7d32}
+.quote-form button{background:linear-gradient(135deg,#2e7d32,#43a047);color:#fff;border:none;border-radius:10px;padding:12px;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity 0.2s}
+.quote-form button:hover{opacity:0.9}
+.sent-msg{display:none;text-align:center;padding:10px;background:#e8f5e9;border-radius:10px;color:#2e7d32;font-weight:600;font-size:0.9rem}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="header">
+    <div class="logo">🌿</div>
+    <h1>Rick's Lawn Care</h1>
+    <p>Baldivis, Perth WA</p>
+    <div class="badge">Professional Landscaper</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="goTab(0)">Services</div>
+    <div class="tab" onclick="goTab(1)">About</div>
+    <div class="tab" onclick="goTab(2)">Contact</div>
+  </div>
+  <div class="panels">
+    <div class="slider" id="slider">
+      <div class="panel">
+        <h2><span>🌱</span>Our Services</h2>
+        <div class="service-grid">
+          <div class="service-card"><div class="icon">🌾</div><p>Lawn Mowing</p></div>
+          <div class="service-card"><div class="icon">💧</div><p>Reticulation</p></div>
+          <div class="service-card"><div class="icon">🍃</div><p>Garden Cleanup</p></div>
+          <div class="service-card"><div class="icon">🟩</div><p>Turf Laying</p></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2><span>📋</span>About Us</h2>
+        <div class="info-row"><div class="info-icon">👷</div><div class="info-text"><strong>Operator</strong><span>Rick</span></div></div>
+        <div class="info-row"><div class="info-icon">📍</div><div class="info-text"><strong>Location</strong><span>Baldivis, Perth WA</span></div></div>
+        <div class="info-row"><div class="info-icon">🔧</div><div class="info-text"><strong>Trade</strong><span>Licensed Landscaper</span></div></div>
+        <div class="info-row"><div class="info-icon">⭐</div><div class="info-text"><strong>Speciality</strong><span>Residential & Commercial</span></div></div>
+        <div class="info-row"><div class="info-icon">✅</div><div class="info-text"><strong>Areas</strong><span>Baldivis & surrounds</span></div></div>
+      </div>
+      <div class="panel">
+        <h2><span>✉️</span>Get a Quote</h2>
+        <div class="quote-form" id="qform">
+          <input type="text" placeholder="Your Name" id="qname">
+          <input type="tel" placeholder="Your Phone Number" id="qphone">
+          <textarea rows="3" placeholder="Tell us what you need..." id="qmsg"></textarea>
+          <button onclick="sendQuote()">Send Enquiry</button>
+          <div class="sent-msg" id="sentMsg">✅ Thanks! Rick will call you soon.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-wrap">
+    <a class="cta" href="tel:0412999888">📞 Call Rick Now<span>0412 999 888</span></a>
+  </div>
+</div>
+<script>
+let cur=0,startX=0,dragging=false;
+const slider=document.getElementById('slider');
+const tabs=document.querySelectorAll('.tab');
+function goTab(n){cur=n;slider.style.transform=`translateX(-${n*100}%)`;tabs.forEach((t,i)=>t.classList.toggle('active',i===n))}
+slider.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;dragging=true},{passive:true});
+slider.addEventListener('touchend',e=>{if(!dragging)return;const dx=e.changedTouches[0].clientX-startX;if(dx<-40&&cur<2)goTab(cur+1);else if(dx>40&&cur>0)goTab(cur-1);dragging=false},{passive:true});
+function sendQuote(){const n=document.getElementById('qname').value.trim();const p=document.getElementById('qphone').value.trim();if(!n||!p){alert('Please enter your name and phone.');return;}document.getElementById('sentMsg').style.display='block';setTimeout(()=>document.getElementById('sentMsg').style.display='none',4000);}
+</script>
+</body>
+</html>
