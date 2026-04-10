@@ -1,0 +1,468 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care - Baldivis Perth</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #1a472a 0%, #2d6a4f 50%, #40916c 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .widget-wrapper {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* === HEADER === */
+  .widget-header {
+    background: linear-gradient(145deg, #1b4332, #2d6a4f);
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .widget-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .widget-header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -20px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+
+  .logo-circle {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #52b788, #40916c);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 3px rgba(82,183,136,0.3);
+    position: relative;
+    z-index: 1;
+    animation: pulse-ring 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 3px rgba(82,183,136,0.3); }
+    50% { box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 0 0 7px rgba(82,183,136,0.15); }
+  }
+
+  .business-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.3px;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .business-name span {
+    color: #74c69d;
+  }
+
+  .business-trade {
+    font-size: 12px;
+    color: #95d5b2;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 5px 12px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #b7e4c7;
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(4px);
+  }
+
+  /* === TAB NAV === */
+  .tab-nav {
+    background: #0f2d1f;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 80px;
+    padding: 13px 8px 11px;
+    background: none;
+    border: none;
+    color: #52b788;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    position: relative;
+    transition: color 0.25s;
+    white-space: nowrap;
+  }
+
+  .tab-btn .tab-icon {
+    font-size: 19px;
+    transition: transform 0.25s;
+  }
+
+  .tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 70%;
+    height: 3px;
+    background: linear-gradient(90deg, #52b788, #74c69d);
+    border-radius: 3px 3px 0 0;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .tab-btn.active {
+    color: #74c69d;
+  }
+
+  .tab-btn.active .tab-icon {
+    transform: scale(1.2);
+  }
+
+  .tab-btn.active::after {
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  /* === PANEL CONTAINER === */
+  .panel-container {
+    background: #f0faf4;
+    border-radius: 0 0 20px 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    touch-action: pan-y;
+  }
+
+  .panels-track {
+    display: flex;
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .panel {
+    min-width: 100%;
+    padding: 24px 20px 28px;
+  }
+
+  /* === HOME PANEL === */
+  .welcome-card {
+    background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    border-radius: 16px;
+    padding: 22px;
+    color: white;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .welcome-card::before {
+    content: '🌿';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 56px;
+    opacity: 0.18;
+  }
+
+  .welcome-card h2 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .welcome-card p {
+    font-size: 13px;
+    opacity: 0.85;
+    line-height: 1.5;
+    max-width: 78%;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(45,106,79,0.1);
+    border: 1px solid rgba(82,183,136,0.15);
+  }
+
+  .stat-card .stat-icon { font-size: 24px; margin-bottom: 6px; }
+  .stat-card .stat-num {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1b4332;
+    display: block;
+  }
+  .stat-card .stat-label {
+    font-size: 9.5px;
+    color: #6b9e80;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .quick-call-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #52b788, #40916c);
+    color: white;
+    text-decoration: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(64,145,108,0.4);
+    letter-spacing: 0.3px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .quick-call-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 8px rgba(64,145,108,0.3);
+  }
+
+  .quick-call-btn .phone-icon {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    animation: ring 2s ease-in-out infinite;
+  }
+
+  @keyframes ring {
+    0%, 100% { transform: rotate(0); }
+    10% { transform: rotate(-15deg); }
+    20% { transform: rotate(15deg); }
+    30% { transform: rotate(-10deg); }
+    40% { transform: rotate(10deg); }
+    50% { transform: rotate(0); }
+  }
+
+  /* === SERVICES PANEL === */
+  .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1b4332;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, #52b788, transparent);
+    border-radius: 2px;
+  }
+
+  .service-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 12px rgba(27,67,50,0.08);
+    border: 1px solid rgba(82,183,136,0.12);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #52b788, #40916c);
+    border-radius: 4px 0 0 4px;
+  }
+
+  .service-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 6px rgba(27,67,50,0.1);
+  }
+
+  .service-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .service-info { flex: 1; }
+  .service-info h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1b4332;
+    margin-bottom: 3px;
+  }
+  .service-info p {
+    font-size: 12px;
+    color: #6b9e80;
+    line-height: 1.4;
+  }
+
+  .service-arrow {
+    color: #95d5b2;
+    font-size: 18px;
+    font-weight: 300;
+  }
+
+  /* === ABOUT PANEL === */
+  .about-hero {
+    background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 16px;
+    text-align: center;
+    border: 1px solid rgba(82,183,136,0.2);
+  }
+
+  .about-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #2d6a4f, #40916c);
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 4px 14px rgba(27,67,50,0.25);
+  }
+
+  .about-hero h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1b4332;
+    margin-bottom: 4px;
+  }
+
+  .about-hero p {
+    font-size: 13px;
+    color: #2d6a4f;
+    line-height: 1.5;
+  }
+
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .feature-item {
+    background: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(27,67,50,0.07);
+    border: 1px solid rgba(82,183,136,0.1);
+  }
+
+  .feature-dot {
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #52b788, #40916c);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .feature-item span {
+    font-size: 13.5px;
+    color: #2d3a30;
+    font-weight: 
