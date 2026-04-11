@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f7ee;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:10px}
+.widget{width:100%;max-width:420px;background:#fff;border-radius:18px;box-shadow:0 8px 32px rgba(34,85,34,0.18);overflow:hidden}
+.header{background:linear-gradient(135deg,#2d7a2d,#5cb85c);color:#fff;text-align:center;padding:22px 16px 14px}
+.header h1{font-size:1.35rem;font-weight:700;letter-spacing:.5px}
+.header p{font-size:.82rem;opacity:.88;margin-top:3px}
+.badge{display:inline-block;background:rgba(255,255,255,.22);border-radius:20px;padding:3px 12px;font-size:.75rem;margin-top:6px;letter-spacing:.5px}
+.tabs{display:flex;background:#1e5c1e;overflow:hidden}
+.tab-btn{flex:1;padding:11px 4px;border:none;background:transparent;color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.4px;transition:all .25s;border-bottom:3px solid transparent}
+.tab-btn.active{color:#fff;background:rgba(255,255,255,.1);border-bottom:3px solid #8be08b}
+.panels{overflow:hidden;position:relative}
+.slider{display:flex;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.panel{min-width:100%;padding:22px 18px;min-height:220px}
+.panel h2{color:#2d7a2d;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.panel h2 span{font-size:1.3rem}
+.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.service-card{background:#f0f7ee;border-radius:12px;padding:14px 10px;text-align:center;border:2px solid #c8e6c8;transition:transform .2s}
+.service-card:active{transform:scale(.96)}
+.service-card .icon{font-size:1.8rem;display:block;margin-bottom:6px}
+.service-card p{font-size:.78rem;font-weight:600;color:#2d5a2d}
+.info-list{list-style:none}
+.info-list li{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:.85rem;color:#444}
+.info-list li:last-child{border-bottom:none}
+.info-list li .ico{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.info-list li strong{display:block;color:#2d7a2d;font-size:.78rem;margin-bottom:2px}
+.cta-wrap{padding:4px 18px 18px;display:flex;flex-direction:column;gap:9px}
+.btn{display:block;text-align:center;padding:13px;border-radius:12px;font-size:.92rem;font-weight:700;text-decoration:none;transition:opacity .2s;letter-spacing:.3px}
+.btn-primary{background:linear-gradient(135deg,#2d7a2d,#5cb85c);color:#fff}
+.btn-secondary{background:#f0f7ee;color:#2d7a2d;border:2px solid #5cb85c}
+.btn:active{opacity:.8}
+.coverage{background:#f9fef9;border-radius:10px;padding:10px 12px;font-size:.8rem;color:#555;display:flex;align-items:center;gap:8px;margin-top:4px}
+.coverage span{font-size:1rem}
+.stars{color:#f5a623;font-size:.95rem;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="widget">
+<div class="header">
+<h1>🌿 Rick's Lawn Care</h1>
+<p>Professional Landscaping Services</p>
+<div class="badge">📍 Baldivis, Perth WA</div>
+</div>
+<div class="tabs">
+<button class="tab-btn active" onclick="goTo(0,this)">Services</button>
+<button class="tab-btn" onclick="goTo(1,this)">About</button>
+<button class="tab-btn" onclick="goTo(2,this)">Contact</button>
+</div>
+<div class="panels" id="panels">
+<div class="slider" id="slider">
+<div class="panel">
+<h2><span>🌱</span>Our Services</h2>
+<div class="service-grid">
+<div class="service-card">
+<span class="icon">🌾</span>
+<p>Lawn Mowing</p>
+</div>
+<div class="service-card">
+<span class="icon">💧</span>
+<p>Reticulation</p>
+</div>
+<div class="service-card">
+<span class="icon">🍃</span>
+<p>Garden Cleanup</p>
+</div>
+<div class="service-card">
+<span class="icon">🟩</span>
+<p>Turf Laying</p>
+</div>
+</div>
+<div class="coverage" style="margin-top:14px"><span>📍</span>Serving Baldivis &amp; surrounding suburbs</div>
+</div>
+<div class="panel">
+<h2><span>👨‍🌾</span>About Rick</h2>
+<ul class="info-list">
+<li><span class="ico">🏆</span><div><strong>Trade</strong>Licensed Landscaper &amp; Lawn Care Specialist</div></li>
+<li><span class="ico">📅</span><div><strong>Experience</strong>Years of experience keeping Perth lawns looking great</div></li>
+<li><span class="ico">⭐</span><div><strong>Quality</strong><span class="stars">★★★★★</span> Trusted by locals in Baldivis</div></li>
+<li><span class="ico">🌿</span><div><strong>Approach</strong>Reliable, tidy &amp; affordable lawn &amp; garden solutions</div></li>
+</ul>
+</div>
+<div class="panel">
+<h2><span>📞</span>Get In Touch</h2>
+<ul class="info-list">
+<li><span class="ico">📱</span><div><strong>Mobile</strong>0412 999 888</div></li>
+<li><span class="ico">📍</span><div><strong>Location</strong>Baldivis, Perth WA 6171</div></li>
+<li><span class="ico">🕐</span><div><strong>Hours</strong>Mon–Sat: 7am – 6pm</div></li>
+<li><span class="ico">💬</span><div><strong>Free Quotes</strong>Call or SMS anytime</div></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="cta-wrap">
+<a class="btn btn-primary" href="tel:0412999888">📞 Call Rick – 0412 999 888</a>
+<a class="btn btn-secondary" href="sms:0412999888">💬 Send SMS</a>
+</div>
+</div>
+<script>
+var cur=0,total=3,startX=0,dragging=false;
+var slider=document.getElementById('slider');
+var btns=document.querySelectorAll('.tab-btn');
+function goTo(i,el){
+cur=i;
+slider.style.transform='translateX(-'+(i*100)+'%)';
+btns.forEach(function(b){b.classList.remove('active')});
+if(el)el.classList.add('active');
+else btns[i].classList.add('active');
+}
+var panels=document.getElementById('panels');
+panels.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;dragging=true},{passive:true});
+panels.addEventListener('touchend',function(e){
+if(!dragging)return;
+var dx=e.changedTouches[0].clientX-startX;
+if(Math.abs(dx)>50){if(dx<0&&cur<total-1)goTo(cur+1,null);else if(dx>0&&cur>0)goTo(cur-1,null);}
+dragging=false;
+},{passive:true});
+</script>
+</body>
+</html>
