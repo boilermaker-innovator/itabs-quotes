@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rick's Lawn Care – Southern Suburbs Perth</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1e1e2e;
+    --text-primary: #ffffff;
+    --text-secondary: #9090b0;
+    --accent: #7c3aed;
+    --accent2: #06b6d4;
+    --i-button: #f59e0b;
+    --card-radius: 16px;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+  }
+
+  .widget {
+    width: 100%;
+    max-width: 430px;
+    height: 100vh;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  .header {
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+  .header-brand { display: flex; flex-direction: column; }
+  .header-name { font-size: 15px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; }
+  .header-tag { font-size: 10px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 1px; }
+  .header-call {
+    background: #16a34a;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 7px 13px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+  }
+
+  /* SWIPE AREA */
+  .swipe-container {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .cards-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .card {
+    flex-shrink: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .card::-webkit-scrollbar { display: none; }
+
+  /* HERO THEMES */
+  .hero-default { background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%); }
+  .hero-purple  { background: linear-gradient(160deg, #4c1d95 0%, #1e1b4b 100%); }
+  .hero-cyan    { background: linear-gradient(160deg, #164e63 0%, #0c4a6e 100%); }
+  .hero-amber   { background: linear-gradient(160deg, #78350f 0%, #431407 100%); }
+  .hero-green   { background: linear-gradient(160deg, #14532d 0%, #052e16 100%); }
+  .hero-red     { background: linear-gradient(160deg, #7f1d1d 0%, #450a0a 100%); }
+
+  /* CARD INNER */
+  .card-inner {
+    padding: 24px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 100%;
+  }
+
+  .card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .card-headline {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.18;
+    letter-spacing: -0.6px;
+    color: var(--text-primary);
+  }
+
+  /* EM colours per theme */
+  .hero-default .card-headline em { color: #cbd5e1; font-style: normal; }
+  .hero-purple  .card-headline em { color: #a78bfa; font-style: normal; }
+  .hero-cyan    .card-headline em { color: #67e8f9; font-style: normal; }
+  .hero-amber   .card-headline em { color: #fcd34d; font-style: normal; }
+  .hero-green   .card-headline em { color: #6ee7b7; font-style: normal; }
+  .hero-red     .card-headline em { color: #fca5a5; font-style: normal; }
+
+  .card-summary {
+    font-size: 14px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.78);
+  }
+
+  .analogy-box {
+    background: rgba(0,0,0,0.25);
+    border-left: 3px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 13px 15px;
+  }
+  .analogy-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+  }
+  .analogy-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* i-BUTTONS */
+  .ibuttons-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .i-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.3);
+    color: var(--i-button);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .i-btn:active { transform: scale(0.96); }
+  .i-btn:hover { background: rgba(245,158,11,0.22); }
+  .i-btn-icon {
+    width: 16px;
+    height: 16px;
+    background: var(--i-button);
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-sheet {
+    width: 100%;
+    max-width: 430px;
+    background: var(--bg-tertiary);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 36px;
+    animation: slideUp 0.28s cubic-bezier(0.4,0,0.2,1);
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    margin: 0 auto 18px;
+  }
+  .modal-type {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--i-button);
+    margin-bottom: 6px;
+  }
+  .modal-term {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    letter-spacing: -0.4px;
+  }
+  .modal-content {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.78);
+  }
+  .modal-close {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.07);
+    border: none;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* PROGRESS */
+  .progress-bar {
+    flex-shrink: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.07);
+    position: relative;
+    z-index: 10;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 0 2px 2px 0;
+    transition: width 0.38s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* DOTS */
+  .dots-nav {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0 6px;
+    background: var(--bg-secondary);
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .dot.active {
+    width: 20px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* NAV ARROWS */
+  .nav-arrows {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 16px 10px;
+    background: var(--bg-secondary);
+  }
+  .nav-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: background 0.2s, color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn:not(:disabled):hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+  .nav-btn.next-btn {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    color: #fff;
+    border-color: transparent;
+  }
+  .nav-btn.next-btn:hover { opacity: 0.9; }
+
+  /* FOOTER */
+  .footer-brand {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 5px 0 8px;
+    background: var(--bg-secondary);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.18);
+  }
+
+  /* LEAD FORM */
+  .lead-form { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.8px; }
+  .form-input, .form-textarea {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: #fff;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-input:focus, .form-textarea:focus { border-color: rgba(110,231,183,0.5); }
+  .form-textarea { min-height: 80px; resize: none; }
+  .form-submit {
+    background: linear-gradient(135deg, #14532d, #16a34a);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.2px;
+    transition: opacity 0.2s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .form-submit:active { transform: scale(0.98); }
+  .form-submit:hover { opacity: 0.92; }
+  .form-note { font-size: 11px; color: rgba(255,255,255,0.35); text-align: center; }
+  .success-msg {
+    display: none;
+    background: rgba(20,83,45,0.4);
+    border: 1px solid rgba(110,231,183,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    color: #6ee7b7;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  /* SERVICE PILLS */
+  .service-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .pill {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 6px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pill-icon { font-size: 13px; }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; }
+  .check-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .check-text { font-size: 13px; line-height: 1.55; color: rgba(255,255,255,0.75); }
+  .check-text strong { color: #fff; }
+</style>
+</head>
+<body>
+<div class="widget">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-brand">
+      <span class="header-name">Rick's Lawn Care</span>
+      <span class="header-tag">Tidy lawns, happy homes</span>
+    </div>
+    <a class="header-call" href="tel:0412345678">📞 Call Rick</a>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 16.66%"></div>
+  </div>
+
+  <!-- CARDS -->
+  <div class="swipe-container" id="swipeContainer">
+    <div class="cards-track" id="cardsTrack">
+
+      <!-- CARD 1: The Problem -->
+      <div class="card hero-default">
+        <div class="card-inner">
+          <span class="card-tag">01 / THE SITUATION</span>
+          <h2 class="card-headline">Your lawn's looking <em>more jungle than garden</em></h2>
+          <p class="card-summary">Life gets busy. Weekends disappear and suddenly the grass is knee-high, the hedges are wild, and the garden is stressing you out just looking at it. You're not alone — it happens to most homeowners in Perth's southern suburbs every single summer.</p>
+          <p class="card-summary">Rick's Lawn Care takes the whole job off your hands. Regular visits, reliable service, and a yard you'll actually be proud of — without lifting a finger.</p>
+          <div class="analogy-box">
+            <div class="analogy-title">Think of it like…</div>
+            <div class="analogy-text">Having a cleaner for your house — but for outside. Rick shows up on schedule, does the work properly, and you come home to a tidy yard without having spent your Saturday on it.</div>
+          </div>
+          <div class="ibuttons-grid">
+            <button class="i-btn" onclick="openModal('Why it matters','Why a tidy lawn matters more than you think','why-it-matters','A well-kept lawn and garden can add real value to your home and improve your kerb appeal. In Perth\'s southern suburbs, where neighbours are close and outdoor living is everything, a tidy yard makes a big difference to how your home looks and feels. It also keeps pests like spiders and snakes away from long grass.')">
+              <span class="i-btn-icon">i</span> Why it matters
+            </button>
+            <button class="i-btn" onclick="openModal('Context','Southern suburbs Perth coverage','context','Rick services the southern suburbs of Perth including areas like Cockburn, Fremantle, Melville, Kwinana, Rockingham and surrounds. If you\'re not sure whether you\'re in the area, just give Rick a call on 0412 345 678 — he\'ll let you know straight away.')">
+              <span class="i-btn-icon">i</span> Areas covered
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 2: Services -->
+      <div class="card hero-purple">
+        <div class="card-inner">
+          <span class="card-tag">02 / SERVICES</span>
+          <h2 class="card-headline">Everything your yard needs, <em>one reliable bloke</em></h2>
+          <p class="card-summary">Rick handles the full package — from the weekly mow to a big seasonal cleanup. No need to call three different tradies or borrow the neighbour's gear. One call, one team, sorted.</p>
+          <div class="service-pills">
+            <div class="pill"><span class="pill-icon">🌿</span> Regular Mowing</div>
+            <div class="pill"><span class="pill-icon">✂️</span> Hedging & Trimming</div>
+            <div class="pill"><span class="pill-icon">🌱</span> Weeding</div>
+            <div class="pill"><span class="pill-icon">🧹</span> Garden Cleanups</div>
+            <div class="pill"><span class="pill-icon">🚛</span> Rubbish Removal</div>
+          </div>
+          <div class="ibuttons-grid">
+            <button class="i-btn" onclick="openModal('Definition','What counts as a garden cleanup?','definition','A garden cleanup is a thorough once-over of your whole yard — cutting back overgrown plants, removing weeds, clearing dead material, edging garden beds, and tidying up anything that\'s gotten out of hand. It\'s the reset button for a neglected garden, and Rick can follow it up with regular maintenance to keep it looking sharp.')">
+              <span class="i-btn-icon">i</span> What's a cleanup?
+            </button>
+            <button class="i-btn" onclick="openModal('Definition','Rubbish removal explained','definition','After a mow or cleanup, there\'s always green waste — clippings, branches, weeds, bags of leaves. Rick removes it all and disposes of it properly so you don\'t have to worry about council pickups or filling your bins. It\'s included or available as an add-on depending on the job size.')">
+              <span class="i-btn-icon">i</span> Rubbish removal
+            </button>
+            <button class="i-btn" onclick="openModal('Why it matters','Why regular mowing beats doing it yourself','why-it-matters','Letting grass get too long before mowing can stress and damage it, leaving it yellow and patchy. A regular mowing schedule keeps grass at the right height, promotes healthy growth, and means each visit is quick and easy. Rick uses the right equipment for different lawn types common in Perth\'s southern suburbs.')">
+              <span class="i-btn-icon">i</span> Regular vs one-off
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 3: How it works -->
+      <div class="card hero-cyan">
+        <div class="card-inner">
+          <span class="card-tag">03 / HOW IT WORKS</span>
+          <h2 class="card-headline">From first call to <em>tidy yard</em> in three easy steps</h2>
+          <p class="card-summary">No complicated quoting process, no waiting weeks for a callback. Rick keeps it simple so you can get on with your life and come home to a lawn that looks after itself.</p>
+          <div class="checklist">
+            <div class="check-item">
+              <span class="check-icon">📞</span>
+              <span class="check-text"><strong>Step 1 — Call or message Rick.</strong> Tell him what you need — a one-off cleanup, regular mowing, or the full works. He'll give you a straight-up quote, no hidden extras.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">📅</span>
+              <span class="check-text"><strong>Step 2 — Lock in a time.</strong> Rick works around your schedule. You don't need to be home — just let him know access details and he'll get it done.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">✅</span>
+              <span class="check-text"><strong>Step 3 — Come home to a tidy yard.</strong> Rick leaves everything neat, gates closed, and sends you a message when it's done. Regular customers get automatic scheduling so you never have to think about it.</span>
+            </div>
+          </div>
+          <div class="ibuttons-grid">
+            <button class="i-btn" onclick="openModal('Context','Do I need to be home?','context','No — most of Rick\'s customers aren\'t home during the visit. As long as there\'s access through a gate or side of the house, Rick can get in, do the job, and let you know when he\'s finished. Just make sure any dogs are secured and let Rick know if there are access codes or locks to deal with.')">
+              <span class="i-btn-icon">i</span> Do I need to be home?
+            </button>
+            <button class="i-btn" onclick="openModal('Context','How often should I mow?','context','In Perth\'s southern suburbs, most lawns need mowing every 2–4 weeks in summer when grass grows fast, and every 4–6 weeks in winter. Rick can recommend the right schedule for your lawn type and yard size after the first visit. Staying on a regular schedule means each job is quicker and cheaper too.')">
+              <span class="i-btn-icon">i</span> How often?
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 4: Why Rick -->
+      <div class="card hero-amber">
+        <div class="card-inner">
+          <span class="card-tag">04 / WHY RICK</span>
+          <h2 class="card-headline">Local, reliable, and <em>actually shows up</em></h2>
+          <p class="card-summary">Finding a lawn mowing service that's consistent and trustworthy is harder than it sounds. Rick has been looking after yards across Perth's southern suburbs for years — same person every visit, same standard every time.</p>
+          <div class="checklist">
+            <div class="check-item">
+              <span class="check-icon">📍</span>
+              <span class="check-text"><strong>Based locally.</strong> Rick lives and works in the southern suburbs — he knows the area, the lawn types, and the conditions.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">🔁</span>
+              <span class="check-text"><strong>No-fuss recurring service.</strong> Set and forget — Rick keeps your schedule without you chasing him up each time.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">💬</span>
+              <span class="check-text"><strong>Communicates properly.</strong> He'll confirm before visiting, let you know when done, and follow up if there's anything you need to know about your garden.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">💰</span>
+              <span class="check-text"><strong>Fair, upfront pricing.</strong> No surprise charges. Rick quotes the job before he starts.</span>
+            </div>
+          </div>
+          <div class="ibuttons-grid">
+            <button class="i-btn" onclick="openModal('Why it matters','Why local matters for lawn care','why-it-matters','A local operator knows that Perth\'s southern suburbs get hot, dry summers that stress lawns differently than other climates. They understand which grass types — couch, kikuyu, buffalo — are common in the area and how to treat them. A local also has a reputation to protect in the community, which means they\'re far more likely to do the job right.')">
+              <span class="i-btn-icon">i</span> Why local matters
+            </button>
+            <button class="i-btn" onclick="openModal('Related','Pricing guide','related','Pricing depends on block size, condition of the lawn, and services needed. A standard mow and edge on a suburban block typically starts from around $50–$80. Garden cleanups are priced per job based on scope. Rick gives free quotes — call 0412 345 678 or fill in the form on the next card to get an estimate.')">
+              <span class="i-btn-icon">i</span> Pricing guide
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 5: Benefits / Use Cases -->
+      <div class="card hero-green">
+        <div class="card-inner">
+          <span class="card-tag">05 / GOOD FIT FOR</span>
+          <h2 class="card-headline">Who gets the most from <em>Rick's service</em></h2>
+          <p class="card-summary">Rick works with all kinds of homeowners and property managers across the southern suburbs. Whether you want a regular routine or a one-off rescue job, there's a service that fits your situation.</p>
+          <div class="checklist">
+            <div class="check-item">
+              <span class="check-icon">🏠</span>
+              <span class="check-text"><strong>Busy families</strong> who don't have time to mow on weekends and just want it handled.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">👴</span>
+              <span class="check-text"><strong>Older homeowners</strong> who've done it themselves for years but need a hand keeping up.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">🏢</span>
+              <span class="check-text"><strong>Property managers and landlords</strong> who need reliable maintenance between tenancies or ongoing.</span>
+            </div>
+            <div class="check-item">
+              <span class="check-icon">🏡</span>
+              <span class="check-text"><strong>Anyone selling their home</strong> who wants the yard looking its absolute best for photos and opens.</span>
+            </div>
+          </div>
+          <div class="ibuttons-grid">
+            <button class="i-btn" onclick="openModal('Context','Preparing your yard for sale','context','First impressions count — especially at a home open. A fresh mow, trimmed hedges, clean garden beds and no weeds can genuinely help your property sell faster and for more. Rick can do a one-off pre-sale cleanup or ongoing maintenance leading up to your sale date. Call him to discuss what you need.')">
+              <span class="i-btn-icon">i</span> Selling your home?
+            </button>
+            <button class="i-btn" onclick="openModal('Context','Property management lawn care','context','Rick works with property managers throughout the southern suburbs. He can maintain a schedule across multiple properties, invoice properly, and communicate directly with tenants where needed. Reach out on 0412 345 678 to discuss ongoing arrangements for your rental properties.')">
+              <span class="i-btn-icon">i</span> Rental properties
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CARD 6: Lead Capture -->
+      <div class="card hero-green">
+        <div class="card-inner">
+          <span class="card-tag">06 / GET A QUOTE</span>
+          <h2 class="card-headline">Ready for a <em>tidy yard</em>? Let's sort it</h2>
+          <p class="card-summary">Fill in your details below and Rick will get back to you fast with a quote. Or if you'd rather just call, he's on <strong style="color:#6ee7b7;">0412 345 678</strong>.</p>
