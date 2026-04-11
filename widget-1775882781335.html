@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f7ee;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:12px}
+.widget{background:#fff;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.13);max-width:420px;width:100%;overflow:hidden}
+.header{background:linear-gradient(135deg,#2d7a2d,#57c457);color:#fff;padding:22px 20px 16px;text-align:center}
+.header h1{font-size:1.4rem;font-weight:700;letter-spacing:.3px}
+.header p{font-size:.82rem;opacity:.9;margin-top:4px;font-style:italic}
+.header .loc{font-size:.75rem;margin-top:6px;opacity:.8;display:flex;align-items:center;justify-content:center;gap:4px}
+.tabs{display:flex;background:#1e5e1e}
+.tab-btn{flex:1;padding:11px 4px;background:none;border:none;color:rgba(255,255,255,.65);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .25s;text-transform:uppercase;letter-spacing:.4px;border-bottom:3px solid transparent}
+.tab-btn.active{color:#fff;border-bottom:3px solid #7de87d;background:rgba(255,255,255,.08)}
+.swipe-wrap{overflow:hidden;position:relative}
+.panels{display:flex;transition:transform .35s cubic-bezier(.4,0,.2,1);will-change:transform}
+.panel{min-width:100%;padding:22px 20px;min-height:220px}
+.panel h2{font-size:1rem;color:#2d7a2d;margin-bottom:12px;font-weight:700;border-left:4px solid #57c457;padding-left:10px}
+.service-list{list-style:none}
+.service-list li{padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:.88rem;color:#333;display:flex;align-items:center;gap:8px}
+.service-list li:last-child{border-bottom:none}
+.service-list li::before{content:'✂';font-size:.9rem}
+.service-list li:nth-child(2)::before{content:'🌿'}
+.service-list li:nth-child(3)::before{content:'🪴'}
+.service-list li:nth-child(4)::before{content:'🧹'}
+.service-list li:nth-child(5)::before{content:'🚛'}
+.info-row{display:flex;flex-direction:column;gap:10px}
+.info-card{background:#f6fcf6;border-radius:10px;padding:12px 14px;border-left:4px solid #57c457}
+.info-card .label{font-size:.7rem;text-transform:uppercase;color:#888;font-weight:700;margin-bottom:3px}
+.info-card .val{font-size:.9rem;color:#222;font-weight:600}
+.contact-panel{text-align:center}
+.contact-panel .tagline{font-size:1rem;color:#2d7a2d;font-weight:700;margin-bottom:18px;font-style:italic}
+.call-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2d7a2d,#57c457);color:#fff;text-decoration:none;padding:14px 32px;border-radius:50px;font-size:1rem;font-weight:700;box-shadow:0 4px 14px rgba(45,122,45,.35);transition:transform .15s,box-shadow .15s;margin-bottom:14px}
+.call-btn:active{transform:scale(.97);box-shadow:0 2px 8px rgba(45,122,45,.25)}
+.call-btn span{font-size:1.1rem}
+.contact-note{font-size:.75rem;color:#888;margin-top:6px}
+.footer{background:#f6fcf6;text-align:center;padding:10px;font-size:.68rem;color:#aaa;border-top:1px solid #eee}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="header">
+    <h1>🌿 Rick's Lawn Care</h1>
+    <p>"Tidy lawns, happy homes"</p>
+    <div class="loc">📍 Southern Suburbs, Perth</div>
+  </div>
+  <div class="tabs" id="tabs">
+    <button class="tab-btn active" data-i="0">Services</button>
+    <button class="tab-btn" data-i="1">About</button>
+    <button class="tab-btn" data-i="2">Contact</button>
+  </div>
+  <div class="swipe-wrap" id="swipeWrap">
+    <div class="panels" id="panels">
+      <div class="panel">
+        <h2>Our Services</h2>
+        <ul class="service-list">
+          <li>Regular lawn mowing</li>
+          <li>Hedging &amp; trimming</li>
+          <li>Weeding</li>
+          <li>Garden cleanups</li>
+          <li>Rubbish removal</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>About Rick's</h2>
+        <div class="info-row">
+          <div class="info-card"><div class="label">Business</div><div class="val">Rick's Lawn Care</div></div>
+          <div class="info-card"><div class="label">Trade</div><div class="val">Lawn mowing &amp; garden maintenance</div></div>
+          <div class="info-card"><div class="label">Area</div><div class="val">Southern Suburbs, Perth WA</div></div>
+          <div class="info-card"><div class="label">Tagline</div><div class="val">Tidy lawns, happy homes</div></div>
+        </div>
+      </div>
+      <div class="panel contact-panel">
+        <h2>Get In Touch</h2>
+        <p class="tagline">"Tidy lawns, happy homes"</p>
+        <a class="call-btn" href="tel:0412345678"><span>📞</span> 0412 345 678</a>
+        <p class="contact-note">Call or tap to dial Rick directly</p>
+        <div style="margin-top:14px">
+          <div class="info-card" style="text-align:left"><div class="label">Servicing</div><div class="val">Southern Suburbs, Perth WA</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© Rick's Lawn Care · Perth WA</div>
+</div>
+<script>
+var cur=0,total=3,startX=0,dragging=false,panels=document.getElementById('panels'),tabs=document.querySelectorAll('.tab-btn'),wrap=document.getElementById('swipeWrap');
+function go(n){cur=Math.max(0,Math.min(total-1,n));panels.style.transform='translateX(-'+cur*100+'%)';tabs.forEach(function(t,i){t.classList.toggle('active',i===cur)})}
+tabs.forEach(function(t){t.addEventListener('click',function(){go(+t.dataset.i)})});
+wrap.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;dragging=true},{passive:true});
+wrap.addEventListener('touchend',function(e){if(!dragging)return;var dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>45){go(dx<0?cur+1:cur-1)}dragging=false},{passive:true});
+</script>
+</body>
+</html>
