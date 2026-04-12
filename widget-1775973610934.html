@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f7ee;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:10px}
+.widget{width:100%;max-width:420px;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18);background:#fff}
+.header{background:linear-gradient(135deg,#2d6a2d,#5aab2e);color:#fff;text-align:center;padding:22px 16px 14px}
+.header h1{font-size:1.4rem;font-weight:800;letter-spacing:0.5px}
+.header p{font-size:0.82rem;opacity:0.88;margin-top:3px}
+.badge{display:inline-block;background:rgba(255,255,255,0.22);border-radius:20px;font-size:0.72rem;padding:3px 12px;margin-top:6px;font-weight:600}
+.tabs{display:flex;background:#1e4d1e}
+.tab{flex:1;padding:11px 4px;text-align:center;color:rgba(255,255,255,0.65);font-size:0.72rem;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.25s;user-select:none;text-transform:uppercase;letter-spacing:0.4px}
+.tab.active{color:#fff;border-bottom:3px solid #7ed957;background:rgba(255,255,255,0.08)}
+.panels{overflow:hidden;position:relative}
+.slider{display:flex;transition:transform 0.35s cubic-bezier(.4,0,.2,1)}
+.panel{min-width:100%;padding:22px 18px;background:#fff}
+.panel h2{font-size:1rem;color:#2d6a2d;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.panel h2 span{font-size:1.2rem}
+.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.service-card{background:linear-gradient(135deg,#f0f7ee,#e0f0d0);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid #c8e6b0}
+.service-card .icon{font-size:1.8rem;margin-bottom:6px}
+.service-card p{font-size:0.78rem;font-weight:700;color:#2d6a2d}
+.info-list{list-style:none}
+.info-list li{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:0.85rem;color:#333}
+.info-list li:last-child{border-bottom:none}
+.info-list .ico{font-size:1.1rem;margin-top:1px;flex-shrink:0}
+.info-list strong{display:block;color:#2d6a2d;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px}
+.cta-block{text-align:center;padding:6px 0 4px}
+.cta-block p{font-size:0.82rem;color:#555;margin-bottom:14px;line-height:1.5}
+.btn-call{display:block;background:linear-gradient(135deg,#2d6a2d,#5aab2e);color:#fff;text-decoration:none;padding:14px;border-radius:12px;font-size:1.05rem;font-weight:800;letter-spacing:0.5px;box-shadow:0 4px 14px rgba(90,171,46,0.35);transition:transform 0.15s}
+.btn-call:active{transform:scale(0.97)}
+.btn-sms{display:block;background:#fff;color:#2d6a2d;text-decoration:none;padding:11px;border-radius:12px;font-size:0.9rem;font-weight:700;border:2px solid #5aab2e;margin-top:10px}
+.star{color:#f5a623;font-size:1rem}
+.review-box{background:#f9fdf6;border-radius:12px;padding:14px;border:1px solid #d4edba;margin-bottom:10px}
+.review-box p{font-size:0.82rem;color:#444;line-height:1.5;font-style:italic}
+.review-box .reviewer{font-size:0.75rem;font-weight:700;color:#2d6a2d;margin-top:6px}
+.area-tag{display:inline-block;background:#e0f0d0;color:#2d6a2d;border-radius:20px;font-size:0.73rem;font-weight:600;padding:4px 11px;margin:3px 2px}
+.footer{background:#1e4d1e;color:rgba(255,255,255,0.6);text-align:center;font-size:0.68rem;padding:9px}
+</style>
+</head>
+<body>
+<div class="widget">
+<div class="header">
+<h1>🌿 Rick's Lawn Care</h1>
+<p>Professional Landscaping Services</p>
+<span class="badge">📍 Baldivis, Perth WA</span>
+</div>
+<div class="tabs">
+<div class="tab active" onclick="goTo(0)">Services</div>
+<div class="tab" onclick="goTo(1)">About</div>
+<div class="tab" onclick="goTo(2)">Reviews</div>
+<div class="tab" onclick="goTo(3)">Contact</div>
+</div>
+<div class="panels">
+<div class="slider" id="slider">
+<div class="panel">
+<h2><span>🌱</span>Our Services</h2>
+<div class="service-grid">
+<div class="service-card"><div class="icon">🌾</div><p>Lawn Mowing</p></div>
+<div class="service-card"><div class="icon">💧</div><p>Reticulation</p></div>
+<div class="service-card"><div class="icon">🍃</div><p>Garden Cleanup</p></div>
+<div class="service-card"><div class="icon">🟩</div><p>Turf Laying</p></div>
+</div>
+<br>
+<p style="font-size:0.8rem;color:#555;line-height:1.55">From regular lawn mowing to full turf installations and reticulation repairs — Rick handles it all with care and expertise across Baldivis and surrounds.</p>
+</div>
+<div class="panel">
+<h2><span>👷</span>About Rick</h2>
+<ul class="info-list">
+<li><span class="ico">🌿</span><div><strong>Trade</strong>Licensed Landscaper</div></li>
+<li><span class="ico">📍</span><div><strong>Location</strong>Baldivis, Perth WA</div></li>
+<li><span class="ico">✅</span><div><strong>Experience</strong>Residential & commercial lawn care with a personal touch</div></li>
+<li><span class="ico">🔧</span><div><strong>Specialties</strong>Reticulation installs, turf laying, seasonal cleanups</div></li>
+</ul>
+<div style="margin-top:12px">
+<strong style="font-size:0.75rem;color:#2d6a2d;text-transform:uppercase;letter-spacing:0.3px">Service Areas</strong>
+<div style="margin-top:7px">
+<span class="area-tag">Baldivis</span><span class="area-tag">Rockingham</span><span class="area-tag">Secret Harbour</span><span class="area-tag">Safety Bay</span><span class="area-tag">Warnbro</span>
+</div>
+</div>
+</div>
+<div class="panel">
+<h2><span>⭐</span>Reviews</h2>
+<div class="review-box">
+<div><span class="star">★★★★★</span></div>
+<p>"Rick did an amazing job laying our new turf. Showed up on time, cleaned up perfectly. Lawn looks incredible!"</p>
+<div class="reviewer">— Sarah M., Baldivis</div>
+</div>
+<div class="review-box">
+<div><span class="star">★★★★★</span></div>
+<p>"Fixed our reticulation and mows fortnightly. Super reliable and reasonably priced. Highly recommend!"</p>
+<div class="reviewer">— James T., Rockingham</div>
+</div>
+<div class="review-box">
+<div><span class="star">★★★★★</span></div>
+<p>"Garden cleanup was outstanding. Rick transformed our yard in a single day. Will definitely book again."</p>
+<div class="reviewer">— Lisa K., Secret Harbour</div>
+</div>
+</div>
+<div class="panel">
+<h2><span>📞</span>Get In Touch</h2>
+<div class="cta-block">
+<p>Ready for a greener yard? Call Rick today for a <strong>free quote</strong> on any lawn or garden service.</p>
+<a class="btn-call" href="tel:0412999888">📞 0412 999 888</a>
+<a class="btn-sms" href="sms:0412999888">💬 Send a Text Message</a>
+</div>
+<ul class="info-list" style="margin-top:14px">
+<li><span class="ico">🕐</span><div><strong>Hours</strong>Mon–Sat: 7am – 5pm</div></li>
+<li><span class="ico">💰</span><div><strong>Quotes</strong>Free, no-obligation estimates</div></li>
+<li><span class="ico">⚡</span><div><strong>Response</strong>Usually replies within the hour</div></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="footer">© 2024 Rick's Lawn Care · Baldivis, Perth WA</div>
+</div>
+<script>
+var cur=0,startX=0,isDrag=false;
+var slider=document.getElementById('slider');
+var tabs=document.querySelectorAll('.tab');
+function goTo(n){cur=n;slider.style.transform='translateX(-'+n*100+'%)';tabs.forEach(function(t,i){t.classList.toggle('active',i===n)})}
+slider.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;isDrag=true},{passive:true});
+slider.addEventListener('touchend',function(e){if(!isDrag)return;var dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>40){if(dx<0&&cur<3)goTo(cur+1);if(dx>0&&cur>0)goTo(cur-1)}isDrag=false});
+</script>
+</body>
+</html>
