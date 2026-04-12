@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iTabs | Your Local Joondalup Electrician</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-tertiary: #1e1e2e; --text-primary: #ffffff; --text-secondary: #9090b0; --accent: #7c3aed; --accent2: #06b6d4; --i-button: #f59e0b; --transition: 0.2s ease; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+        .container { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
+        .biz-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--bg-secondary); border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+        .biz-info { display: flex; flex-direction: column; gap: 2px; }
+        .biz-name { font-size: 14px; font-weight: 700; }
+        .biz-location { font-size: 11px; color: var(--text-secondary); }
+        .biz-contact-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #7c3aed; border: none; border-radius: 20px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .progress-container { display: flex; gap: 4px; padding: 10px 16px 8px; background: var(--bg-primary); flex-shrink: 0; }
+        .progress-segment { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; transition: background var(--transition); }
+        .progress-segment.viewed { background: rgba(255,255,255,0.6); }
+        .progress-segment.active { background: var(--accent); }
+        .cards-wrapper { flex: 1; position: relative; overflow: hidden; }
+        .card { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; pointer-events: none; }
+        .card.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+        .card.prev { opacity: 0; transform: translateX(-100%); }
+        .card-hero { padding: 28px 20px 20px; min-height: 38%; display: flex; flex-direction: column; justify-content: flex-end; }
+        .hero-default { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .hero-purple { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+        .hero-cyan { background: linear-gradient(135deg, #164e63 0%, #0c4a6e 100%); }
+        .hero-amber { background: linear-gradient(135deg, #78350f 0%, #431407 100%); }
+        .hero-green { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); }
+        .hero-red { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); }
+        .card-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 8px; }
+        .tag-cyan { color: #67e8f9; } .tag-amber { color: #fcd34d; } .tag-green { color: #6ee7b7; } .tag-red { color: #fca5a5; } .tag-purple { color: #a78bfa; }
+        .card-headline { font-size: clamp(20px, 5vw, 26px); font-weight: 700; line-height: 1.25; }
+        .hero-default em { color: #cbd5e1; font-style: normal; } .hero-purple em { color: #a78bfa; font-style: normal; } .hero-cyan em { color: #67e8f9; font-style: normal; } .hero-amber em { color: #fcd34d; font-style: normal; } .hero-green em { color: #6ee7b7; font-style: normal; } .hero-red em { color: #fca5a5; font-style: normal; } .hero-photo em { color: #fff; font-style: normal; }
+        .card-body { flex: 1; padding: 20px; background: var(--bg-secondary); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .card-summary { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+        .analogy-box { background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border-left: 3px solid var(--accent2); }
+        .analogy-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent2); text-transform: uppercase; margin-bottom: 6px; }
+        .analogy-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; white-space: pre-line; }
+        .i-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .i-button { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; color: var(--i-button); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+        .i-dot { width: 18px; height: 18px; background: var(--i-button); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0; }
+        .lead-form { display: flex; flex-direction: column; gap: 10px; }
+        .lead-form input, .lead-form textarea { width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-primary); font-size: 14px; font-family: inherit; outline: none; }
+        .lead-form input::placeholder, .lead-form textarea::placeholder { color: var(--text-secondary); }
+        .lead-form textarea { height: 80px; resize: none; }
+        .lead-form button { padding: 14px; background: var(--accent); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .call-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); border-radius: 12px; color: var(--accent2); font-size: 15px; font-weight: 600; text-decoration: none; }
+        .nav-area { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--bg-secondary); border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+        .nav-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 18px; cursor: pointer; font-family: inherit; }
+        .nav-btn:disabled { opacity: 0.3; cursor: default; }
+        .card-counter { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+        .itabs-footer { text-align: center; font-size: 10px; color: rgba(255,255,255,0.2); padding: 6px; background: var(--bg-secondary); letter-spacing: 0.1em; flex-shrink: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--transition); z-index: 1000; }
+        .overlay.active { opacity: 1; pointer-events: all; }
+        .sheet { width: 100%; max-width: 430px; margin: 0 auto; background: var(--bg-tertiary); border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
+        .overlay.active .sheet { transform: translateY(0); }
+        .sheet-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px; }
+        .sheet-title { font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+        .sheet-term { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .sheet-type { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--i-button); margin-bottom: 12px; }
+        .sheet-content { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .sheet-close { margin-top: 16px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .contact-option { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: var(--text-primary); text-decoration: none; cursor: pointer; margin-bottom: 10px; width: 100%; font-family: inherit; }
+        .contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .opt-call .contact-icon { background: rgba(16,185,129,0.2); }
+        .opt-email .contact-icon { background: rgba(124,58,237,0.2); }
+        .opt-web .contact-icon { background: rgba(245,158,11,0.2); }
+        .opt-save .contact-icon { background: rgba(6,182,212,0.2); }
+        .contact-text { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+        .contact-label { font-size: 15px; font-weight: 600; }
+        .contact-sub { font-size: 12px; color: var(--text-secondary); }
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; overflow-y: auto; max-height: 60vh; }
+        .gallery-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; background: var(--bg-tertiary); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="biz-header">
+        <div class="biz-info">
+            <div class="biz-name">Sparky's Electrical</div>
+            <div class="biz-location">Joondalup, Perth</div>
+        </div>
+        <button class="biz-contact-btn" id="contactBtn">💬 Contact</button>
+    </div>
+    <div class="progress-container" id="progress"></div>
+    <div class="cards-wrapper" id="cardsWrapper"></div>
+    <div class="nav-area">
+        <button class="nav-btn" id="prevBtn">←</button>
+        <span class="card-counter" id="counter">1 / N</span>
+        <button class="nav-btn" id="nextBtn">→</button>
+    </div>
+    <div class="itabs-footer">POWERED BY ITABS</div>
+</div>
+
+<div class="overlay" id="modalOverlay" onclick="if(event.target===this)closeAll()">
+    <div class="sheet" id="modalSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-term" id="modalTerm"></div>
+        <div class="sheet-type" id="modalType"></div>
+        <div class="sheet-content" id="modalContent"></div>
+        <button class="sheet-close" onclick="closeAll()">Close</button>
+    </div>
+</div>
+
+<div class="overlay" id="contactOverlay" onclick="if(event.target===this)closeAll()">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Sparky's Electrical</div>
+        <a class="contact-option opt-call" href="tel:0433456789">
+            <div class="contact-icon">📞</div>
+            <div class="contact-text"><div class="contact-label">Call Us</div><div class="contact-sub">0433 456 789</div></div>
+        </a>
+        <a class="contact-option opt-email" href="mailto:info@sparkyselectrical.com.au"><div class="contact-icon">✉️</div><div class="contact-text"><div class="contact-label">Email Us</div><div class="contact-sub">info@sparkyselectrical.com.au</div></div></a>
+        
+        <button class="contact-option opt-save" id="saveContact">
+            <div class="contact-icon">💾</div>
+            <div class="contact-text"><div class="contact-label">Save Contact</div><div class="contact-sub">Add to your phone contacts</div></div>
+        </button>
+        <button class="sheet-close" onclick="closeAll()">Close</button>
+    </div>
+</div>
+
+<div class="overlay" id="galleryOverlay" onclick="if(event.target===this)closeAll()">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">📸 Our Work</div>
+        <div class="gallery-grid"></div>
+        <button class="sheet-close" onclick="closeAll()">Close</button>
+    </div>
+</div>
+
+<script>
+const BUSINESS_NAME = "Sparky's Electrical";
+const BUSINESS_PHONE = "0433456789";
+const WIDGET_URL = "https://boilermaker-innovator.github.io/itabs-quotes/widget-1775994424334.html";
+const cards = [{"tag":"01 / ABOUT","tagClass":"","headline":"Joondalup's <em>Trusted</em> Sparky","heroClass":"hero-default","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Sparky's Electrical keeps Joondalup homes safe and powered up. We're the local electricians who show up on time, explain everything clearly, and leave your place cleaner than we found it. From quick fixes to full rewires, we treat every job like it's our own home.","analogy":null,"iButtons":[{"label":"Our Promise","type":"context","term":"The Sparky's Guarantee","content":"Every job comes with our triple promise: we arrive when we say we will, we quote before we start, and we clean up completely. If you're not happy, we come back and make it right — no arguments, no excuses. That's how we've built our reputation in Joondalup."}],"isForm":false,"phone":null},{"tag":"02 / THE PROBLEM","tagClass":"","headline":"Electrical Gremlins <em>Love</em> Perth Homes","heroClass":"hero-red","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Flickering lights, tripping circuits, and that weird burning smell — older Perth homes weren't built for modern electrical demands. Between the air con, the pool pump, and everyone charging their devices, your switchboard is working overtime. And dodgy DIY wiring from previous owners? That's a house fire waiting to happen.","analogy":null,"iButtons":[{"label":"Warning Signs","type":"context","term":"Red Flags to Watch For","content":"If your lights dim when the air con kicks in, your powerpoints feel warm to touch, or your safety switch trips more than once a month — your home is telling you something. These aren't minor annoyances; they're your electrical system crying for help. The good news? Most issues are straightforward fixes when caught early."},{"label":"Why It Matters","type":"context","term":"The Real Risk","content":"Electrical faults cause over 40% of house fires in Australia. That's not a scare tactic — it's why we take every inspection seriously. A $200 safety check today could save you from a catastrophic loss. We've seen too many near-misses in Joondalup homes with outdated wiring."}],"isForm":false,"phone":null},{"tag":"03 / SERVICES","tagClass":"","headline":"Everything <em>Electrical</em> Under One Roof","heroClass":"hero-cyan","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"From installing your new EV charger to making sure your smoke alarms actually work, we handle all residential electrical needs. No job too small, no switchboard too old. We're fully licensed, insured, and genuinely enjoy solving electrical puzzles.","analogy":null,"iButtons":[{"label":"Home Electrical","type":"context","term":"Residential Wiring & Upgrades","content":"Whether you're renovating, extending, or just adding more powerpoints because you're sick of power boards everywhere — we design and install wiring that handles today's demands with room to grow. Our switchboard upgrades bring 1970s electrical systems into 2024, with proper safety switches and circuit protection."},{"label":"Safety Services","type":"context","term":"Inspections, Smoke Alarms & RCDs","content":"We conduct thorough safety inspections that check every circuit, connection, and potential hazard. Smoke alarm installations and testing to meet current regulations — because the $50 fine is nothing compared to the alternative. Safety switches (RCDs) that actually trip when they should, tested and certified."},{"label":"Future-Ready","type":"context","term":"EV Chargers & Outdoor Lighting","content":"Electric vehicle charger installation done right — we'll assess your switchboard capacity, install dedicated circuits, and set you up with a charger that won't trip your whole house. Plus outdoor lighting design that makes your garden look amazing while deterring the opportunists who love dark driveways."}],"isForm":false,"phone":null},{"tag":"04 / HOW IT WORKS","tagClass":"","headline":"Simple as <em>Flipping</em> a Switch","heroClass":"hero-purple","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Getting your electrical sorted shouldn't feel like pulling teeth. You call, we listen, we show up when we say we will. We explain what needs doing in plain English, give you an upfront price, and get it done right the first time.","analogy":{"icon":"🔌","title":"Think of Us as Your Home's Personal Electrician","text":"Like having a good mechanic you trust with your car, you need an electrician who knows your home's quirks. We keep notes on your switchboard, your wiring age, and what we've done before — so every visit builds on the last. No starting from scratch, no repeating yourself, just seamless service."},"iButtons":[{"label":"The Process","type":"context","term":"From Call to Completion","content":"Step one: call or text us your issue. Step two: we book a time that suits you — often same-day for urgent jobs. Step three: we arrive on time, diagnose the problem, and quote before touching anything. Step four: you approve, we fix, you sign off happy. Any questions after? We're a phone call away."}],"isForm":false,"phone":null},{"tag":"05 / WHY US","tagClass":"","headline":"Why Joondalup <em>Chooses</em> Sparky's","heroClass":"hero-amber","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"We live and work in your neighbourhood. When we say we'll be there at 2pm, we mean 2pm — not 'sometime this afternoon.' We explain what we're doing and why, so you understand your own home better. And we guarantee our work because we know we'll see you at Lakeside Joondalup.","analogy":null,"iButtons":[{"label":"Local Knowledge","type":"context","term":"We Know Joondalup Homes","content":"From the 1980s builds around Connolly to the newer estates in Iluka, we've worked on every style of home in the area. We know which developments have aluminium wiring issues, which builders cut corners on switchboards, and exactly what your home needs. That local expertise saves you time and money."},{"label":"Straight Talking","type":"context","term":"No Sparky Jargon","content":"We'll never bamboozle you with technical terms to justify a bigger bill. If your switchboard needs replacing, we'll show you exactly why and explain your options. If a simple fix will do, that's what we'll recommend. We'd rather earn your trust than squeeze your wallet — because trusted sparkies get recommended to neighbours."}],"isForm":false,"phone":null},{"tag":"06 / PRICING","tagClass":"","headline":"Clear Pricing, <em>No</em> Shocks","heroClass":"hero-green","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"We quote upfront and stick to it. No call-out fee surprises, no mysterious 'parts markup.' You'll know exactly what you're paying before we start — and we'll explain where every dollar goes.","analogy":{"icon":"💡","title":"Budget Like You're Planning a Reno","text":"A typical service call for a simple fix runs $150-250. Switchboard upgrades usually land between $1,500-3,000 depending on your home's needs. EV charger installations range from $1,200-2,500 including the circuit work. Safety inspections start at $180 — cheap insurance for peace of mind."},"iButtons":[{"label":"What Affects Price","type":"context","term":"Understanding Your Quote","content":"Three things drive electrical pricing: complexity of the job, age of your existing wiring, and parts required. A straightforward powerpoint install in a modern home is quick and affordable. Chasing cables through a double-brick 1970s build takes longer. We'll always explain what's involved so the price makes sense."}],"isForm":false,"phone":null},{"tag":"07 / GET A QUOTE","tagClass":"","headline":"Let's Get You <em>Sorted</em>","heroClass":"hero-green","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Tell us what's going on and we'll get back to you within a few hours — usually much sooner. For urgent issues, give us a call and we'll do our best to get there today.","analogy":null,"iButtons":[],"isForm":true,"phone":"0433 456 789"}];
+const HAS_GALLERY = false;
+
+let currentCard = 0;
+const totalCards = cards.length;
+
+function init() {
+    const progress = document.getElementById('progress');
+    const wrapper = document.getElementById('cardsWrapper');
+    cards.forEach((card, i) => {
+        const seg = document.createElement('div');
+        seg.className = 'progress-segment' + (i === 0 ? ' active' : '');
+        progress.appendChild(seg);
+        wrapper.appendChild(buildCard(card, i));
+    });
+    document.getElementById('counter').textContent = '1 / ' + totalCards;
+    document.getElementById('prevBtn').addEventListener('click', () => navigate(-1));
+    document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
+    document.getElementById('prevBtn').disabled = true;
+    document.getElementById('contactBtn').addEventListener('click', () => document.getElementById('contactOverlay').classList.add('active'));
+    document.getElementById('saveContact').addEventListener('click', function() {
+        const v = ['BEGIN:VCARD','VERSION:3.0','FN:'+BUSINESS_NAME,'TEL;TYPE=CELL:'+BUSINESS_PHONE,'URL:'+WIDGET_URL,'NOTE:iTabs Business Card','END:VCARD'].join('\n');
+        const b = new Blob([v], {type:'text/vcard'});
+        const u = URL.createObjectURL(b);
+        const a = document.createElement('a');
+        a.href=u; a.download=BUSINESS_NAME.toLowerCase().replace(/\s+/g,'-')+'.vcf'; a.click();
+        URL.revokeObjectURL(u); closeAll();
+    });
+    document.addEventListener('keydown', e => { if(e.key==='Escape')closeAll(); if(e.key==='ArrowRight')navigate(1); if(e.key==='ArrowLeft')navigate(-1); });
+    let sx = 0;
+    const cw = document.getElementById('cardsWrapper');
+    cw.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+    cw.addEventListener('touchend', e => { const d = sx - e.changedTouches[0].clientX; if(Math.abs(d)>50)navigate(d>0?1:-1); });
+}
+
+function buildCard(card, index) {
+    const el = document.createElement('div');
+    el.className = 'card' + (index === 0 ? ' active' : '');
+    const analogyHTML = card.analogy && card.analogy.title && card.analogy.text && card.analogy.title !== 'undefined' && card.analogy.text !== 'undefined' ? '<div class="analogy-box"><div class="analogy-title">'+card.analogy.title+'</div><div class="analogy-text">'+card.analogy.text+'</div></div>' : '';
+    // Filter out gallery i-buttons if there are no gallery photos
+    const visibleButtons = card.iButtons ? card.iButtons.filter(b => b.type !== 'gallery' || HAS_GALLERY) : [];
+    const iButtonsHTML = visibleButtons.length ? '<div class="i-buttons">'+visibleButtons.map(b=>'<button class="i-button" data-term="'+b.term+'" data-type="'+b.type+'" data-content="'+encodeURIComponent(b.content||'')+'"><span class="i-dot">i</span>'+b.label+'</button>').join('')+'</div>' : '';
+    const formHTML = card.isForm ? '<a class="call-btn" href="tel:'+BUSINESS_PHONE+'">📞 &nbsp;Call '+card.phone+'</a><div class="lead-form" id="leadForm"><input type="text" id="fname" placeholder="Your name"/><input type="tel" id="fphone" placeholder="Your phone number"/><input type="email" id="femail" placeholder="Email (optional)"/><textarea id="fjob" placeholder="Tell us about your job..."></textarea><button id="submitBtn">Send My Details →</button></div><p id="formMsg" style="display:none;text-align:center;color:#6ee7b7;font-size:14px;padding-top:8px;">✅ Got it!</p>' : '';
+    el.innerHTML = '<div class="card-hero '+card.heroClass+'"><div class="card-tag '+(card.tagClass||'')+'">'+card.tag+'</div><h2 class="card-headline">'+card.headline+'</h2></div><div class="card-body"><p class="card-summary">'+card.summary+'</p>'+analogyHTML+iButtonsHTML+formHTML+'</div>';
+    if(card.photoUrl){ el.querySelector('.card-hero').style.cssText="background-image:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.82) 100%),url('"+card.photoUrl+"');background-size:"+(card.photoSize||'cover')+";background-position:"+(card.photoPos||'center')+";"; }
+    el.querySelectorAll('.i-button').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            if(btn.dataset.type==='gallery'){ document.getElementById('galleryOverlay').classList.add('active'); }
+            else { openModal(btn.dataset.term, btn.dataset.type, decodeURIComponent(btn.dataset.content)); }
+        });
+    });
+    if(card.isForm){ setTimeout(()=>{ const sb=el.querySelector('#submitBtn'); if(sb){ sb.addEventListener('click', async()=>{ const name=el.querySelector('#fname').value,phone=el.querySelector('#fphone').value; if(!name||!phone){alert('Name and phone required.');return;} sb.textContent='Sending...';sb.disabled=true; try{await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({access_key:'99a11c15-5c61-4765-99c5-673adec64b16',subject:'New iTabs Lead — '+BUSINESS_NAME,name,phone,email:el.querySelector('#femail').value,job_description:el.querySelector('#fjob').value})});}catch(e){} el.querySelector('#leadForm').style.display='none';el.querySelector('#formMsg').style.display='block'; }); }},100); }
+    return el;
+}
+
+function navigate(dir){ const n=currentCard+dir; if(n>=0&&n<totalCards)updateCard(n); }
+function updateCard(i){
+    document.querySelectorAll('.card').forEach((c,j)=>{ c.classList.remove('active','prev'); if(j===i)c.classList.add('active'); else if(j<i)c.classList.add('prev'); });
+    document.querySelectorAll('.progress-segment').forEach((s,j)=>{ s.classList.remove('active','viewed'); if(j===i)s.classList.add('active'); else if(j<i)s.classList.add('viewed'); });
+    currentCard=i;
+    document.getElementById('counter').textContent=(i+1)+' / '+totalCards;
+    document.getElementById('prevBtn').disabled=i===0;
+    document.getElementById('nextBtn').disabled=i===totalCards-1;
+}
+function openModal(term,type,content){
+    const labels={'definition':'Definition','context':'Context','why-it-matters':'Why It Matters','related':'Related'};
+    document.getElementById('modalTerm').textContent=term;
+    document.getElementById('modalType').textContent=labels[type]||type;
+    document.getElementById('modalContent').textContent=content;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+function closeAll(){
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('contactOverlay').classList.remove('active');
+    document.getElementById('galleryOverlay').classList.remove('active');
+}
+init();
+</script>
+</body>
+</html>
