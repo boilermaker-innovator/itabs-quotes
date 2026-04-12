@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smithy's Plumbing — iTabs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg-primary:#0a0a0f;
+    --bg-secondary:#12121a;
+    --bg-tertiary:#1e1e2e;
+    --text-primary:#ffffff;
+    --text-secondary:#9090b0;
+    --accent:#7c3aed;
+    --accent2:#06b6d4;
+    --i-button:#f59e0b;
+    --card-radius:16px;
+  }
+  html,body{height:100%;width:100%;overflow:hidden;background:var(--bg-primary);font-family:'Inter',sans-serif;color:var(--text-primary)}
+  .app-wrap{display:flex;flex-direction:column;height:100vh;max-width:430px;margin:0 auto;position:relative;overflow:hidden}
+
+  /* HEADER */
+  .header-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(10,10,15,0.95);border-bottom:1px solid rgba(255,255,255,0.07);z-index:10}
+  .header-biz{display:flex;flex-direction:column}
+  .header-name{font-size:14px;font-weight:700;color:#fff;line-height:1.2}
+  .header-loc{font-size:11px;color:var(--text-secondary);margin-top:1px}
+  .contact-pill{background:var(--i-button);color:#000;font-size:12px;font-weight:700;padding:7px 14px;border-radius:999px;border:none;cursor:pointer;white-space:nowrap;letter-spacing:0.3px}
+
+  /* CARD VIEWPORT */
+  .card-viewport{flex:1;overflow:hidden;position:relative}
+  .card-track{display:flex;height:100%;transition:transform 0.38s cubic-bezier(0.4,0,0.2,1);will-change:transform}
+  .card{flex:0 0 100%;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative}
+
+  /* HERO THEMES */
+  .card-hero{flex-shrink:0;position:relative;min-height:190px;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 18px 14px}
+  .hero-default .card-hero{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%)}
+  .hero-purple .card-hero{background:linear-gradient(135deg,#4c1d95 0%,#1e1b4b 100%)}
+  .hero-cyan .card-hero{background:linear-gradient(135deg,#164e63 0%,#0c4a6e 100%)}
+  .hero-amber .card-hero{background:linear-gradient(135deg,#78350f 0%,#431407 100%)}
+  .hero-green .card-hero{background:linear-gradient(135deg,#14532d 0%,#052e16 100%)}
+  .hero-red .card-hero{background:linear-gradient(135deg,#7f1d1d 0%,#450a0a 100%)}
+  .hero-photo .card-hero{background:#111}
+
+  .hero-photo-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0.55}
+  .hero-photo .card-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.1) 100%)}
+  .hero-photo .hero-content{position:relative;z-index:2}
+
+  .hero-tag{font-size:10px;font-weight:700;letter-spacing:1.5px;opacity:0.75;margin-bottom:7px;text-transform:uppercase}
+  .hero-headline{font-size:22px;font-weight:800;line-height:1.25;color:#fff}
+  .hero-default em{color:#cbd5e1;font-style:normal}
+  .hero-purple em{color:#a78bfa;font-style:normal}
+  .hero-cyan em{color:#67e8f9;font-style:normal}
+  .hero-amber em{color:#fcd34d;font-style:normal}
+  .hero-green em{color:#6ee7b7;font-style:normal}
+  .hero-red em{color:#fca5a5;font-style:normal}
+  .hero-photo em{color:#ffffff;font-style:normal}
+
+  /* CARD BODY */
+  .card-body{flex:1;overflow-y:auto;padding:16px 16px 12px;background:var(--bg-secondary);-webkit-overflow-scrolling:touch}
+  .card-body::-webkit-scrollbar{width:3px}
+  .card-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px}
+  .summary-text{font-size:14px;line-height:1.65;color:#d1d5db}
+  .analogy-box{margin-top:14px;background:var(--bg-tertiary);border-left:3px solid var(--i-button);border-radius:10px;padding:12px 14px}
+  .analogy-title{font-size:11px;font-weight:700;color:var(--i-button);letter-spacing:0.8px;margin-bottom:5px;text-transform:uppercase}
+  .analogy-text{font-size:13px;color:#c4c4d8;line-height:1.6}
+  .ibuttons-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .i-btn{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,0.13);border:1px solid rgba(245,158,11,0.35);color:var(--i-button);font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;cursor:pointer;transition:background 0.2s}
+  .i-btn:hover{background:rgba(245,158,11,0.25)}
+  .i-btn-icon{font-size:13px}
+
+  /* FORM CARD */
+  .form-wrap{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+  .form-wrap input,.form-wrap select,.form-wrap textarea{background:var(--bg-tertiary);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;padding:11px 13px;width:100%;outline:none;transition:border-color 0.2s}
+  .form-wrap input::placeholder,.form-wrap textarea::placeholder{color:var(--text-secondary)}
+  .form-wrap input:focus,.form-wrap select:focus,.form-wrap textarea:focus{border-color:var(--accent2)}
+  .form-wrap textarea{resize:none;min-height:80px}
+  .form-wrap select{appearance:none;-webkit-appearance:none}
+  .form-wrap select option{background:#1e1e2e}
+  .submit-btn{background:linear-gradient(135deg,#059669,#047857);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:12px;padding:14px;cursor:pointer;margin-top:4px;letter-spacing:0.3px}
+  .submit-btn:active{opacity:0.85}
+  .form-note{font-size:11px;color:var(--text-secondary);text-align:center;margin-top:2px}
+
+  /* NAVIGATION */
+  .nav-bar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(10,10,15,0.95);border-top:1px solid rgba(255,255,255,0.07)}
+  .nav-btn{background:var(--bg-tertiary);border:1px solid rgba(255,255,255,0.1);color:#fff;font-size:18px;width:42px;height:42px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 0.2s}
+  .nav-btn:disabled{opacity:0.25;cursor:default}
+  .progress-dots{display:flex;gap:6px;align-items:center}
+  .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.18);transition:all 0.3s}
+  .dot.active{background:var(--accent2);width:20px;border-radius:4px}
+
+  /* FOOTER */
+  .footer-strip{flex-shrink:0;text-align:center;padding:5px;background:var(--bg-primary);font-size:10px;font-weight:600;letter-spacing:1.2px;color:rgba(255,255,255,0.18);text-transform:uppercase}
+
+  /* MODAL OVERLAY */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.28s;max-width:430px;margin:0 auto}
+  .overlay.active{opacity:1;pointer-events:all}
+  .sheet{background:var(--bg-secondary);border-radius:20px 20px 0 0;padding:22px 20px 34px;width:100%;max-height:82vh;overflow-y:auto;transform:translateY(30px);transition:transform 0.28s;-webkit-overflow-scrolling:touch}
+  .overlay.active .sheet{transform:translateY(0)}
+  .sheet-handle{width:36px;height:4px;background:rgba(255,255,255,0.18);border-radius:2px;margin:0 auto 18px}
+  .sheet-tag{font-size:10px;font-weight:700;letter-spacing:1.4px;color:var(--i-button);text-transform:uppercase;margin-bottom:6px}
+  .sheet-title{font-size:18px;font-weight:800;margin-bottom:12px;color:#fff}
+  .sheet-body{font-size:14px;line-height:1.7;color:#c4c4d8}
+  .sheet-close{position:absolute;top:14px;right:16px;background:var(--bg-tertiary);border:none;color:#fff;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .sheet{position:relative}
+
+  /* CONTACT SHEET */
+  .contact-actions{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+  .contact-btn{display:flex;align-items:center;gap:12px;background:var(--bg-tertiary);border:1px solid rgba(255,255,255,0.1);border-radius:13px;padding:14px 16px;color:#fff;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;transition:background 0.2s}
+  .contact-btn:hover{background:rgba(255,255,255,0.08)}
+  .contact-btn-icon{font-size:20px;width:28px;text-align:center}
+
+  /* GALLERY SHEET */
+  .gallery-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+  .gallery-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--bg-tertiary)}
+  .gallery-empty{color:var(--text-secondary);font-size:14px;text-align:center;padding:30px 0}
+
+  /* SUCCESS */
+  .success-msg{display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px 0;text-align:center}
+  .success-msg.show{display:flex}
+  .success-icon{font-size:48px}
+  .success-title{font-size:20px;font-weight:800;color:#6ee7b7}
+  .success-sub{font-size:14px;color:var(--text-secondary);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="app-wrap">
+
+  <!-- HEADER -->
+  <div class="header-bar">
+    <div class="header-biz">
+      <div class="header-name">Smithy's Plumbing</div>
+      <div class="header-loc">📍 Brisbane, QLD</div>
+    </div>
+    <button class="contact-pill" id="contactBtn">💬 Contact</button>
+  </div>
+
+  <!-- CARD VIEWPORT -->
+  <div class="card-viewport">
+    <div class="card-track" id="cardTrack"></div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav-bar">
+    <button class="nav-btn" id="prevBtn" disabled>&#8592;</button>
+    <div class="progress-dots" id="progressDots"></div>
+    <button class="nav-btn" id="nextBtn">&#8594;</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-strip">POWERED BY ITABS</div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div class="overlay" id="modalOverlay">
+  <div class="sheet" id="modalSheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="modalClose">✕</button>
+    <div class="sheet-tag" id="modalTag"></div>
+    <div class="sheet-title" id="modalTitle"></div>
+    <div class="sheet-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- CONTACT OVERLAY -->
+<div class="overlay" id="contactOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="contactClose">✕</button>
+    <div class="sheet-tag">GET IN TOUCH</div>
+    <div class="sheet-title">Smithy's Plumbing</div>
+    <div class="contact-actions">
+      <a href="tel:0412345678" class="contact-btn"><span class="contact-btn-icon">📞</span> Call 0412 345 678</a>
+      <a href="mailto:dave@smithysplumbing.com.au" class="contact-btn"><span class="contact-btn-icon">✉️</span> dave@smithysplumbing.com.au</a>
+      <a href="https://www.smithysplumbing.com.au" target="_blank" class="contact-btn"><span class="contact-btn-icon">🌐</span> www.smithysplumbing.com.au</a>
+      <a href="#" class="contact-btn" id="saveContactBtn"><span class="contact-btn-icon">💾</span> Save Contact</a>
+    </div>
+  </div>
+</div>
+
+<!-- GALLERY OVERLAY -->
+<div class="overlay" id="galleryOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <button class="sheet-close" id="galleryClose">✕</button>
+    <div class="sheet-tag">OUR WORK</div>
+    <div class="sheet-title">📸 Photo Gallery</div>
+    <div class="gallery-grid" id="galleryGrid">
+      <div class="gallery-empty" style="grid-column:1/-1">No photos added yet — check back soon!</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CARDS = [
+  {
+    tag: "01 / ABOUT",
+    headline: "Brisbane's <em>trusted</em> family plumbers",
+    heroClass: "hero-default",
+    summary: "Smithy's Plumbing is a family-owned business with 15 years of hands-on experience across Brisbane and surrounding suburbs. Dave and the team handle everything from emergency call-outs to full bathroom renovations. Upfront pricing, no hidden fees — ever.",
+    analogy: null,
+    iButtons: [
+      { label: "📸 Our Work", type: "gallery", term: "Gallery", content: "" },
+      { label: "⏱ 15 Years Experience", type: "why-it-matters", term: "Why Experience Matters", content: "With 15 years in the trade, we've seen every plumbing problem Brisbane can throw at us. That means faster diagnosis, fewer return visits, and repairs done right the first time. You're not paying for someone to learn on the job." },
+      { label: "📍 Service Area", type: "context", term: "Where We Work", content: "We service all of Brisbane and surrounding suburbs — north, south, east, west and everywhere in between. From the CBD to the outer suburbs, if you're in the greater Brisbane area, we've got you covered." }
+    ]
+  },
+  {
+    tag: "02 / THE PROBLEM",
+    headline: "Plumbing problems don't wait for a <em>convenient time</em>",
+    heroClass: "hero-red",
+    summary: "A burst pipe at midnight. A hot water system that dies on a cold morning. A blocked drain turning your bathroom into a swamp. Plumbing emergencies are stressful, messy, and can cause serious damage if not dealt with fast. The wrong tradie makes it worse.",
+    analogy: null,
+    iButtons: [
+      { label: "💸 Hidden Fee Trap", type: "why-it-matters", term: "The Hidden Fee Problem", content: "Many plumbers quote low to win the job, then hit you with surprise charges once they're knee-deep in your pipes. We quote upfront — what we say is what you pay. No ambushes on invoice day." },
+      { label: "⏰ Waiting Too Long", type: "context", term: "Delays Cost More", content: "A slow drip becomes a flood. A blocked drain becomes a sewage backup. Delaying plumbing repairs almost always makes the problem bigger and the bill higher. Same-day service means we stop small problems before they explode." },
+      { label: "🚫 Unlicensed Risk", type: "definition", term: "Licensed vs Unlicensed", content: "In Queensland, all plumbing work must be carried out by a licensed plumber. Unlicensed work can void your home insurance, fail safety inspections, and create serious health hazards. Dave is fully licensed and insured — every job, every time." }
+    ]
+  },
+  {
+    tag: "03 / SERVICES",
+    headline: "Everything plumbing, from <em>hot water to emergencies</em>",
+    heroClass: "hero-cyan",
+    summary: "We cover the full range of residential and light commercial plumbing across Brisbane. Whether it's a routine fix or a 3am emergency, Smithy's Plumbing has you covered. One call, one reliable team.",
+    analogy: null,
+    iButtons: [
+      { label: "🔥 Hot Water Systems", type: "definition", term: "Hot Water Systems", content: "We supply and install gas and electric hot water systems from leading brands. Whether your existing unit needs repair or it's time for a full replacement, we'll advise the most cost-effective option for your home. Hot water replacements start from $1,200." },
+      { label: "🚿 Blocked Drains", type: "definition", term: "Blocked Drains", content: "Blocked drains are one of the most common — and most unpleasant — plumbing issues. We use jet blasting and CCTV drain cameras to locate and clear blockages fast, without unnecessary digging or guesswork." },
+      { label: "🛁 Renovations", type: "definition", term: "Bathroom & Kitchen Renos", content: "Planning a bathroom or kitchen renovation? We handle all the plumbing side — from relocating pipes to installing new fixtures. Free quotes on all renovation plumbing work. We work alongside your builder or directly with you." },
+      { label: "🚨 24/7 Emergencies", type: "why-it-matters", term: "Emergency Call-Outs", content: "Plumbing emergencies don't keep business hours. We offer 24/7 emergency call-outs across Brisbane. Call us any time — day, night, weekend or public holiday. Emergency call-out fee from $99." }
+    ]
+  },
+  {
+    tag: "04 / HOW IT WORKS",
+    headline: "From your first call to a <em>fixed problem</em>",
+    heroClass: "hero-purple",
+    summary: "Getting your plumbing sorted with Smithy's is simple. Call or submit a quote request, we confirm a time that suits you, arrive on time, diagnose the issue, and give you a clear price before we start. Once you're happy, we fix it — properly.",
+    analogy: { title: "Think of it like...", text: "Calling a plumber should be like calling a trusted mate who happens to be a licensed tradesperson. You explain the problem, they give you a straight answer and a fair price, then they turn up and get it done. No jargon. No runaround. That's exactly how we work." },
+    iButtons: [
+      { label: "📋 Upfront Quoting", type: "definition", term: "How We Quote", content: "We assess the job first, then give you a fixed price before any work begins. You'll never be hit with unexpected charges. For larger renovation jobs, we provide a detailed written quote so you know exactly what's included." },
+      { label: "✅ After the Job", type: "context", term: "Job Completion", content: "Once the work is done, we clean up the work area, walk you through what was done, and make sure you're 100% satisfied before we leave. All work comes with a workmanship guarantee and complies with Queensland plumbing standards." }
+    ]
+  },
+  {
+    tag: "05 / WHY US",
+    headline: "Licensed, local, and <em>5-star rated</em>",
+    heroClass: "hero-amber",
+    summary: "There's no shortage of plumbers in Brisbane — but not all of them will show up on time, give you a straight price, and stand behind their work. Smithy's Plumbing has built its reputation over 15 years on doing exactly that.",
+    analogy: null,
+    iButtons: [
+      { label: "⭐ 5-Star Reviews", type: "why-it-matters", term: "What Customers Say", content: "Our 5-star Google rating isn't an accident — it's the result of 15 years of showing up on time, communicating clearly, and doing quality work. Read our reviews on Google to see what Brisbane homeowners are saying about us." },
+      { label: "🛡 Licensed & Insured", type: "definition", term: "Our Credentials", content: "Dave Smith is a fully licensed Queensland plumber with current public liability and professional indemnity insurance. All work meets or exceeds the Plumbing and Drainage Act 2018 (QLD). You're fully protected." },
+      { label: "👴 Pensioner Discounts", type: "why-it-matters", term: "Pensioner Discount", content: "We offer discounted rates for eligible pensioners because we believe quality plumbing should be accessible to everyone. Mention your pensioner concession card when booking to apply your discount." },
+      { label: "📅 Same-Day Service", type: "context", term: "Same-Day Availability", content: "Subject to availability, we offer same-day service for urgent plumbing issues across Brisbane. Call us early and we'll do everything we can to get to you the same day. Emergencies are always prioritised." }
+    ]
+  },
+  {
+    tag: "06 / PRICING",
+    headline: "Honest prices with <em>no surprises</em>",
+    heroClass: "hero-green",
+    summary: "We keep our pricing straightforward and transparent. You'll always know what you're up for before we start. Call-out fees start from just $99, hot water replacements from $1,200, and renovation quotes are completely free.",
+    analogy: { title: "Think of it like...", text: "Think of our pricing like a menu at a good local café — everything has a clear price, no mystery charges, and you know exactly what you're getting. The call-out fee gets us to your door. After that, everything is agreed upfront before we pick up a wrench." },
+    iButtons: [
+      { label: "🔧 Call-Out Fee", type: "definition", term: "Call-Out Fee", content: "Our call-out fee starts from $99 and covers our travel to your property and initial diagnosis. We'll then quote any additional work before starting. For 24/7 emergency call-outs, after-hours rates apply — ask when you book." },
+      { label: "🚿 Hot Water Cost", type: "definition", term: "Hot Water Replacement", content: "Hot water system replacement starts from $1,200 depending on unit type, brand, and installation complexity. Gas systems may cost more if gas line work is required. We'll give you a firm quote before any work starts." },
+      { label: "🛁 Free Reno Quotes", type: "why-it-matters", term: "Free Renovation Quotes", content: "Not sure what your bathroom or kitchen renovation plumbing will cost? We provide completely free, no-obligation quotes on all renovation plumbing. We'll come to site, assess the scope, and give you a written quote — no charge, no pressure." }
+    ]
+  },
+  {
+    tag: "07 / GET A QUOTE",
+    headline: "Let's sort your plumbing — <em>fast</em>",
+    heroClass: "hero-green",
+    summary: "Fill in your details below and Dave will get back to you promptly. For emergencies, call directly on 0412 345 678 — we're available 24/7.",
+    analogy: null,
+    iButtons: [],
+    isForm: true,
+    phone: "0412 345 678"
+  }
+];
+
+let current = 0;
+
+function buildCard(card, index) {
+  const div = document.createElement('div');
+  div.className = `card ${card.heroClass}`;
+
+  // Hero
+  let heroContent = `<div class="hero-tag">${card.tag}</div><div class="hero-headline">${card.headline}</div>`;
+  let heroEl = `<div class="card-hero"><div class="hero-content">${heroContent}</div></div>`;
+  div.innerHTML = heroEl;
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'card-body';
+
+  if (card.isForm) {
+    body.innerHTML = `
+      <p class="summary-text">${card.summary}</p>
+      <div id="formWrap" class="form-wrap" style="margin-top:14px">
+        <input type="text" id="fName" placeholder="Your Name" autocomplete="name">
+        <input type="tel" id="fPhone" placeholder="Your Phone Number" autocomplete="tel">
+        <input type="email" id="fEmail" placeholder="Email (optional)" autocomplete="email">
+        <select id="fService">
+          <option value="" disabled selected>What do you need help with?</option>
+          <option>Hot Water System</option>
+          <option>Blocked Drain</option>
+          <option>Bathroom / Kitchen Renovation</option>
+          <option>Emergency Call-Out</option>
+          <option>Other</option>
+        </select>
+        <textarea id="fMsg" placeholder="Briefly describe the issue..."></textarea>
+        <button class="submit-btn" id="submitBtn">🔧 Send My Request</button>
+        <p class="form-note">Or call directly: <a href="tel:0412345678" style="color:var(--accent2)">0412 345 678</a></p>
+      </div>
+      <div class="success-msg" id="successMsg">
+        <div class="success-icon">✅</div>
+        <div class="success-title">Request Sent!</div>
+        <div class="success-sub">Thanks! Dave will be in touch shortly.<br>For urgent jobs call <a href="tel:0412345678" style="color:var(--accent2)">0412 345 678</a></div>
+      </div>`;
+  } else {
+    let html = `<p class="summary-text">${card.summary}</p>`;
+    if (card.analogy) {
+      html += `<div class="analogy-box"><div class="analogy-title">${card.analogy.title}</div><div class="analogy-text">${card.analogy.text}</div></div>`;
+    }
+    if (card.iButtons && card.iButtons.length) {
+      html += `<div class="ibuttons-row">`;
+      card.iButtons.forEach((btn, i) => {
+        html += `<button class="i-btn" data-index="${index}" data-btn="${i}" data-type="${btn.type}" data-term="${encodeURIComponent(btn.term)}" data-content="${encodeURIComponent(btn.content)}"><span class="i-btn-icon">ⓘ</span>${btn.label}</button>`;
+      });
+      html += `</div>`;
+    }
+    body.innerHTML = html;
+  }
+
+  div.appendChild(body);
+
+  // Wire i-buttons after append
+  setTimeout(() => {
+    div.querySelectorAll('.i-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.type;
+        if (type === 'gallery') {
+          openGallery();
+        } else {
+          const term = decodeURIComponent(btn.dataset.term);
+          const content = decodeURIComponent(btn.dataset.content);
+          openModal(type, term, content);
+        }
+      });
+    });
+    if (card.isForm) {
+      const submitBtn = div.querySelector('#submitBtn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+          const name = div.querySelector('#fName').value.trim();
+          const phone = div.querySelector('#fPhone').value.trim();
+          if (!name || !phone) {
+            alert('Please enter your name and phone number.');
+            return;
+          }
+          div.querySelector('#formWrap').style.display = 'none';
+          div.querySelector('#successMsg').classList.add('show');
+        });
+      }
+    }
+  }, 0);
+
+  return div;
+}
+
+function openModal(type, term, content) {
+  const tagMap = { definition: 'DEFINITION', 'why-it-matters': 'WHY IT MATTERS', context: 'CONTEXT', related: 'RELATED', gallery: 'GALLERY' };
+  document.getElementById('modalTag').textContent = tagMap[type] || type.toUpperCase();
+  document.getElementById('modalTitle').textContent = term;
+  document.getElementById('modalBody').textContent = content;
+  document.getElementById('modalOverlay').classList.add('active');
+}
+
+function openGallery() {
+  document.getElementById('galleryOver
