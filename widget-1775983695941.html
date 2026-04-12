@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>iTabs | Your garden, done properly</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        :root { --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-tertiary: #1e1e2e; --text-primary: #ffffff; --text-secondary: #9090b0; --accent: #7c3aed; --accent2: #06b6d4; --i-button: #f59e0b; --transition: 0.2s ease; }
+        html, body { height: 100%; overflow: hidden; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+        .container { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
+        .biz-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--bg-secondary); border-bottom: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+        .biz-info { display: flex; flex-direction: column; gap: 2px; }
+        .biz-name { font-size: 14px; font-weight: 700; }
+        .biz-location { font-size: 11px; color: var(--text-secondary); }
+        .biz-contact-btn { display: flex; align-items: center; gap: 6px; padding: 7px 14px; background: #7c3aed; border: none; border-radius: 20px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .progress-container { display: flex; gap: 4px; padding: 10px 16px 8px; background: var(--bg-primary); flex-shrink: 0; }
+        .progress-segment { flex: 1; height: 3px; background: rgba(255,255,255,0.2); border-radius: 2px; transition: background var(--transition); }
+        .progress-segment.viewed { background: rgba(255,255,255,0.6); }
+        .progress-segment.active { background: var(--accent); }
+        .cards-wrapper { flex: 1; position: relative; overflow: hidden; }
+        .card { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; transform: translateX(100%); transition: all 0.3s ease; pointer-events: none; }
+        .card.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+        .card.prev { opacity: 0; transform: translateX(-100%); }
+        .card-hero { padding: 28px 20px 20px; min-height: 38%; display: flex; flex-direction: column; justify-content: flex-end; }
+        .hero-default { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .hero-purple { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+        .hero-cyan { background: linear-gradient(135deg, #164e63 0%, #0c4a6e 100%); }
+        .hero-amber { background: linear-gradient(135deg, #78350f 0%, #431407 100%); }
+        .hero-green { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); }
+        .hero-red { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); }
+        .card-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; color: rgba(255,255,255,0.5); text-transform: uppercase; margin-bottom: 8px; }
+        .tag-cyan { color: #67e8f9; } .tag-amber { color: #fcd34d; } .tag-green { color: #6ee7b7; } .tag-red { color: #fca5a5; } .tag-purple { color: #a78bfa; }
+        .card-headline { font-size: clamp(20px, 5vw, 26px); font-weight: 700; line-height: 1.25; }
+        .hero-default em { color: #cbd5e1; font-style: normal; } .hero-purple em { color: #a78bfa; font-style: normal; } .hero-cyan em { color: #67e8f9; font-style: normal; } .hero-amber em { color: #fcd34d; font-style: normal; } .hero-green em { color: #6ee7b7; font-style: normal; } .hero-red em { color: #fca5a5; font-style: normal; } .hero-photo em { color: #fff; font-style: normal; }
+        .card-body { flex: 1; padding: 20px; background: var(--bg-secondary); overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .card-summary { font-size: 15px; color: var(--text-secondary); line-height: 1.7; }
+        .analogy-box { background: var(--bg-tertiary); border-radius: 12px; padding: 14px; border-left: 3px solid var(--accent2); }
+        .analogy-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent2); text-transform: uppercase; margin-bottom: 6px; }
+        .analogy-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; white-space: pre-line; }
+        .i-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+        .i-button { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 20px; color: var(--i-button); font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
+        .i-dot { width: 18px; height: 18px; background: var(--i-button); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0; }
+        .lead-form { display: flex; flex-direction: column; gap: 10px; }
+        .lead-form input, .lead-form textarea { width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text-primary); font-size: 14px; font-family: inherit; outline: none; }
+        .lead-form input::placeholder, .lead-form textarea::placeholder { color: var(--text-secondary); }
+        .lead-form textarea { height: 80px; resize: none; }
+        .lead-form button { padding: 14px; background: var(--accent); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .call-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); border-radius: 12px; color: var(--accent2); font-size: 15px; font-weight: 600; text-decoration: none; }
+        .nav-area { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: var(--bg-secondary); border-top: 1px solid rgba(255,255,255,0.06); flex-shrink: 0; }
+        .nav-btn { width: 40px; height: 40px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 18px; cursor: pointer; font-family: inherit; }
+        .nav-btn:disabled { opacity: 0.3; cursor: default; }
+        .card-counter { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+        .itabs-footer { text-align: center; font-size: 10px; color: rgba(255,255,255,0.2); padding: 6px; background: var(--bg-secondary); letter-spacing: 0.1em; flex-shrink: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity var(--transition); z-index: 1000; }
+        .overlay.active { opacity: 1; pointer-events: all; }
+        .sheet { width: 100%; max-width: 430px; margin: 0 auto; background: var(--bg-tertiary); border-radius: 20px 20px 0 0; padding: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
+        .overlay.active .sheet { transform: translateY(0); }
+        .sheet-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 0 auto 16px; }
+        .sheet-title { font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+        .sheet-term { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .sheet-type { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--i-button); margin-bottom: 12px; }
+        .sheet-content { font-size: 14px; color: var(--text-secondary); line-height: 1.7; }
+        .sheet-close { margin-top: 16px; width: 100%; padding: 12px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: var(--text-primary); font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .contact-option { display: flex; align-items: center; gap: 14px; padding: 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: var(--text-primary); text-decoration: none; cursor: pointer; margin-bottom: 10px; width: 100%; font-family: inherit; }
+        .contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+        .opt-call .contact-icon { background: rgba(16,185,129,0.2); }
+        .opt-email .contact-icon { background: rgba(124,58,237,0.2); }
+        .opt-web .contact-icon { background: rgba(245,158,11,0.2); }
+        .opt-save .contact-icon { background: rgba(6,182,212,0.2); }
+        .contact-text { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+        .contact-label { font-size: 15px; font-weight: 600; }
+        .contact-sub { font-size: 12px; color: var(--text-secondary); }
+        .gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; overflow-y: auto; max-height: 60vh; }
+        .gallery-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 10px; background: var(--bg-tertiary); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="biz-header">
+        <div class="biz-info">
+            <div class="biz-name">Sharp Cuts Landscaping</div>
+            <div class="biz-location">Mandurah, Perth</div>
+        </div>
+        <button class="biz-contact-btn" id="contactBtn">💬 Contact</button>
+    </div>
+    <div class="progress-container" id="progress"></div>
+    <div class="cards-wrapper" id="cardsWrapper"></div>
+    <div class="nav-area">
+        <button class="nav-btn" id="prevBtn">←</button>
+        <span class="card-counter" id="counter">1 / N</span>
+        <button class="nav-btn" id="nextBtn">→</button>
+    </div>
+    <div class="itabs-footer">POWERED BY ITABS</div>
+</div>
+
+<div class="overlay" id="modalOverlay" onclick="if(event.target===this)closeAll()">
+    <div class="sheet" id="modalSheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-term" id="modalTerm"></div>
+        <div class="sheet-type" id="modalType"></div>
+        <div class="sheet-content" id="modalContent"></div>
+        <button class="sheet-close" onclick="closeAll()">Close</button>
+    </div>
+</div>
+
+<div class="overlay" id="contactOverlay" onclick="if(event.target===this)closeAll()">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">Sharp Cuts Landscaping</div>
+        <a class="contact-option opt-call" href="tel:0467234567">
+            <div class="contact-icon">📞</div>
+            <div class="contact-text"><div class="contact-label">Call Us</div><div class="contact-sub">0467 234 567</div></div>
+        </a>
+        <a class="contact-option opt-email" href="mailto:info@sharpcutslandscaping.com.au"><div class="contact-icon">✉️</div><div class="contact-text"><div class="contact-label">Email Us</div><div class="contact-sub">info@sharpcutslandscaping.com.au</div></div></a>
+        
+        <button class="contact-option opt-save" id="saveContact">
+            <div class="contact-icon">💾</div>
+            <div class="contact-text"><div class="contact-label">Save Contact</div><div class="contact-sub">Add to your phone contacts</div></div>
+        </button>
+        <button class="sheet-close" onclick="closeAll()">Close</button>
+    </div>
+</div>
+
+<div class="overlay" id="galleryOverlay" onclick="if(event.target===this)closeAll()">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">📸 Our Work</div>
+        <div class="gallery-grid"></div>
+        <button class="sheet-close" onclick="closeAll()">Close</button>
+    </div>
+</div>
+
+<script>
+const BUSINESS_NAME = "Sharp Cuts Landscaping";
+const BUSINESS_PHONE = "0467234567";
+const WIDGET_URL = "https://boilermaker-innovator.github.io/itabs-quotes/widget-1775983695941.html";
+const cards = [{"tag":"01 / ABOUT","tagClass":"","headline":"Mandurah's <em>landscape</em> experts","heroClass":"hero-default","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Sharp Cuts Landscaping transforms outdoor spaces across Mandurah and greater Perth. From stunning garden designs to practical retaining walls, we bring your vision to life with quality workmanship and attention to detail. Your garden, done properly — that's not just our tagline, it's our promise.","analogy":null,"iButtons":[{"label":"Our Approach","type":"context","term":"Our Approach","content":"We start every project with a thorough site assessment and genuine conversation about what you want. No cookie-cutter solutions — just tailored landscaping that suits your lifestyle, budget, and Perth's unique climate."},{"label":"Service Areas","type":"context","term":"Service Areas","content":"Based in Mandurah, we service the entire Perth metro area including Rockingham, Baldivis, Pinjarra, and surrounding suburbs. Local knowledge means we understand the soil, climate, and what grows best here."}],"isForm":false,"phone":null},{"tag":"02 / THE PROBLEM","tagClass":"","headline":"Gardens that <em>frustrate</em> not impress","heroClass":"hero-red","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"You've got a backyard that's either a sandy wasteland or an overgrown jungle. Maybe the lawn is patchy, the garden beds are full of weeds, or you're sick of looking at that crumbling retaining wall. Weekend warriors end up with sore backs and half-finished projects.","analogy":null,"iButtons":[{"label":"DIY Disasters","type":"context","term":"DIY Disasters","content":"We see it all the time — retaining walls leaning after one winter, irrigation that waters the fence instead of the plants, and lawn that dies within months. Landscaping looks simple until you're knee-deep in mistakes that cost more to fix than doing it right the first time."},{"label":"Dodgy Operators","type":"context","term":"Dodgy Operators","content":"Perth's full of guys with a ute and a whipper snipper calling themselves landscapers. No insurance, no qualifications, no callbacks when things go wrong. You deserve better than ghosted phone calls and botched jobs."}],"isForm":false,"phone":null},{"tag":"03 / SERVICES","tagClass":"","headline":"Complete <em>outdoor</em> transformations","heroClass":"hero-cyan","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"From initial design through to ongoing maintenance, we handle every aspect of your outdoor space. Whether it's a full backyard renovation or a simple lawn installation, Sharp Cuts delivers quality results that last.","analogy":null,"iButtons":[{"label":"Garden Design","type":"context","term":"Garden Design","content":"Custom garden designs that work with Perth's climate and your lifestyle. We consider sun exposure, soil conditions, water requirements, and how you actually want to use your space. Native and waterwise options available."},{"label":"Lawn Installation","type":"context","term":"Lawn Installation","content":"Professional turf installation including soil preparation, levelling, and the right grass variety for your conditions. We use quality Sir Walter, Kikuyu, or Couch depending on your shade, traffic, and maintenance preferences."},{"label":"Retaining Walls","type":"context","term":"Retaining Walls","content":"Limestone, concrete sleeper, and block retaining walls engineered for Perth's sandy soils. Proper drainage and footings mean walls that stay straight for decades, not months."},{"label":"Irrigation Systems","type":"context","term":"Irrigation Systems","content":"Efficient reticulation design and installation that actually waters your plants, not your driveway. We work with your bore or mains supply and set up smart controllers to maximise water efficiency."},{"label":"Mulching & Gardens","type":"context","term":"Mulching & Gardens","content":"Quality mulch installation to suppress weeds, retain moisture, and improve soil health. We source premium mulches and apply at proper depths for real results."},{"label":"Tree Removal","type":"context","term":"Tree Removal","content":"Safe removal of problem trees including stump grinding. We assess whether trees can be saved or need to go, and handle council permits if required."},{"label":"Maintenance","type":"context","term":"Maintenance","content":"Ongoing garden maintenance to keep your investment looking sharp. Regular visits, seasonal care, and responsive service when you need us."}],"isForm":false,"phone":null},{"tag":"04 / HOW IT WORKS","tagClass":"","headline":"From <em>consultation</em> to completion","heroClass":"hero-purple","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"We make landscaping straightforward with a clear process from first call to final walkthrough. No surprises, no scope creep, just professional project management from start to finish.","analogy":"Think of us like architects for your outdoor space. Just as you wouldn't build a house without proper plans, we design your landscape with drainage, sun patterns, and future growth in mind — then build it to last.","iButtons":[{"label":"1. Free Consultation","type":"context","term":"Free Consultation","content":"We visit your property, discuss your vision, assess site conditions, and talk through realistic options for your budget. No obligation, no pressure — just honest advice about what's possible."},{"label":"2. Design & Quote","type":"context","term":"Design & Quote","content":"You receive a detailed written quote with clear scope, material specifications, and timeline. For larger projects, we provide concept designs so you can visualise the end result before we start."},{"label":"3. Professional Install","type":"context","term":"Professional Install","content":"Our experienced crew handles everything from site prep to final cleanup. We communicate throughout, stick to timelines, and treat your property with respect."},{"label":"4. Final Walkthrough","type":"context","term":"Final Walkthrough","content":"We walk through the completed project together, explain maintenance requirements, and make sure you're completely happy before we leave. Our work is guaranteed."}],"isForm":false,"phone":null},{"tag":"05 / WHY US","tagClass":"","headline":"Why Mandurah <em>trusts</em> Sharp Cuts","heroClass":"hero-amber","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"We're not the cheapest landscapers in Perth, and we're okay with that. What we are is reliable, skilled, and committed to results that actually last. Your outdoor space is an investment — treat it like one.","analogy":null,"iButtons":[{"label":"Local Experience","type":"context","term":"Local Experience","content":"Years of landscaping in Perth's unique conditions. We know which plants thrive in sandy coastal soils, how to handle summer heat, and what survives Mandurah's salt air."},{"label":"Fully Licensed","type":"context","term":"Fully Licensed","content":"Proper insurance, relevant qualifications, and compliance with all regulations. We handle council approvals for retaining walls and work safely around services."},{"label":"Quality Materials","type":"context","term":"Quality Materials","content":"We use premium turf, quality mulches, and structural materials that won't fail. Relationships with trusted suppliers mean better products at fair prices."},{"label":"Clear Communication","type":"context","term":"Clear Communication","content":"We answer our phone, respond to messages, and keep you informed throughout your project. No chasing, no excuses, no surprises on invoice day."},{"label":"Guaranteed Work","type":"context","term":"Guaranteed Work","content":"We stand behind our workmanship. If something's not right, we come back and fix it. That's not special — that's how every tradie should operate."}],"isForm":false,"phone":null},{"tag":"06 / PRICING","tagClass":"","headline":"Honest <em>pricing</em> for quality work","heroClass":"hero-green","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Every property is different, so we quote based on your specific requirements. Here's a rough guide to help you budget, but the best way to get accurate pricing is a free on-site consultation.","analogy":"Landscaping is like renovating your kitchen — you can spend $5K on flat-pack or $50K on custom cabinetry. We help you find the sweet spot where quality meets budget, and we're upfront about where it makes sense to invest versus save.","iButtons":[{"label":"Lawn Installation","type":"context","term":"Lawn Installation","content":"Basic lawn installation typically runs $25-45 per square metre depending on soil prep required and turf variety. A standard 100sqm backyard lawn might cost $3,500-5,500 installed, including soil prep and initial fertilising."},{"label":"Retaining Walls","type":"context","term":"Retaining Walls","content":"Limestone walls from around $350-500 per lineal metre depending on height. Concrete sleeper walls from $400-600 per lineal metre. Engineering required for walls over 500mm, which adds to cost but keeps your wall standing."},{"label":"Garden Design & Install","type":"context","term":"Garden Design & Install","content":"Full garden makeovers vary hugely — from $5,000 for a simple courtyard refresh to $30,000+ for complete backyard transformations with paving, planting, and features. We work with your budget."},{"label":"Irrigation Systems","type":"context","term":"Irrigation Systems","content":"Basic front and back reticulation from around $1,500-3,000 for an average property. Smart controllers, drip systems for garden beds, and complex layouts increase costs but save water long-term."},{"label":"Maintenance","type":"context","term":"Maintenance","content":"Regular maintenance visits from $80-150 depending on property size and scope. Monthly, fortnightly, or custom schedules available."}],"isForm":false,"phone":null},{"tag":"07 / GET A QUOTE","tagClass":"","headline":"Ready to <em>transform</em> your garden?","heroClass":"hero-green","photoUrl":null,"photoSize":"cover","photoPos":"center","summary":"Get in touch for a free, no-obligation consultation. We'll visit your property, discuss your vision, and provide honest advice on how to achieve the outdoor space you've been dreaming about.","analogy":null,"iButtons":[],"isForm":true,"phone":"0467 234 567"}];
+const HAS_GALLERY = false;
+
+let currentCard = 0;
+const totalCards = cards.length;
+
+function init() {
+    const progress = document.getElementById('progress');
+    const wrapper = document.getElementById('cardsWrapper');
+    cards.forEach((card, i) => {
+        const seg = document.createElement('div');
+        seg.className = 'progress-segment' + (i === 0 ? ' active' : '');
+        progress.appendChild(seg);
+        wrapper.appendChild(buildCard(card, i));
+    });
+    document.getElementById('counter').textContent = '1 / ' + totalCards;
+    document.getElementById('prevBtn').addEventListener('click', () => navigate(-1));
+    document.getElementById('nextBtn').addEventListener('click', () => navigate(1));
+    document.getElementById('prevBtn').disabled = true;
+    document.getElementById('contactBtn').addEventListener('click', () => document.getElementById('contactOverlay').classList.add('active'));
+    document.getElementById('saveContact').addEventListener('click', function() {
+        const v = ['BEGIN:VCARD','VERSION:3.0','FN:'+BUSINESS_NAME,'TEL;TYPE=CELL:'+BUSINESS_PHONE,'URL:'+WIDGET_URL,'NOTE:iTabs Business Card','END:VCARD'].join('\n');
+        const b = new Blob([v], {type:'text/vcard'});
+        const u = URL.createObjectURL(b);
+        const a = document.createElement('a');
+        a.href=u; a.download=BUSINESS_NAME.toLowerCase().replace(/\s+/g,'-')+'.vcf'; a.click();
+        URL.revokeObjectURL(u); closeAll();
+    });
+    document.addEventListener('keydown', e => { if(e.key==='Escape')closeAll(); if(e.key==='ArrowRight')navigate(1); if(e.key==='ArrowLeft')navigate(-1); });
+    let sx = 0;
+    const cw = document.getElementById('cardsWrapper');
+    cw.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+    cw.addEventListener('touchend', e => { const d = sx - e.changedTouches[0].clientX; if(Math.abs(d)>50)navigate(d>0?1:-1); });
+}
+
+function buildCard(card, index) {
+    const el = document.createElement('div');
+    el.className = 'card' + (index === 0 ? ' active' : '');
+    const analogyHTML = card.analogy ? '<div class="analogy-box"><div class="analogy-title">'+card.analogy.title+'</div><div class="analogy-text">'+card.analogy.text+'</div></div>' : '';
+    // Filter out gallery i-buttons if there are no gallery photos
+    const visibleButtons = card.iButtons ? card.iButtons.filter(b => b.type !== 'gallery' || HAS_GALLERY) : [];
+    const iButtonsHTML = visibleButtons.length ? '<div class="i-buttons">'+visibleButtons.map(b=>'<button class="i-button" data-term="'+b.term+'" data-type="'+b.type+'" data-content="'+encodeURIComponent(b.content||'')+'"><span class="i-dot">i</span>'+b.label+'</button>').join('')+'</div>' : '';
+    const formHTML = card.isForm ? '<a class="call-btn" href="tel:'+BUSINESS_PHONE+'">📞 &nbsp;Call '+card.phone+'</a><div class="lead-form" id="leadForm"><input type="text" id="fname" placeholder="Your name"/><input type="tel" id="fphone" placeholder="Your phone number"/><input type="email" id="femail" placeholder="Email (optional)"/><textarea id="fjob" placeholder="Tell us about your job..."></textarea><button id="submitBtn">Send My Details →</button></div><p id="formMsg" style="display:none;text-align:center;color:#6ee7b7;font-size:14px;padding-top:8px;">✅ Got it!</p>' : '';
+    el.innerHTML = '<div class="card-hero '+card.heroClass+'"><div class="card-tag '+(card.tagClass||'')+'">'+card.tag+'</div><h2 class="card-headline">'+card.headline+'</h2></div><div class="card-body"><p class="card-summary">'+card.summary+'</p>'+analogyHTML+iButtonsHTML+formHTML+'</div>';
+    if(card.photoUrl){ el.querySelector('.card-hero').style.cssText="background-image:linear-gradient(to bottom,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.82) 100%),url('"+card.photoUrl+"');background-size:"+(card.photoSize||'cover')+";background-position:"+(card.photoPos||'center')+";"; }
+    el.querySelectorAll('.i-button').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.stopPropagation();
+            if(btn.dataset.type==='gallery'){ document.getElementById('galleryOverlay').classList.add('active'); }
+            else { openModal(btn.dataset.term, btn.dataset.type, decodeURIComponent(btn.dataset.content)); }
+        });
+    });
+    if(card.isForm){ setTimeout(()=>{ const sb=el.querySelector('#submitBtn'); if(sb){ sb.addEventListener('click', async()=>{ const name=el.querySelector('#fname').value,phone=el.querySelector('#fphone').value; if(!name||!phone){alert('Name and phone required.');return;} sb.textContent='Sending...';sb.disabled=true; try{await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({access_key:'99a11c15-5c61-4765-99c5-673adec64b16',subject:'New iTabs Lead — '+BUSINESS_NAME,name,phone,email:el.querySelector('#femail').value,job_description:el.querySelector('#fjob').value})});}catch(e){} el.querySelector('#leadForm').style.display='none';el.querySelector('#formMsg').style.display='block'; }); }},100); }
+    return el;
+}
+
+function navigate(dir){ const n=currentCard+dir; if(n>=0&&n<totalCards)updateCard(n); }
+function updateCard(i){
+    document.querySelectorAll('.card').forEach((c,j)=>{ c.classList.remove('active','prev'); if(j===i)c.classList.add('active'); else if(j<i)c.classList.add('prev'); });
+    document.querySelectorAll('.progress-segment').forEach((s,j)=>{ s.classList.remove('active','viewed'); if(j===i)s.classList.add('active'); else if(j<i)s.classList.add('viewed'); });
+    currentCard=i;
+    document.getElementById('counter').textContent=(i+1)+' / '+totalCards;
+    document.getElementById('prevBtn').disabled=i===0;
+    document.getElementById('nextBtn').disabled=i===totalCards-1;
+}
+function openModal(term,type,content){
+    const labels={'definition':'Definition','context':'Context','why-it-matters':'Why It Matters','related':'Related'};
+    document.getElementById('modalTerm').textContent=term;
+    document.getElementById('modalType').textContent=labels[type]||type;
+    document.getElementById('modalContent').textContent=content;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+function closeAll(){
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.getElementById('contactOverlay').classList.remove('active');
+    document.getElementById('galleryOverlay').classList.remove('active');
+}
+init();
+</script>
+</body>
+</html>
