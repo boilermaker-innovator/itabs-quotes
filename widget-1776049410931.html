@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rick's Lawn Care</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f7ee;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:10px}
+.widget{width:100%;max-width:420px;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(34,85,34,0.18)}
+.header{background:linear-gradient(135deg,#2d7a2d,#5ab85a);padding:22px 18px 16px;text-align:center;color:#fff}
+.logo{width:62px;height:62px;border-radius:50%;background:#fff;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.header h1{font-size:1.25rem;font-weight:700;letter-spacing:.5px}
+.header p{font-size:.8rem;opacity:.88;margin-top:3px}
+.badge{display:inline-block;background:rgba(255,255,255,0.22);border-radius:20px;padding:3px 12px;font-size:.72rem;margin-top:6px;letter-spacing:.5px}
+.tabs{display:flex;background:#1e5e1e;overflow:hidden}
+.tab-btn{flex:1;padding:11px 4px;color:rgba(255,255,255,0.65);font-size:.72rem;font-weight:600;border:none;background:none;cursor:pointer;text-transform:uppercase;letter-spacing:.4px;border-bottom:3px solid transparent;transition:all .25s}
+.tab-btn.active{color:#fff;border-bottom:3px solid #7ee87e;background:rgba(255,255,255,0.08)}
+.panels-wrap{overflow:hidden}
+.panels{display:flex;transition:transform .35s cubic-bezier(.4,0,.2,1)}
+.panel{min-width:100%;padding:22px 18px;min-height:220px}
+.panel h2{font-size:1rem;color:#1e5e1e;margin-bottom:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.service-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.service-card{background:#f0f7ee;border-radius:12px;padding:14px 10px;text-align:center;border:2px solid #c8e6c8}
+.service-card .icon{font-size:1.8rem;margin-bottom:6px}
+.service-card p{font-size:.78rem;font-weight:600;color:#2d5a2d;line-height:1.3}
+.info-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #eaf3ea}
+.info-row:last-child{border-bottom:none}
+.info-icon{font-size:1.3rem;width:32px;text-align:center;flex-shrink:0}
+.info-text strong{display:block;font-size:.78rem;color:#2d7a2d;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.info-text span{font-size:.88rem;color:#333}
+.cta-area{padding:8px 18px 20px;display:flex;flex-direction:column;gap:9px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;font-size:.92rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.btn:active{transform:scale(.97)}
+.btn-call{background:linear-gradient(135deg,#2d7a2d,#5ab85a);color:#fff;box-shadow:0 4px 14px rgba(45,122,45,0.35)}
+.btn-sms{background:#fff;color:#2d7a2d;border:2px solid #2d7a2d}
+.swipe-hint{text-align:center;font-size:.68rem;color:#aaa;padding:0 0 10px;letter-spacing:.3px}
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="header">
+    <div class="logo">🌿</div>
+    <h1>Rick's Lawn Care</h1>
+    <p>Baldivis, Perth WA</p>
+    <span class="badge">🏡 Professional Landscaper</span>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="goTab(0)">Services</button>
+    <button class="tab-btn" onclick="goTab(1)">About</button>
+    <button class="tab-btn" onclick="goTab(2)">Contact</button>
+  </div>
+  <div class="panels-wrap">
+    <div class="panels" id="panels">
+      <div class="panel">
+        <h2>🌱 Our Services</h2>
+        <div class="service-grid">
+          <div class="service-card"><div class="icon">🌾</div><p>Lawn Mowing</p></div>
+          <div class="service-card"><div class="icon">💧</div><p>Reticulation</p></div>
+          <div class="service-card"><div class="icon">🍃</div><p>Garden Cleanup</p></div>
+          <div class="service-card"><div class="icon">🟩</div><p>Turf Laying</p></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>ℹ️ About Rick</h2>
+        <div class="info-row"><div class="info-icon">👷</div><div class="info-text"><strong>Trade</strong><span>Licensed Landscaper</span></div></div>
+        <div class="info-row"><div class="info-icon">📍</div><div class="info-text"><strong>Location</strong><span>Baldivis, Perth WA</span></div></div>
+        <div class="info-row"><div class="info-icon">✅</div><div class="info-text"><strong>Speciality</strong><span>Residential & Commercial Lawns</span></div></div>
+        <div class="info-row"><div class="info-icon">⭐</div><div class="info-text"><strong>Service Area</strong><span>Baldivis & Surrounds</span></div></div>
+        <div class="info-row"><div class="info-icon">🕐</div><div class="info-text"><strong>Availability</strong><span>Mon – Sat, 7am – 5pm</span></div></div>
+      </div>
+      <div class="panel">
+        <h2>📞 Get In Touch</h2>
+        <div class="info-row"><div class="info-icon">📱</div><div class="info-text"><strong>Phone</strong><span>0412 999 888</span></div></div>
+        <div class="info-row"><div class="info-icon">📍</div><div class="info-text"><strong>Area</strong><span>Baldivis, Perth WA</span></div></div>
+        <div class="info-row"><div class="info-icon">💬</div><div class="info-text"><strong>Free Quotes</strong><span>Call or SMS anytime</span></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="cta-area">
+    <a class="btn btn-call" href="tel:0412999888">📞 Call Rick — 0412 999 888</a>
+    <a class="btn btn-sms" href="sms:0412999888">💬 Send a Text Message</a>
+  </div>
+  <div class="swipe-hint">← Swipe tabs to explore →</div>
+</div>
+<script>
+var cur=0,startX=0,wrap=document.querySelector('.panels-wrap'),panels=document.getElementById('panels'),btns=document.querySelectorAll('.tab-btn');
+function goTab(n){cur=n;panels.style.transform='translateX(-'+n*100+'%)';btns.forEach(function(b,i){b.classList.toggle('active',i===n)})}
+wrap.addEventListener('touchstart',function(e){startX=e.touches[0].clientX},{ passive:true});
+wrap.addEventListener('touchend',function(e){var dx=e.changedTouches[0].clientX-startX;if(Math.abs(dx)>40){if(dx<0&&cur<2)goTab(cur+1);if(dx>0&&cur>0)goTab(cur-1)}},{ passive:true});
+</script>
+</body>
+</html>
