@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smithy's Plumbing - Rockingham's Trusted Plumber</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1e1e2e;
+            --text-primary: #ffffff;
+            --text-secondary: #9090b0;
+            --accent: #7c3aed;
+            --accent2: #06b6d4;
+            --i-button: #f59e0b;
+            --card-radius: 16px;
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .widget-container {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--bg-secondary);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+            transition: width var(--transition);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .progress-segments {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            display: flex;
+        }
+
+        .progress-segment {
+            flex: 1;
+            border-right: 1px solid var(--bg-primary);
+        }
+
+        .progress-segment:last-child {
+            border-right: none;
+        }
+
+        .cards-container {
+            height: 100vh;
+            display: flex;
+            transition: transform var(--transition);
+            touch-action: pan-y;
+        }
+
+        .card {
+            min-width: 100%;
+            width: 100%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .hero-default { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .hero-purple  { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+        .hero-cyan    { background: linear-gradient(135deg, #164e63 0%, #0c4a6e 100%); }
+        .hero-amber   { background: linear-gradient(135deg, #78350f 0%, #431407 100%); }
+        .hero-green   { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); }
+        .hero-red     { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); }
+
+        .hero-default em { color: #cbd5e1; font-style: normal; }
+        .hero-purple  em { color: #a78bfa; font-style: normal; }
+        .hero-cyan    em { color: #67e8f9; font-style: normal; }
+        .hero-amber   em { color: #fcd34d; font-style: normal; }
+        .hero-green   em { color: #6ee7b7; font-style: normal; }
+        .hero-red     em { color: #fca5a5; font-style: normal; }
+
+        .card-header {
+            margin-bottom: 32px;
+        }
+
+        .card-tag {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .tag-cyan { background: rgba(6, 182, 212, 0.2); color: #67e8f9; }
+        .tag-purple { background: rgba(124, 58, 237, 0.2); color: #a78bfa; }
+        .tag-amber { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
+        .tag-green { background: rgba(34, 197, 94, 0.2); color: #6ee7b7; }
+        .tag-red { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+        .card-headline {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .card-summary {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .analogy-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .analogy-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .analogy-text {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .i-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+            padding-top: 24px;
+        }
+
+        .i-button {
+            background: var(--i-button);
+            color: var(--bg-primary);
+            border: none;
+            padding: 14px 20px;
+            border-radius: var(--card-radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-align: left;
+            position: relative;
+        }
+
+        .i-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .i-button:active {
+            transform: translateY(0);
+        }
+
+        .form-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color var(--transition);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-submit {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: var(--bg-primary);
+            border: none;
+            padding: 16px 24px;
+            border-radius: var(--card-radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            margin-top: auto;
+        }
+
+        .form-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .thank-you-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: var(--card-radius);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .thank-you-message h3 {
+            color: #6ee7b7;
+            margin-bottom: 12px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .nav-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .nav-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .card-counter {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            max-width: 380px;
+            width: 100%;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .modal-body {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .services-list {
+            list-style: none;
+            margin: 16px 0;
+        }
+
+        .services-list li {
+            padding: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .services-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent2);
+            font-weight: bold;
+        }
+
+        .steps-list {
+            list-style: none;
+            margin: 16px 0;
+        }
+
+        .steps-list li {
+            padding: 12px 0;
+            padding-left: 30px;
+            position: relative;
+            counter-increment: step-counter;
+        }
+
+        .steps-list {
+            counter-reset: step-counter;
+        }
+
+        .steps-list li:before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 12px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @media (max-width: 430px) {
+            .card {
+                padding: 20px;
+            }
+            .card-headline {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+            <div class="progress-segments">
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+                <div class="progress-segment"></div>
+            </div>
+        </div>
+
+        <div class="cards-container">
+            <!-- Card 1: About -->
+            <div class="card hero-default">
+                <div class="card-header">
+                    <div class="card-tag">01 / ABOUT</div>
+                    <h1 class="card-headline">Rockingham's <em>Trusted</em> Plumber</h1>
+                    <p class="card-summary">Dave Smith has been keeping Rockingham homes and businesses flowing smoothly for 15 years. From emergency call-outs to complete bathroom renovations, Smithy's Plumbing delivers reliable service with our promise: no mess, no stress — just good plumbing.</p>
+                </div>
+                <div class="i-buttons">
+                    <button class="i-button" data-type="context" data-term="Dave Smith" data-content="Fully%20licensed%20plumber%20with%2015%20years%20experience%20in%20Rockingham.%20Known%20for%20punctuality%2C%20fair%20pricing%2C%20and%20always%20leaving%20your%20property%20cleaner%20than%20when%20he%20arrived.">Meet Dave</button>
+                    <button class="i-button" data-type="context" data-term="Service Area" data-content="Proudly%20serving%20Rockingham%2C%20Baldivis%2C%20Warnbro%2C%20Safety%20Bay%2C%20and%20surrounding%20southern%20Perth%20suburbs.%20Local%20knowledge%20means%20faster%20response%20times.">Service Area</button>
+                </div>
+            </div>
+
+            <!-- Card 2: Problem -->
+            <div class="card hero-red">
+                <div class="card-header">
+                    <div class="card-tag tag-red">02 / PROBLEM</div>
+                    <h1 class="card-headline">When Plumbing <em>Goes Wrong</em></h1>
+                    <p class="card-summary">Burst pipes flooding your laundry. Hot water system that's given up the ghost. Blocked drains backing up at the worst possible moment. Plumbing problems don't wait for convenient times — they happen when you least expect them and need fixing fast.</p>
+                </div>
+                <div class="i-buttons">
+                    <button class="i-button" data-type="context" data-term="Emergency Response" data-content="Available%207%20days%20for%20plumbing%20emergencies.%20Fast%20response%20times%20across%20Rockingham%20and%20southern%20suburbs%20to%20minimize%20damage%20and%20disruption.">24/7 Emergency</button>
+                    <button class="i-button" data-type="context" data-term="Common Issues" data-content="Blocked%20drains%2C%20burst%20pipes%2C%20leaking%20taps%2C%20hot%20water%20failures%2C%20toilet%20problems%2C%20and%20gas%20fitting%20issues%20are%20the%20most%20frequent%20calls%20we%20receive.">Frequent Problems</button>
+                </div>
+            </div>
+
+            <!-- Card 3: Services -->
+            <div class="card hero-cyan">
+                <div class="card-header">
+                    <div class="card-tag tag-cyan">03 / SERVICES</div>
+                    <h1 class="card-headline">Complete <em>Plumbing</em> Solutions</h1>
+                    <p class="card-summary">From quick fixes to major installations, we handle every aspect of residential and commercial plumbing. Specializing in hot water systems, bathroom renovations, and emergency repairs throughout Rockingham.</p>
+                </div>
+                <div class="i-buttons">
+                    <button class="i-button" data-type="context" data-term="Hot Water Systems" data-content="Installation%2C%20repair%20and%20replacement%20of%20electric%2C%20gas%20and%20solar%20hot%20water%20systems.%20We%20work%20with%20all%20major%20brands%20and%20can%20recommend%20the%20best%20system%20for%20your%20home.">Hot Water Systems</button>
+                    <button class="i-button" data-type="context" data-term="Blocked Drains" data-content="High-pressure%20water%20jetting%20and%20CCTV%20drain%20inspection%20to%20clear%20blockages%20and%20identify%20underlying%20issues.%20We%20clear%20kitchen%2C%20bathroom%2C%20and%20stormwater%20drains.">Blocked Drains</button>
+                    <button class="i-button" data-type="context" data-term="Emergency Repairs" data-content="Burst%20pipes%2C%20major%20leaks%2C%20gas%20leaks%2C%20and%20sewer%20backups.%20Fast%20response%20to%20minimize%20damage%20and%20get%20your%20plumbing%20back%20to%20normal.">Emergency Repairs</button>
+                    <button class="i-button" data-type="context" data-term="Bathroom Renovations" data-content="Complete%20bathroom%20makeovers%20including%20new%20fixtures%2C%20vanities%2C%20showers%2C%20and%20toilets.%20We%20handle%20all%20plumbing%20aspects%20of%20your%20renovation%20project.">Bathroom Renos</button>
+                </div>
+            </div>
+
+            <!-- Card 4: How It Works -->
+            <div class="card hero-purple">
+                <div class="card-header">
+                    <div class="card-tag tag-purple">04 / HOW IT WORKS</div>
+                    <h1 class="card-headline">Simple <em>Process</em>, Quality Results</h1>
+                    <p class="card-summary">Getting your plumbing sorted shouldn't be complicated. We've streamlined our process to be as straightforward as possible, keeping you informed every step of the way.</p>
+                    <div class="analogy-box">
+                        <div class="analogy-title">Think of it like...</div>
+                        <div class="analogy-text">A good mechanic for your car — we diagnose the problem, explain what's needed in plain English, give you a fair quote, and fix it right the first time.</div>
+                    </div>
+                </div>
+                <div class="i-buttons">
+                    <button class="i-button" data-type="context" data-term="Step-by-Step Process" data-content="1.%20Call%20or%20message%20us%20with%20your%20problem%0A2.%20We%20provide%20initial%20advice%20and%20schedule%20a%20visit%0A3.%20Thorough%20diagnosis%20and%20upfront%20quote%0A4.%20Quality%20repair%20or%20installation%0A5.%20Clean%20up%20and%20final%20walkthrough">Our Process</button>
+                    <button class="i-button" data-type="context" data-term="Upfront Pricing" data-content="No%20surprises%20or%20hidden%20costs.%20We%20provide%20detailed%20quotes%20before%20starting%20work%20and%20stick%20to%20them.%20Any%20changes%20are%20discussed%20and%20approved%20first.">Transparent Pricing</button>
+                </div>
+            </div>
+
+            <!-- Card 5: Why Us -->
+            <div class="card hero-amber">
+                <div class="card-header">
+                    <div class="card-tag tag-amber">05 / WHY US</div>
+                    <h1 class="card-headline">Why Choose <em>Smithy's</em></h1>
+                    <p class="card-summary">15 years serving Rockingham means we know the local area, the common issues, and how to fix them fast. Dave's reputation is built on reliability, quality workmanship, and always leaving your place spotless.</p>
+                </div>
+                <div class="i-buttons">
+                    <button class="i-button" data-type="context" data-term="Local Knowledge" data-content="Born%20and%20raised%20in%20Rockingham%2C%20Dave%20knows%20the%20area%20like%20the%20back%20of%20his%20hand.%20Common%20local%20issues%2C%20council%20requirements%2C%20and%20fastest%20routes%20for%20emergency%20calls.">Rockingham Local</button>
+                    <button class="i-button" data-type="context" data-term="Quality Guarantee" data-content="All%20work%20comes%20with%20comprehensive%20warranties.%20We%20use%20quality%20parts%20and%20stand%20behind%20our%20workmanship.%20If%20something%20goes%20wrong%2C%20we%20make%20it%20right.">Quality Guaranteed</button>
+                    <button class="i-button" data-type="context" data-term="Clean and Tidy" data-content="We%20always%20lay%20drop%20sheets%2C%20wear%20shoe%20covers%2C%20and%20clean%20up%20thoroughly.%20Many%20customers%20say%20their%20place%20was%20cleaner%20after%20we%20finished%20than%20before%20we%20started.">No Mess Promise</button>
+                </div>
+            </div>
+
+            <!-- Card 6: Pricing -->
+            <div class="card hero-green">
+                <div class="card-header">
+                    <div class="card-tag tag-green">06 / PRICING</div>
+                    <h1 class="card-headline">Fair <em>Pricing</em>, No Surprises</h1>
+                    <p class="card-summary">Competitive rates for quality workmanship. We provide upfront quotes so you know exactly what you're paying before we start. No hidden costs, no surprise charges.</p>
+                    <div class="analogy-box">
+                        <div class="analogy-title">Ballpark pricing...</div>
+                        <div class="analogy-text">Service calls start around $150, tap repairs from $180, hot water installations from $1,200. Every job is different, so we provide detailed quotes after assessing your specific situation.</div>
+                    </div>
+                </div>
+                <div class="i-buttons">
+                    <button class="i-button" data-type="context" data-term="Service Call" data-content="Standard%20service%20call%20fee%20covers%20diagnosis%20and%20first%20hour%20of%20labour.%20This%20fee%20is%20often%20waived%20if%20you%20proceed%20with%20recommended%20repairs.">Service Calls</button>
+                    <button class="i-button" data-type="context" data-term="Common Repairs" data-content="Tap%20repairs%20%24180-300%2C%20toilet%20repairs%20%24200-400%2C%20drain%20clearing%20%24250-450%2C%20pipe%20repairs%20%24300-800.%20Complex%20jobs%20quoted%20individually.">Repair Pricing</button>
+                    <button class="i-button" data-type="context" data-term="Installations" data-content="Hot%20water%20systems%20from%20%241%2C200%2C%20new%20taps%20from%20%24250%2C%20toilet%20installations%20from%20%24450.%20Bathroom%20renovation%20plumbing%20quoted%20per%20project.">Installation Costs</button>
+                </div>
+            </div>
+
+            <!-- Card 7: Get Quote -->
+            <div class="card hero-green">
+                <div class="card-header">
+                    <div class="card-tag tag-green">07 / GET A QUOTE</div>
+                    <h1 class="card-headline">Get Your <em>Free Quote</em></h1>
+                    <p class="card-summary">Ready to solve your plumbing problem? Drop us a message with the details and we'll get back to you with a quote and availability. For emergencies, call Dave directly on 0412 345 678.</p>
+                </div>
+                <div class="form-container">
+                    <form id="quoteForm" action="https://api.web3forms.com/submit" method="POST">
+                        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+                        <input type="hidden" name="redirect" value="">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="name">Your Name</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="message">Describe Your Plumbing Issue</label>
+                            <textarea id="message" name="message" class="form-textarea" placeholder="Tell us about the problem, location in your home, and when you need it fixed..." required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="form-submit">Get My Free Quote</button>
+                    </form>
+                    
+                    <div class="thank-you-message" id="thankYouMessage">
+                        <h3>Thanks for your enquiry!</h3>
+                        <p>Dave will get back to you within 2 hours with a quote and availability. For urgent issues, call 0412 345 678.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="nav-button" id="prevBtn">‹</button>
+            <div class="card-counter">
+                <span id="currentCard">1</span> / <span id="totalCards">7</span>
+            </div>
+            <button class="nav-button" id="nextBtn">›</button>
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle"></div>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        class iTabs {
+            constructor() {
+                this.currentCard = 0;
+                this.totalCards = 7;
+                this.touchStartX = 0;
+                this.touchEndX = 0;
+                
+                this.init();
+            }
+
+            init() {
+                this.updateProgressBar();
+                this.updateControls();
+                this.bindEvents();
+                this.setupFormSubmission();
+            }
+
+            bindEvents() {
+                // Navigation buttons
+                document.getElementById('prevBtn').addEventListener('click', () => this.prevCard());
+                document.getElementById('nextBtn').addEventListener('click', () => this.nextCard());
+
+                // Touch events
+                const container = document.querySelector('.cards-container');
+                container.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+                container.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+
+                // Keyboard events
+                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+
+                // i-button events
+                document.querySelectorAll('.i-button').forEach(button => {
+                    button.addEventListener('click', (e) => this.handleIButtonClick(e));
+                });
+
+                // Modal events
+                document.getElementById('modalClose').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'modal') this.closeModal();
+                });
+            }
+
+            handleTouchStart(e) {
+                this.touchStartX = e.changedTouches[0].screenX;
+            }
+
+            handleTouchEnd(e) {
+                this.touchEndX = e.changedTouches[0].screenX;
+                this.handleSwipe();
+            }
+
+            handleSwipe() {
+                const swipeThreshold = 50;
+                const diff = this.touchStartX - this.touchEndX;
+
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        this.nextCard();
+                    } else {
+                        this.prevCard();
+                    }
+                }
+            }
+
+            handleKeyDown(e) {
+                switch(e.key) {
+                    case
