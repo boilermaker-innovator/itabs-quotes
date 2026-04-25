@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pete's Fencing Co - Professional Fencing Services Rockingham</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1e1e2e;
+            --text-primary: #ffffff;
+            --text-secondary: #9090b0;
+            --accent: #7c3aed;
+            --accent2: #06b6d4;
+            --i-button: #f59e0b;
+            --card-radius: 16px;
+            --transition: 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cards-track {
+            display: flex;
+            height: 100%;
+            transition: transform var(--transition);
+            width: 700%;
+        }
+
+        .card {
+            width: 100%;
+            height: 100vh;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            position: relative;
+        }
+
+        .hero-section {
+            padding: 40px 20px 30px;
+            border-radius: var(--card-radius);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .hero-default { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+        .hero-purple  { background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%); }
+        .hero-cyan    { background: linear-gradient(135deg, #164e63 0%, #0c4a6e 100%); }
+        .hero-amber   { background: linear-gradient(135deg, #78350f 0%, #431407 100%); }
+        .hero-green   { background: linear-gradient(135deg, #14532d 0%, #052e16 100%); }
+        .hero-red     { background: linear-gradient(135deg, #7f1d1d 0%, #450a0a 100%); }
+
+        .hero-default em { color: #cbd5e1; font-style: normal; }
+        .hero-purple  em { color: #a78bfa; font-style: normal; }
+        .hero-cyan    em { color: #67e8f9; font-style: normal; }
+        .hero-amber   em { color: #fcd34d; font-style: normal; }
+        .hero-green   em { color: #6ee7b7; font-style: normal; }
+        .hero-red     em { color: #fca5a5; font-style: normal; }
+
+        .card-tag {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .card-tag.tag-cyan { color: var(--accent2); }
+        .card-tag.tag-purple { color: var(--accent); }
+        .card-tag.tag-amber { color: var(--i-button); }
+        .card-tag.tag-green { color: #10b981; }
+        .card-tag.tag-red { color: #ef4444; }
+
+        .card-headline {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .card-summary {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .content-section {
+            flex: 1;
+            background: var(--bg-secondary);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .analogy-box {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .analogy-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent);
+        }
+
+        .analogy-text {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .i-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .i-button {
+            background: var(--i-button);
+            color: #000;
+            border: none;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: left;
+            position: relative;
+        }
+
+        .i-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .i-button.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .i-button-content {
+            margin-top: 12px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: none;
+        }
+
+        .i-button-content.show {
+            display: block;
+        }
+
+        .navigation {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            transition: width var(--transition);
+            z-index: 100;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .thank-you-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--bg-tertiary);
+            border-radius: var(--card-radius);
+            color: var(--text-primary);
+        }
+
+        .thank-you-message.show {
+            display: block;
+        }
+
+        .thank-you-message h3 {
+            color: #10b981;
+            margin-bottom: 16px;
+            font-size: 24px;
+        }
+
+        .services-list {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .services-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+        }
+
+        .services-list li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .process-steps {
+            list-style: none;
+            counter-reset: step-counter;
+        }
+
+        .process-steps li {
+            counter-increment: step-counter;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+            position: relative;
+            padding-left: 50px;
+        }
+
+        .process-steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        @media (max-width: 430px) {
+            .card {
+                padding: 16px;
+            }
+            .hero-section {
+                padding: 30px 16px 24px;
+            }
+            .card-headline {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <div class="progress-bar" id="progressBar"></div>
+        
+        <div class="cards-track" id="cardsTrack">
+            <!-- Card 1: About -->
+            <div class="card">
+                <div class="hero-section hero-default">
+                    <div class="card-tag">01 / ABOUT</div>
+                    <h1 class="card-headline">Your Trusted <em>Fencing</em> Specialists</h1>
+                    <p class="card-summary">Pete's Fencing Co has been protecting and beautifying Rockingham properties for years. We're your local fencing experts, delivering quality installations with honest pricing and reliable service throughout Perth's southern suburbs.</p>
+                </div>
+                <div class="content-section">
+                    <div class="i-buttons">
+                        <button class="i-button" data-type="context" data-term="Experience" data-content="Pete%20has%20over%2015%20years%20of%20fencing%20experience%20in%20Perth.%20We've%20installed%20hundreds%20of%20fences%20across%20Rockingham%2C%20Mandurah%2C%20and%20surrounding%20areas%2C%20building%20a%20reputation%20for%20quality%20workmanship%20and%20fair%20pricing.">Our Experience</button>
+                        <button class="i-button" data-type="context" data-term="Local Knowledge" data-content="As%20Rockingham%20locals%2C%20we%20understand%20Perth's%20unique%20conditions%20-%20from%20coastal%20winds%20to%20sandy%20soils.%20We%20know%20which%20materials%20work%20best%20and%20how%20to%20build%20fences%20that%20last%20in%20our%20climate.">Local Knowledge</button>
+                        <button class="i-button" data-type="context" data-term="Quality Promise" data-content="Every%20fence%20we%20install%20comes%20with%20our%20quality%20guarantee.%20We%20use%20premium%20materials%2C%20proper%20installation%20techniques%2C%20and%20stand%20behind%20our%20work%20with%20comprehensive%20warranties.">Quality Promise</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Problem -->
+            <div class="card">
+                <div class="hero-section hero-red">
+                    <div class="card-tag tag-red">02 / PROBLEM</div>
+                    <h1 class="card-headline">Tired of <em>Poor</em> Fencing Jobs?</h1>
+                    <p class="card-summary">Too many Rockingham homeowners have dealt with dodgy fencers - wonky posts, gaps under panels, cheap materials that don't last. You need proper boundaries that enhance your property value, not detract from it.</p>
+                </div>
+                <div class="content-section">
+                    <div class="i-buttons">
+                        <button class="i-button" data-type="context" data-term="Wonky Installation" data-content="We've%20seen%20it%20all%20-%20posts%20that%20lean%2C%20panels%20that%20sag%2C%20gates%20that%20won't%20close%20properly.%20Poor%20installation%20makes%20your%20property%20look%20unprofessional%20and%20can%20be%20expensive%20to%20fix%20later.">Wonky Installation</button>
+                        <button class="i-button" data-type="context" data-term="Cheap Materials" data-content="Some%20contractors%20use%20thin%20steel%2C%20poor%20quality%20timber%2C%20or%20inadequate%20footings.%20These%20shortcuts%20might%20save%20money%20upfront%20but%20cost%20you%20more%20when%20the%20fence%20fails%20prematurely.">Cheap Materials</button>
+                        <button class="i-button" data-type="context" data-term="No Communication" data-content="Nothing's%20worse%20than%20fencers%20who%20don't%20show%20up%20when%20promised%2C%20don't%20return%20calls%2C%20or%20leave%20jobs%20half-finished.%20You%20deserve%20clear%20communication%20and%20reliable%20service.">No Communication</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Services -->
+            <div class="card">
+                <div class="hero-section hero-cyan">
+                    <div class="card-tag tag-cyan">03 / SERVICES</div>
+                    <h1 class="card-headline">Complete <em>Fencing</em> Solutions</h1>
+                    <p class="card-summary">From sturdy Colorbond to beautiful timber, secure pool fencing to custom gates - we handle all your fencing needs. Every installation is tailored to your property and built to Perth standards.</p>
+                </div>
+                <div class="content-section">
+                    <ul class="services-list">
+                        <li>Colorbond Fencing - Durable steel in 22+ colours</li>
+                        <li>Timber Fencing - Jarrah, Pine, and treated options</li>
+                        <li>Pool Fencing - Glass and aluminium safety barriers</li>
+                        <li>Gate Installation - Swing and sliding gates</li>
+                        <li>Fence Repairs - Fix existing damage professionally</li>
+                    </ul>
+                    <div class="i-buttons">
+                        <button class="i-button" data-type="context" data-term="Material Choice" data-content="We'll%20help%20you%20choose%20the%20right%20material%20for%20your%20needs%20and%20budget.%20Colorbond%20for%20low%20maintenance%2C%20timber%20for%20natural%20beauty%2C%20or%20glass%20pool%20fencing%20for%20unobstructed%20views.">Material Advice</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: How It Works -->
+            <div class="card">
+                <div class="hero-section hero-purple">
+                    <div class="card-tag tag-purple">04 / HOW IT WORKS</div>
+                    <h1 class="card-headline">Our Simple <em>Process</em></h1>
+                    <p class="card-summary">Getting your perfect fence is straightforward with Pete's Fencing Co. We handle everything from initial consultation to final cleanup, keeping you informed every step of the way.</p>
+                </div>
+                <div class="content-section">
+                    <div class="analogy-box">
+                        <div class="analogy-title">Think of it like...</div>
+                        <div class="analogy-text">Building a fence is like tailoring a suit - we measure carefully, choose quality materials, and craft something that fits your property perfectly.</div>
+                    </div>
+                    <ol class="process-steps">
+                        <li><strong>Free Quote:</strong> We visit your property, discuss options, and provide detailed pricing</li>
+                        <li><strong>Planning:</strong> Finalise design, obtain permits if needed, schedule installation</li>
+                        <li><strong>Installation:</strong> Professional installation with quality materials and proper techniques</li>
+                        <li><strong>Completion:</strong> Final inspection, cleanup, and warranty documentation</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Card 5: Why Us -->
+            <div class="card">
+                <div class="hero-section hero-amber">
+                    <div class="card-tag tag-amber">05 / WHY US</div>
+                    <h1 class="card-headline">Why Choose <em>Pete's</em> Fencing?</h1>
+                    <p class="card-summary">We're not just another fencing contractor. Pete's Fencing Co combines local expertise with genuine care for quality. We build relationships, not just fences.</p>
+                </div>
+                <div class="content-section">
+                    <div class="i-buttons">
+                        <button class="i-button" data-type="context" data-term="Local & Licensed" data-content="Fully%20licensed%20and%20insured%20Perth%20contractor.%20We're%20part%20of%20the%20Rockingham%20community%20and%20our%20reputation%20depends%20on%20every%20job%20we%20do.%20You%20can%20trust%20us%20to%20do%20it%20right.">Local & Licensed</button>
+                        <button class="i-button" data-type="context" data-term="Quality Materials" data-content="We%20only%20use%20premium%20materials%20from%20trusted%20suppliers.%20BlueScope%20Colorbond%20steel%2C%20treated%20timber%2C%20and%20Australian%20-made%20hardware%20that%20stands%20up%20to%20Perth's%20conditions.">Quality Materials</button>
+                        <button class="i-button" data-type="context" data-term="Fair Pricing" data-content="No%20hidden%20costs%20or%20surprise%20extras.%20Our%20quotes%20are%20detailed%20and%20honest%2C%20and%20we%20stick%20to%20our%20prices.%20Great%20value%20doesn't%20mean%20cutting%20corners.">Fair Pricing</button>
+                        <button class="i-button" data-type="context" data-term="Reliable Service" data-content="We%20show%20up%20when%20promised%2C%20complete%20jobs%20on%20time%2C%20and%20communicate%20clearly%20throughout.%20Your%20time%20is%20valuable%20and%20we%20respect%20that.">Reliable Service</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: Pricing -->
+            <div class="card">
+                <div class="hero-section hero-green">
+                    <div class="card-tag tag-green">06 / PRICING</div>
+                    <h1 class="card-headline">Honest <em>Pricing</em> Guide</h1>
+                    <p class="card-summary">Every property is different, but here's a ballpark guide to help you budget. All prices include quality materials, professional installation, and our workmanship warranty.</p>
+                </div>
+                <div class="content-section">
+                    <div class="analogy-box">
+                        <div class="analogy-title">Think of it like...</div>
+                        <div class="analogy-text">Pricing a fence is like quoting car repairs - the final cost depends on what's needed, but we'll give you a clear breakdown so there are no surprises.</div>
+                    </div>
+                    <div class="i-buttons">
+                        <button class="i-button" data-type="context" data-term="Colorbond Fencing" data-content="From%20%24120-180%20per%20metre%20depending%20on%20height%20and%20style.%20Includes%20posts%2C%20panels%2C%20concrete%20footings%2C%20and%20professional%20installation.%20Most%20popular%20choice%20for%20Perth%20homes.">Colorbond: $120-180/m</button>
+                        <button class="i-button" data-type="context" data-term="Timber Fencing" data-content="From%20%2490-150%20per%20metre%20for%20treated%20pine%2C%20%24150-220%20for%20Jarrah.%20Includes%20all%20materials%20and%20installation.%20Perfect%20for%20gardens%20and%20traditional%20looks.">Timber: $90-220/m</button>
+                        <button class="i-button" data-type="context" data-term="Pool Fencing" data-content="Glass%20pool%20fencing%20from%20%24300-450%20per%20metre%2C%20aluminium%20from%20%24200-280%20per%20metre.%20All%20compliant%20with%20Australian%20safety%20standards%20and%20includes%20self-closing%20gates.">Pool: $200-450/m</button>
+                        <button class="i-button" data-type="context" data-term="Gates" data-content="Single%20gates%20from%20%24450-750%2C%20double%20gates%20from%20%24850-1200.%20Includes%20hinges%2C%20latches%2C%20locks%2C%20and%20professional%20installation.%20Custom%20sizes%20available.">Gates: $450-1200</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 7: Get Quote -->
+            <div class="card">
+                <div class="hero-section hero-green">
+                    <div class="card-tag tag-green">07 / GET A QUOTE</div>
+                    <h1 class="card-headline">Get Your <em>Free</em> Quote</h1>
+                    <p class="card-summary">Ready for a quality fence that enhances your Rockingham property? Get in touch today for a free, no-obligation quote. We'll visit your property and provide detailed pricing.</p>
+                </div>
+                <div class="content-section" id="formContainer">
+                    <form id="quoteForm" action="https://api.web3forms.com/submit" method="POST">
+                        <input type="hidden" name="access_key" value="99a11c15-5c61-4765-99c5-673adec64b16">
+                        <input type="hidden" name="redirect" value="">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="name">Your Name *</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="phone">Phone Number *</label>
+                            <input type="tel" id="phone" name="phone" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="message">Tell us about your fencing project</label>
+                            <textarea id="message" name="message" class="form-textarea" placeholder="Type of fencing needed, approximate length, any special requirements..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-button">Get My Free Quote</button>
+                    </form>
+                    
+                    <div class="thank-you-message" id="thankYouMessage">
+                        <h3>Thank You!</h3>
+                        <p>Your quote request has been received. Pete will contact you within 24 hours to arrange a site visit.</p>
+                        <p style="margin-top: 16px; color: var(--text-secondary);">
+                            <strong>Call direct:</strong> 0412 333 444<br>
+                            <strong>Email:</strong> pete@example.com
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation" id="navigation">
+            <div class="nav-dot active" data-card="0"></div>
+            <div class="nav-dot" data-card="1"></div>
+            <div class="nav-dot" data-card="2"></div>
+            <div class="nav-dot" data-card="3"></div>
+            <div class="nav-dot" data-card="4"></div>
+            <div class="nav-dot" data-card="5"></div>
+            <div class="nav-dot" data-card="6"></div>
+        </div>
+    </div>
+
+    <script>
+        class iTabs {
+            constructor() {
+                this.currentCard = 0;
+                this.totalCards = 7;
+                this.cardsTrack = document.getElementById('cardsTrack');
+                this.navigation = document.getElementById('navigation');
+                this.progressBar = document.getElementById('progressBar');
+                this.touchStartX = 0;
+                this.touchEndX = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupNavigation();
+                this.setupTouchHandlers();
+                this.setupKeyboardHandlers();
+                this.setupFormHandler();
+                this.setupButtons();
+                this.updateProgress();
+            }
+            
+            setupNavigation() {
+                const dots = this.navigation.querySelectorAll('.nav-dot');
+                dots.forEach((dot, index) => {
+                    dot.addEventListener('click', () => {
+                        this.goToCard(index);
+                    });
+                });
+            }
+            
+            setupTouchHandlers() {
+                this.cardsTrack.addEventListener('touchstart', (e) => {
+                    this.touchStartX = e.changedTouches[0].screenX;
+                });
+                
+                this.cardsTrack.addEventListener('touchend', (e) => {
+                    this.touchEndX = e.changedTouches[0].screenX;
+                    this.handleSwipe();
+                });
+            }
+            
+            setupKeyboardHandlers() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowLeft') {
+                        this.previousCard();
+                    } else if (e.key === 'ArrowRight') {
+                        this.nextCard();
+                    } else if (e.key === 'Escape') {
+                        this.closeAllButtons();
+                    }
+                });
+            }
+            
+            handleSwipe() {
+                const swipeThreshold = 50;
+                const diff = this.touchStartX - this.touchEndX;
+                
+                if (Math.abs(diff) > swipeThreshold) {
+                    if (diff > 0) {
+                        this.nextCard();
+                    } else {
+                        this.previousCard();
+                    }
+                }
+            }
+            
+            goToCard(index) {
+                if (index >= 0 && index < this.totalCards) {
+                    this.currentCard = index;
+                    this.cardsTrack.style.transform = `translateX(-${(100 / this.totalCards) * index}%)`;
+                    this.updateNavigation();
+                    this.updateProgress();
+                    this.closeAllButtons();
+                }
+            }
+            
+            nextCard() {
+                if (this.currentCard < this.totalCards - 1) {
+                    this.goToCard(this.currentCard + 1);
+                }
+            }
+            
+            previousCard() {
+                if (this.currentCard > 0) {
+                    this.goToCard(this.currentCard - 1);
+                }
+            }
+            
+            updateNavigation() {
+                const dots = this.navigation.querySelectorAll('.nav-dot');
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === this.currentCard);
+                });
+            }
+            
+            updateProgress() {
+                const progress = ((this.currentCard + 1) / this.totalCards) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            }
+            
+            setupButtons() {
+                const buttons = document.querySelectorAll('.i-button');
+                buttons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const content = decodeURIComponent(button.dataset.content);
+                        this.toggleButtonContent(button, content);
+                    });
+                });
+            }
+            
+            toggleButtonContent(button, content) {
+                const existingContent = button.nextElementSibling;
+                
+                if (existingContent && existingContent.classList.contains('i-button-content')) {
+                    // Toggle existing content
+                    if (existingContent.classList.contains('show')) {
+                        existingContent.classList.remove('show');
+                        button.classList.remove('active');
+                    } else {
+                        this.closeAllButtons();
+                        existingContent.classList.add('show');
+                        button.classList.add('active
