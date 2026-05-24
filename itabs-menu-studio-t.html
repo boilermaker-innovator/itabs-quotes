@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio T | Independent Hairdresser</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0d0d0d; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+  .header { position: sticky; top: 0; z-index: 100; background: #111; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+  .header-title { font-size: 17px; font-weight: 700; color: #fff; }
+  .header-sub { font-size: 12px; color: #888; margin-top: 2px; }
+  .connect-btn { background: #e91e8c; color: #fff; border: none; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .hero { position: relative; padding: 48px 20px 36px; text-align: center; border-bottom: 1px solid rgba(233,30,140,0.15); overflow: hidden; min-height: 260px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .hero-bg { position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80'); background-size: cover; background-position: center; filter: brightness(0.35); z-index: 0; }
+  .hero > * { position: relative; z-index: 1; }
+  .hero-badge { display: inline-block; background: rgba(233,30,140,0.2); border: 1px solid rgba(233,30,140,0.4); color: #e91e8c; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 14px; letter-spacing: 0.5px; }
+  .hero h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.2; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
+  .hero p { font-size: 14px; color: #ccc; margin-bottom: 24px; }
+  .book-btn { display: inline-block; background: #e91e8c; color: #fff; text-decoration: none; padding: 14px 36px; border-radius: 30px; font-size: 16px; font-weight: 700; letter-spacing: 0.3px; box-shadow: 0 4px 24px rgba(233,30,140,0.5); }
+  .tabs { display: flex; overflow-x: auto; padding: 16px 20px 0; gap: 8px; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex-shrink: 0; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); color: #888; background: transparent; transition: all 0.2s; }
+  .tab.active { background: #e91e8c; color: #fff; border-color: #e91e8c; }
+  .container { max-width: 600px; margin: 0 auto; padding: 0 16px 120px; }
+  .section { display: none; padding-top: 8px; }
+  .section.active { display: block; }
+  .section-label { font-size: 11px; font-weight: 700; color: #e91e8c; letter-spacing: 1px; text-transform: uppercase; padding: 20px 0 10px; }
+  .cat-image { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin: 16px 0 4px; display: block; }
+  .service-card { background: #161616; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .service-info { flex: 1; }
+  .service-name { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .service-desc { font-size: 13px; color: #888; margin-bottom: 6px; line-height: 1.4; }
+  .service-duration { font-size: 12px; color: #666; margin-bottom: 10px; }
+  .service-duration span { color: #e91e8c; }
+  .book-service-btn { display: inline-block; background: #e91e8c; color: #fff; text-decoration: none; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px; }
+  .service-price { font-size: 18px; font-weight: 800; color: #e91e8c; white-space: nowrap; padding-top: 2px; }
+  .footer { text-align: center; padding: 28px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .footer-zeller { font-size: 14px; color: #aaa; margin-bottom: 6px; }
+  .footer-powered { font-size: 12px; color: #555; }
+  .footer-powered a { color: #e91e8c; text-decoration: none; }
+  .footer-edit { display: inline-block; margin-top: 12px; font-size: 11px; color: #333; cursor: pointer; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; }
+  .overlay.open { display: block; }
+  .sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 600px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 24px 20px 36px; z-index: 201; transition: transform 0.3s ease; }
+  .sheet.open { transform: translateX(-50%) translateY(0); }
+  .sheet-handle { width: 36px; height: 4px; background: #444; border-radius: 2px; margin: 0 auto 20px; }
+  .sheet-title { font-size: 16px; font-weight: 700; margin-bottom: 18px; text-align: center; }
+  .sheet-action { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; text-decoration: none; color: #fff; }
+  .sheet-action:last-of-type { border-bottom: none; }
+  .sheet-icon { width: 40px; height: 40px; background: rgba(233,30,140,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .sheet-label { font-size: 15px; font-weight: 600; }
+  .sheet-sub { font-size: 12px; color: #888; }
+  .pin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300; align-items: center; justify-content: center; }
+  .pin-overlay.open { display: flex; }
+  .pin-box { background: #1a1a1a; border-radius: 16px; padding: 28px 24px; width: 280px; text-align: center; }
+  .pin-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .pin-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
+  .pin-input { width: 100%; background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 22px; text-align: center; padding: 12px; letter-spacing: 8px; margin-bottom: 14px; }
+  .pin-btn { width: 100%; background: #e91e8c; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+  .pin-cancel { font-size: 13px; color: #666; cursor: pointer; }
+  .editor-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 400; }
+  .editor-overlay.open { display: block; }
+  .editor-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 20px; max-height: 80vh; overflow-y: auto; z-index: 401; }
+  .editor-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .editor-btn { width: 100%; background: #e91e8c; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+  .editor-cancel { width: 100%; background: transparent; color: #888; border: 1px solid #333; border-radius: 10px; padding: 12px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Studio T</div>
+    <div class="header-sub">Independent Hairdresser &middot; Perth, WA</div>
+  </div>
+  <button class="connect-btn" onclick="openConnect()">Contact</button>
+</div>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">&#x2728; Available for bookings</div>
+  <h1>Your next look<br>starts here</h1>
+  <p>Professional cuts, colour &amp; treatments</p>
+  <a href="tel:0419915688" class="book-btn">&#x1F4F1; Book Now</a>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('cut', this)">Cut</div>
+  <div class="tab" onclick="showTab('colour', this)">Colour</div>
+  <div class="tab" onclick="showTab('treatment', this)">Treatment</div>
+  <div class="tab" onclick="showTab('styling', this)">Styling</div>
+</div>
+
+<div class="container">
+
+  <div id="tab-cut" class="section active">
+    <img class="cat-image" src="https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80" alt="Hair Cut">
+    <div class="section-label">Cuts</div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Women's Cut &amp; Blowdry</div>
+        <div class="service-desc">Includes wash, cut, and blowdry finish</div>
+        <div class="service-duration">&#x23F1; <span>60 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Women's%20Cut%20%26%20Blowdry%20(%2485%20%2F%2060%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$85</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Men's Cut</div>
+        <div class="service-desc">Wash, cut and style</div>
+        <div class="service-duration">&#x23F1; <span>30 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Men's%20Cut%20(%2445%20%2F%2030%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$45</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Kids Cut</div>
+        <div class="service-desc">Under 12. Wash and cut</div>
+        <div class="service-duration">&#x23F1; <span>20 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Kids%20Cut%20(%2435%20%2F%2020%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$35</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Fringe Trim</div>
+        <div class="service-desc">Quick fringe tidy-up</div>
+        <div class="service-duration">&#x23F1; <span>10 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Fringe%20Trim%20(%2415%20%2F%2010%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$15</div>
+    </div>
+  </div>
+
+  <div id="tab-colour" class="section">
+    <img class="cat-image" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80" alt="Hair Colour">
+    <div class="section-label">Colour</div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Full Colour</div>
+        <div class="service-desc">All-over colour application</div>
+        <div class="service-duration">&#x23F1; <span>90 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Full%20Colour%20(%24120%20%2F%2090%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$120</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Highlights</div>
+        <div class="service-desc">Partial or full foil highlights</div>
+        <div class="service-duration">&#x23F1; <span>120 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20Highlights%20(%24150%20%2F%20120%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$150</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Balayage</div>
+        <div class="service-desc">Hand-painted natural-looking colour</div>
+        <div class="service-duration">&#x23F1; <span>150 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Balayage%20(%24180%20%2F%20150%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$180</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Toner</div>
+        <div class="service-desc">Tone and refresh existing colour</div>
+        <div class="service-duration">&#x23F1; <span>45 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Toner%20(%2460%20%2F%2045%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$60</div>
+    </div>
+  </div>
+
+  <div id="tab-treatment" class="section">
+    <img class="cat-image" src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80" alt="Hair Treatment">
+    <div class="section-label">Treatments</div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Keratin Treatment</div>
+        <div class="service-desc">Smoothing treatment for frizz-free hair</div>
+        <div class="service-duration">&#x23F1; <span>120 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Keratin%20Treatment%20(%24200%20%2F%20120%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$200</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Deep Conditioning</div>
+        <div class="service-desc">Intensive moisture and repair mask</div>
+        <div class="service-duration">&#x23F1; <span>30 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20Deep%20Conditioning%20(%2445%20%2F%2030%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$45</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Scalp Treatment</div>
+        <div class="service-desc">Targeted scalp health treatment</div>
+        <div class="service-duration">&#x23F1; <span>45 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Scalp%20Treatment%20(%2455%20%2F%2045%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$55</div>
+    </div>
+  </div>
+
+  <div id="tab-styling" class="section">
+    <img class="cat-image" src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=600&q=80" alt="Hair Styling">
+    <div class="section-label">Styling</div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Blowdry</div>
+        <div class="service-desc">Wash and blowdry finish</div>
+        <div class="service-duration">&#x23F1; <span>45 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20a%20Blowdry%20(%2455%20%2F%2045%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$55</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Upstyle</div>
+        <div class="service-desc">Elegant updo for any occasion</div>
+        <div class="service-duration">&#x23F1; <span>60 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20an%20Upstyle%20(%2485%20%2F%2060%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$85</div>
+    </div>
+    <div class="service-card">
+      <div class="service-info">
+        <div class="service-name">Event Style</div>
+        <div class="service-desc">Full styling for weddings and special events</div>
+        <div class="service-duration">&#x23F1; <span>75 min</span></div>
+        <a class="book-service-btn" href="https://wa.me/61419915688?text=Hi!%20I'd%20like%20to%20book%20Event%20Styling%20(%2495%20%2F%2075%20min)%20-%20when%20are%20you%20available%3F" target="_blank">Book &#x1F4AC;</a>
+      </div>
+      <div class="service-price">$95</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-zeller">&#x1F4B3; Payments via Zeller</div>
+    <div class="footer-powered">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> &middot; itabs.ai</div>
+    <div class="footer-edit" onclick="openPin()">itabs &middot; edit</div>
+  </div>
+
+</div>
+
+<div class="overlay" id="connectOverlay" onclick="closeConnect()"></div>
+<div class="sheet" id="connectSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Get in touch</div>
+  <a href="tel:0419915688" class="sheet-action">
+    <div class="sheet-icon">&#x1F4DE;</div>
+    <div><div class="sheet-label">Call</div><div class="sheet-sub">0419 915 688</div></div>
+  </a>
+  <a href="https://wa.me/61419915688" class="sheet-action" target="_blank">
+    <div class="sheet-icon">&#x1F4AC;</div>
+    <div><div class="sheet-label">WhatsApp</div><div class="sheet-sub">Message Studio T</div></div>
+  </a>
+  <a href="https://instagram.com" class="sheet-action" target="_blank">
+    <div class="sheet-icon">&#x1F4F7;</div>
+    <div><div class="sheet-label">Instagram</div><div class="sheet-sub">See the work</div></div>
+  </a>
+</div>
+
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-title">Owner access</div>
+    <div class="pin-sub">Enter your 4-digit PIN</div>
+    <input class="pin-input" id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="- - - -">
+    <button class="pin-btn" onclick="checkPin()">Unlock</button>
+    <div class="pin-cancel" onclick="closePin()">Cancel</div>
+  </div>
+</div>
+
+<div class="editor-overlay" id="editorOverlay">
+  <div class="editor-sheet">
+    <div class="editor-title">Edit Services</div>
+    <div id="editorItems"></div>
+    <button class="editor-btn" onclick="saveEditor()">Save Changes</button>
+    <button class="editor-cancel" onclick="closeEditor()">Cancel</button>
+  </div>
+</div>
+
+<script>
+var CORRECT_PIN = '8688';
+function showTab(tab, el) {
+  var sections = document.querySelectorAll('.section');
+  for (var i = 0; i < sections.length; i++) { sections[i].classList.remove('active'); }
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) { tabs[i].classList.remove('active'); }
+  document.getElementById('tab-' + tab).classList.add('active');
+  el.classList.add('active');
+}
+function openConnect() { document.getElementById('connectOverlay').classList.add('open'); document.getElementById('connectSheet').classList.add('open'); }
+function closeConnect() { document.getElementById('connectOverlay').classList.remove('open'); document.getElementById('connectSheet').classList.remove('open'); }
+function openPin() { document.getElementById('pinOverlay').classList.add('open'); document.getElementById('pinInput').value = ''; }
+function closePin() { document.getElementById('pinOverlay').classList.remove('open'); }
+function checkPin() { if (document.getElementById('pinInput').value === CORRECT_PIN) { closePin(); openEditor(); } }
+function openEditor() {
+  document.getElementById('editorOverlay').classList.add('open');
+  var html = '';
+  var cards = document.querySelectorAll('.section.active .service-card');
+  for (var i = 0; i < cards.length; i++) {
+    var name = cards[i].querySelector('.service-name').textContent;
+    var price = cards[i].querySelector('.service-price').textContent.replace('$', '');
+    html += '<div style="display:flex;gap:10px;margin-bottom:12px;">';
+    html += '<input style="flex:1;background:#111;border:1px solid #333;border-radius:8px;color:#fff;padding:10px;font-size:14px;" value="' + name + '">';
+    html += '<input style="width:70px;background:#111;border:1px solid #333;border-radius:8px;color:#e91e8c;padding:10px;font-size:14px;text-align:center;" value="' + price + '">';
+    html += '</div>';
+  }
+  document.getElementById('editorItems').innerHTML = html;
+}
+function closeEditor() { document.getElementById('editorOverlay').classList.remove('open'); }
+function saveEditor() {
+  var cards = document.querySelectorAll('.section.active .service-card');
+  var inputs = document.querySelectorAll('#editorItems input[style*="flex:1"]');
+  var prices = document.querySelectorAll('#editorItems input[style*="width:70px"]');
+  for (var i = 0; i < cards.length; i++) {
+    if (inputs[i]) cards[i].querySelector('.service-name').textContent = inputs[i].value;
+    if (prices[i]) cards[i].querySelector('.service-price').textContent = '$' + prices[i].value;
+  }
+  closeEditor();
+}
+</script>
+</body>
+</html>
