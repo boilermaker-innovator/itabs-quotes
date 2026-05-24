@@ -37,9 +37,8 @@
   .container { max-width: 600px; margin: 0 auto; padding: 0 16px 140px; }
 
   /* TABS */
-  .tabs { display: flex; gap: 8px; padding: 16px 0 8px; overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn { flex-shrink: 0; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .tabs { display: flex; gap: 8px; padding: 16px 0 8px; }
+  .tab-btn { flex: 1; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 10px 4px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
   .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 
   /* CATEGORY IMAGE */
@@ -355,10 +354,10 @@ function renderCards() {
   categories.forEach(function(cat) {
     var container = document.getElementById('cards-' + cat);
     container.innerHTML = '';
-    menuData[cat].forEach(function(item) {
+    menuData[cat].forEach(function(item, i) {
       var div = document.createElement('div');
       div.className = 'service-card';
-      var inCart = cart[item.name] ? true : false;
+      var inCart = cart[cat + '-' + i] ? true : false;
       div.innerHTML =
         '<div class="service-info">' +
           '<div class="service-name">' + item.name + '</div>' +
@@ -366,8 +365,8 @@ function renderCards() {
         '</div>' +
         '<div style="display:flex;align-items:center;gap:12px;">' +
           '<div class="service-price">$' + item.price + '</div>' +
-          '<button class="add-btn' + (inCart ? ' added' : '') + '" id="btn-' + item.name.replace(/\s+/g, '-') + '" onclick="toggleService(\'' + item.name + '\',' + item.price + ',' + item.time + ')">' +
-            (inCart ? '✓ Added' : '+ Add') +
+          '<button class="add-btn' + (inCart ? ' added' : '') + '" id="btn-' + cat + '-' + i + '" onclick="toggleService(\'' + cat + '\',' + i + ')">' +
+            (inCart ? '&#10003; Added' : '+ Add') +
           '</button>' +
         '</div>';
       container.appendChild(div);
@@ -376,19 +375,21 @@ function renderCards() {
 }
 
 // ─── CART ────────────────────────────────────────────────────────────────────
-function toggleService(name, price, time) {
-  if (cart[name]) {
-    delete cart[name];
+function toggleService(cat, i) {
+  var item = menuData[cat][i];
+  var key = cat + '-' + i;
+  if (cart[key]) {
+    delete cart[key];
   } else {
-    cart[name] = { price: price, time: time };
+    cart[key] = { name: item.name, price: item.price, time: item.time };
   }
-  var btn = document.getElementById('btn-' + name.replace(/\s+/g, '-'));
+  var btn = document.getElementById('btn-' + cat + '-' + i);
   if (btn) {
-    if (cart[name]) {
-      btn.textContent = '✓ Added';
+    if (cart[key]) {
+      btn.innerHTML = '&#10003; Added';
       btn.classList.add('added');
     } else {
-      btn.textContent = '+ Add';
+      btn.innerHTML = '+ Add';
       btn.classList.remove('added');
     }
   }
@@ -433,7 +434,7 @@ function openSummary() {
   keys.forEach(function(k) {
     total += cart[k].price;
     time += cart[k].time;
-    html += '<div class="summary-item"><span>' + k + '</span><span>$' + cart[k].price + '</span></div>';
+    html += '<div class="summary-item"><span>' + cart[k].name + '</span><span>$' + cart[k].price + '</span></div>';
   });
   document.getElementById('summaryItems').innerHTML = html;
   document.getElementById('summaryTotal').textContent = '$' + total;
@@ -463,7 +464,7 @@ function sendWhatsApp() {
   keys.forEach(function(k) {
     total += cart[k].price;
     time += cart[k].time;
-    lines += '• ' + k + ' — $' + cart[k].price + '\n';
+    lines += '- ' + cart[k].name + ' — $' + cart[k].price + '\n';
   });
   lines += '\nTotal: $' + total + ' (~' + time + ' min)\n\nWhen are you available?';
   var url = 'https://wa.me/61419915688?text=' + encodeURIComponent(lines);
