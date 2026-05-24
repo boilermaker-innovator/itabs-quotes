@@ -3,455 +3,545 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Studio T | Independent Hairdresser</title>
+<title>Studio T — Hair Services</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a1a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; display: flex; justify-content: center; }
-  .phone-frame { background: #0d0d0d; width: 100%; max-width: 430px; min-height: 100vh; position: relative; box-shadow: 0 0 60px rgba(0,0,0,0.8); }
-  .header { position: sticky; top: 0; z-index: 100; background: #111; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
-  .header-title { font-size: 17px; font-weight: 700; }
-  .header-sub { font-size: 12px; color: #888; margin-top: 2px; }
-  .connect-btn { background: #e91e8c; color: #fff; border: none; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .hero { position: relative; padding: 48px 20px 36px; text-align: center; border-bottom: 1px solid rgba(233,30,140,0.15); overflow: hidden; min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .hero-bg { position: absolute; inset: 0; background-image: url('https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600&q=80'); background-size: cover; background-position: center; filter: brightness(0.35); z-index: 0; }
-  .hero > * { position: relative; z-index: 1; }
-  .hero-badge { display: inline-block; background: rgba(233,30,140,0.2); border: 1px solid rgba(233,30,140,0.4); color: #e91e8c; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 12px; }
-  .hero h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
-  .hero p { font-size: 13px; color: #ccc; }
-  .tabs { display: flex; overflow-x: auto; padding: 14px 16px 0; gap: 8px; scrollbar-width: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  :root {
+    --bg-main: #0d0d0d;
+    --bg-card: #161616;
+    --bg-sheet: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-muted: #888888;
+    --accent: #e91e8c;
+    --accent-dark: #0d0d0d;
+    --border: rgba(255,255,255,0.1);
+    --zeller-blue: #2563eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg-main); color: var(--text-primary); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  .header { position: sticky; top: 0; z-index: 100; background: rgba(13,13,13,0.95); backdrop-filter: blur(10px); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+  .header-brand { font-size: 18px; font-weight: 700; letter-spacing: 0.05em; }
+  .header-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .connect-btn { background: var(--accent); color: #fff; border: none; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  /* HERO */
+  .hero { position: relative; height: 200px; overflow: hidden; }
+  .hero-bg { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.4); }
+  .hero-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+  .hero-title { font-size: 28px; font-weight: 800; letter-spacing: 0.05em; }
+  .hero-sub { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 6px; }
+  .itabs-badge { margin-top: 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 4px 12px; font-size: 11px; color: rgba(255,255,255,0.6); }
+
+  /* CONTAINER */
+  .container { max-width: 600px; margin: 0 auto; padding: 0 16px 140px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 8px; padding: 16px 0 8px; overflow-x: auto; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab { flex-shrink: 0; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.12); color: #888; background: transparent; transition: all 0.2s; }
-  .tab.active { background: #e91e8c; color: #fff; border-color: #e91e8c; }
-  .container { max-width: 430px; margin: 0 auto; padding: 0 16px 160px; }
-  .section { display: none; padding-top: 8px; }
+  .tab-btn { flex-shrink: 0; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+  .tab-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+
+  /* CATEGORY IMAGE */
+  .category-img { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; margin: 8px 0 16px; opacity: 0.85; }
+
+  /* SERVICE CARDS */
+  .section { display: none; }
   .section.active { display: block; }
-  .section-label { font-size: 11px; font-weight: 700; color: #e91e8c; letter-spacing: 1px; text-transform: uppercase; padding: 20px 0 10px; }
-  .cat-image { width: 100%; height: 130px; object-fit: cover; border-radius: 12px; margin: 16px 0 4px; }
-  .service-card { background: #161616; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: border-color 0.2s; }
-  .service-card.selected { border-color: #e91e8c; background: #1a0d14; }
+  .service-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .service-info { flex: 1; }
-  .service-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-  .service-desc { font-size: 12px; color: #888; margin-bottom: 5px; line-height: 1.4; }
-  .service-meta { display: flex; gap: 10px; align-items: center; }
-  .service-duration { font-size: 12px; color: #666; }
-  .service-duration span { color: #e91e8c; }
-  .service-price { font-size: 15px; font-weight: 800; color: #e91e8c; }
-  .service-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-  .add-btn { background: transparent; border: 2px solid #e91e8c; color: #e91e8c; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .add-btn.added { background: #e91e8c; color: #fff; }
+  .service-name { font-size: 15px; font-weight: 600; }
+  .service-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .service-price { font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .add-btn { background: var(--accent); border: none; color: #fff; border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .add-btn.added { background: #333; color: var(--accent); }
 
-  /* Enquiry bar */
-  .enquiry-bar { display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: #111; border-top: 1px solid rgba(233,30,140,0.3); padding: 12px 16px; z-index: 150; }
+  /* ENQUIRY BAR */
+  .enquiry-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 200; background: var(--bg-sheet); border-top: 1px solid var(--border); padding: 12px 20px; display: none; }
   .enquiry-bar.active { display: block; }
-  .enquiry-summary { font-size: 12px; color: #aaa; margin-bottom: 8px; }
-  .enquiry-summary strong { color: #e91e8c; }
-  .enquiry-send { width: 100%; background: #e91e8c; color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; }
-  .enquiry-clear { display: block; text-align: center; font-size: 12px; color: #555; margin-top: 8px; cursor: pointer; }
+  .enquiry-inner { max-width: 600px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .enquiry-info { flex: 1; }
+  .enquiry-count { font-size: 13px; color: var(--text-muted); }
+  .enquiry-total { font-size: 18px; font-weight: 700; }
+  .enquiry-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .pay-btn { background: var(--zeller-blue); color: #fff; border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .pay-btn svg { width: 18px; height: 18px; fill: currentColor; }
 
-  .footer { text-align: center; padding: 28px 20px; border-top: 1px solid rgba(255,255,255,0.06); }
-  .footer-zeller { font-size: 13px; color: #aaa; margin-bottom: 6px; }
-  .footer-powered { font-size: 12px; color: #555; }
-  .footer-powered a { color: #e91e8c; text-decoration: none; }
-  .footer-edit { display: inline-block; margin-top: 12px; font-size: 11px; color: #333; cursor: pointer; }
+  /* BOTTOM SHEETS */
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 300; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .overlay.active { opacity: 1; pointer-events: all; }
+  .sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 400; background: var(--bg-sheet); border-radius: 20px 20px 0 0; padding: 24px 20px 40px; transform: translateY(100%); transition: transform 0.3s ease; max-width: 600px; margin: 0 auto; }
+  .sheet.open { transform: translateY(0); }
+  .sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+  .sheet-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
 
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; }
-  .overlay.open { display: block; }
-  .sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 430px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 24px 20px 36px; z-index: 201; transition: transform 0.3s ease; }
-  .sheet.open { transform: translateX(-50%) translateY(0); }
-  .sheet-handle { width: 36px; height: 4px; background: #444; border-radius: 2px; margin: 0 auto 20px; }
-  .sheet-title { font-size: 16px; font-weight: 700; margin-bottom: 18px; text-align: center; }
-  .sheet-action { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); text-decoration: none; color: #fff; }
-  .sheet-action:last-of-type { border-bottom: none; }
-  .sheet-icon { width: 40px; height: 40px; background: rgba(233,30,140,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .sheet-label { font-size: 15px; font-weight: 600; }
-  .sheet-sub { font-size: 12px; color: #888; }
+  /* CONNECT SHEET */
+  .contact-row { display: flex; gap: 12px; margin-bottom: 12px; }
+  .contact-btn { flex: 1; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: block; }
 
-  .pin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 300; align-items: center; justify-content: center; }
-  .pin-overlay.open { display: flex; }
-  .pin-box { background: #1a1a1a; border-radius: 16px; padding: 28px 24px; width: 280px; text-align: center; }
-  .pin-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .pin-sub { font-size: 13px; color: #888; margin-bottom: 20px; }
-  .pin-input { width: 100%; background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 22px; text-align: center; padding: 12px; letter-spacing: 8px; margin-bottom: 14px; }
-  .pin-btn { width: 100%; background: #e91e8c; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
-  .pin-cancel { font-size: 13px; color: #666; cursor: pointer; }
-  .editor-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 400; }
-  .editor-overlay.open { display: block; }
-  .editor-sheet { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: #1a1a1a; border-radius: 20px 20px 0 0; padding: 20px; max-height: 80vh; overflow-y: auto; z-index: 401; }
-  .editor-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; text-align: center; }
-  .editor-btn { width: 100%; background: #e91e8c; color: #fff; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; }
-  .editor-cancel { width: 100%; background: transparent; color: #888; border: 1px solid #333; border-radius: 10px; padding: 12px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+  /* SUMMARY SHEET */
+  .summary-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .summary-item:last-child { border-bottom: none; }
+  .summary-total { display: flex; justify-content: space-between; padding: 14px 0 0; font-size: 17px; font-weight: 700; }
+  .summary-time { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+
+  /* ZELLER PAYMENT SECTION */
+  .zeller-section { margin-top: 20px; }
+  .zeller-title { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; text-align: center; }
+  .zeller-pay-btn { width: 100%; background: var(--zeller-blue); color: #fff; border: none; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .zeller-logo { font-size: 13px; font-weight: 800; letter-spacing: -0.02em; }
+  .zeller-logo span { color: #60a5fa; }
+  .pay-divider { text-align: center; font-size: 12px; color: var(--text-muted); margin: 12px 0; }
+  .whatsapp-btn { width: 100%; background: #1a1a1a; border: 1px solid var(--border); color: var(--text-primary); border-radius: 14px; padding: 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+  /* SUCCESS POPUP */
+  .popup { position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .popup.active { opacity: 1; pointer-events: all; }
+  .popup-box { background: var(--bg-sheet); border-radius: 20px; padding: 32px 28px; text-align: center; max-width: 300px; }
+  .popup-icon { font-size: 48px; margin-bottom: 12px; }
+  .popup-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .popup-sub { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+  .popup-close { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; }
+
+  /* PIN MODAL */
+  .pin-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; }
+  .pin-modal.active { display: flex; }
+  .pin-box { background: var(--bg-sheet); border-radius: 20px; padding: 28px 24px; width: 280px; text-align: center; }
+  .pin-label { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .pin-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 10px; padding: 12px; font-size: 20px; letter-spacing: 8px; text-align: center; margin-bottom: 12px; }
+  .pin-unlock { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 12px; font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+  .pin-cancel { width: 100%; background: transparent; color: var(--text-muted); border: none; padding: 8px; font-size: 14px; cursor: pointer; }
+
+  /* EDITOR PANEL */
+  .editor-panel { position: fixed; inset: 0; z-index: 700; background: var(--bg-main); display: none; flex-direction: column; overflow-y: auto; }
+  .editor-panel.active { display: flex; }
+  .editor-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--bg-sheet); }
+  .editor-title { font-size: 18px; font-weight: 700; }
+  .editor-close { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 8px; padding: 8px 14px; font-size: 13px; cursor: pointer; }
+  .editor-body { padding: 20px; flex: 1; }
+  .editor-section { margin-bottom: 24px; }
+  .editor-section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.08em; margin-bottom: 12px; }
+  .editor-field { margin-bottom: 10px; }
+  .editor-field label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .editor-field input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+  .editor-field input:focus { outline: none; border-color: var(--accent); }
+  .zeller-link-field { background: var(--bg-card); border: 1px solid var(--zeller-blue); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .zeller-link-label { font-size: 12px; color: #60a5fa; margin-bottom: 6px; font-weight: 600; }
+  .zeller-link-input { width: 100%; background: transparent; border: none; color: var(--text-primary); font-size: 13px; outline: none; }
+  .zeller-link-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .editor-save { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 14px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+
+  /* FOOTER */
+  .footer { text-align: center; padding: 20px; font-size: 11px; color: var(--text-muted); border-top: 1px solid var(--border); }
+  .footer a { color: var(--text-muted); text-decoration: none; }
+  .zeller-footer { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; font-size: 12px; color: var(--text-muted); }
+  .zeller-footer-badge { background: var(--zeller-blue); color: #fff; border-radius: 4px; padding: 2px 7px; font-size: 11px; font-weight: 800; letter-spacing: -0.02em; }
 </style>
 </head>
 <body>
-<div class="phone-frame">
 
+<!-- HEADER -->
 <div class="header">
   <div>
-    <div class="header-title">Studio T</div>
-    <div class="header-sub">Independent Hairdresser &middot; Perth, WA</div>
+    <div class="header-brand">STUDIO T</div>
+    <div class="header-sub">Hair Services · Kensington</div>
   </div>
   <button class="connect-btn" onclick="openConnect()">Contact</button>
 </div>
 
+<!-- HERO -->
 <div class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-badge">&#x2728; Available for bookings</div>
-  <h1>Your next look<br>starts here</h1>
-  <p>Select services below to make an enquiry</p>
+  <img class="hero-bg" src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80" alt="Salon">
+  <div class="hero-overlay">
+    <div class="hero-title">STUDIO T</div>
+    <div class="hero-sub">Professional Hair Services</div>
+    <div class="itabs-badge">Powered by iTabs</div>
+  </div>
 </div>
 
-<div class="tabs">
-  <div class="tab active" onclick="showTab('cut', this)">Cut</div>
-  <div class="tab" onclick="showTab('colour', this)">Colour</div>
-  <div class="tab" onclick="showTab('treatment', this)">Treatment</div>
-  <div class="tab" onclick="showTab('styling', this)">Styling</div>
-</div>
-
+<!-- CONTAINER -->
 <div class="container">
 
-  <div id="tab-cut" class="section active">
-    <img class="cat-image" src="https://images.unsplash.com/photo-1562322140-8baeececf3df?w=600&q=80" alt="Cut">
-    <div class="section-label">Cuts</div>
-    <div class="service-card" id="card-wcut">
-      <div class="service-info">
-        <div class="service-name">Women's Cut &amp; Blowdry</div>
-        <div class="service-desc">Includes wash, cut, and blowdry finish</div>
-        <div class="service-meta">
-          <div class="service-duration">&#x23F1; <span>60 min</span></div>
-        </div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$85</div>
-        <button class="add-btn" onclick="toggleService(this, 'wcut', 'Women\'s Cut & Blowdry', 85, 60)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-mcut">
-      <div class="service-info">
-        <div class="service-name">Men's Cut</div>
-        <div class="service-desc">Wash, cut and style</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>30 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$45</div>
-        <button class="add-btn" onclick="toggleService(this, 'mcut', 'Men\'s Cut', 45, 30)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-kcut">
-      <div class="service-info">
-        <div class="service-name">Kids Cut</div>
-        <div class="service-desc">Under 12. Wash and cut</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>20 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$35</div>
-        <button class="add-btn" onclick="toggleService(this, 'kcut', 'Kids Cut', 35, 20)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-fring">
-      <div class="service-info">
-        <div class="service-name">Fringe Trim</div>
-        <div class="service-desc">Quick fringe tidy-up</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>10 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$15</div>
-        <button class="add-btn" onclick="toggleService(this, 'fring', 'Fringe Trim', 15, 10)">+ Add</button>
-      </div>
-    </div>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('cut', this)">✂️ Cut</button>
+    <button class="tab-btn" onclick="switchTab('colour', this)">🎨 Colour</button>
+    <button class="tab-btn" onclick="switchTab('treatment', this)">✨ Treatment</button>
+    <button class="tab-btn" onclick="switchTab('styling', this)">💫 Styling</button>
   </div>
 
-  <div id="tab-colour" class="section">
-    <img class="cat-image" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80" alt="Colour">
-    <div class="section-label">Colour</div>
-    <div class="service-card" id="card-fcol">
-      <div class="service-info">
-        <div class="service-name">Full Colour</div>
-        <div class="service-desc">All-over colour application</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>90 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$120</div>
-        <button class="add-btn" onclick="toggleService(this, 'fcol', 'Full Colour', 120, 90)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-high">
-      <div class="service-info">
-        <div class="service-name">Highlights</div>
-        <div class="service-desc">Partial or full foil highlights</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>120 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$150</div>
-        <button class="add-btn" onclick="toggleService(this, 'high', 'Highlights', 150, 120)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-bala">
-      <div class="service-info">
-        <div class="service-name">Balayage</div>
-        <div class="service-desc">Hand-painted natural-looking colour</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>150 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$180</div>
-        <button class="add-btn" onclick="toggleService(this, 'bala', 'Balayage', 180, 150)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-tone">
-      <div class="service-info">
-        <div class="service-name">Toner</div>
-        <div class="service-desc">Tone and refresh existing colour</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>45 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$60</div>
-        <button class="add-btn" onclick="toggleService(this, 'tone', 'Toner', 60, 45)">+ Add</button>
-      </div>
-    </div>
+  <!-- CUT -->
+  <div class="section active" id="section-cut">
+    <img class="category-img" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&q=80" alt="Cut">
+    <div id="cards-cut"></div>
   </div>
 
-  <div id="tab-treatment" class="section">
-    <img class="cat-image" src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600&q=80" alt="Treatment">
-    <div class="section-label">Treatments</div>
-    <div class="service-card" id="card-kera">
-      <div class="service-info">
-        <div class="service-name">Keratin Treatment</div>
-        <div class="service-desc">Smoothing treatment for frizz-free hair</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>120 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$200</div>
-        <button class="add-btn" onclick="toggleService(this, 'kera', 'Keratin Treatment', 200, 120)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-deep">
-      <div class="service-info">
-        <div class="service-name">Deep Conditioning</div>
-        <div class="service-desc">Intensive moisture and repair mask</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>30 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$45</div>
-        <button class="add-btn" onclick="toggleService(this, 'deep', 'Deep Conditioning', 45, 30)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-scal">
-      <div class="service-info">
-        <div class="service-name">Scalp Treatment</div>
-        <div class="service-desc">Targeted scalp health treatment</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>45 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$55</div>
-        <button class="add-btn" onclick="toggleService(this, 'scal', 'Scalp Treatment', 55, 45)">+ Add</button>
-      </div>
-    </div>
+  <!-- COLOUR -->
+  <div class="section" id="section-colour">
+    <img class="category-img" src="https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?w=800&q=80" alt="Colour">
+    <div id="cards-colour"></div>
   </div>
 
-  <div id="tab-styling" class="section">
-    <img class="cat-image" src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=600&q=80" alt="Styling">
-    <div class="section-label">Styling</div>
-    <div class="service-card" id="card-blow">
-      <div class="service-info">
-        <div class="service-name">Blowdry</div>
-        <div class="service-desc">Wash and blowdry finish</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>45 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$55</div>
-        <button class="add-btn" onclick="toggleService(this, 'blow', 'Blowdry', 55, 45)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-upst">
-      <div class="service-info">
-        <div class="service-name">Upstyle</div>
-        <div class="service-desc">Elegant updo for any occasion</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>60 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$85</div>
-        <button class="add-btn" onclick="toggleService(this, 'upst', 'Upstyle', 85, 60)">+ Add</button>
-      </div>
-    </div>
-    <div class="service-card" id="card-evnt">
-      <div class="service-info">
-        <div class="service-name">Event Style</div>
-        <div class="service-desc">Full styling for weddings and special events</div>
-        <div class="service-meta"><div class="service-duration">&#x23F1; <span>75 min</span></div></div>
-      </div>
-      <div class="service-right">
-        <div class="service-price">$95</div>
-        <button class="add-btn" onclick="toggleService(this, 'evnt', 'Event Style', 95, 75)">+ Add</button>
-      </div>
-    </div>
+  <!-- TREATMENT -->
+  <div class="section" id="section-treatment">
+    <img class="category-img" src="https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&q=80" alt="Treatment">
+    <div id="cards-treatment"></div>
   </div>
 
+  <!-- STYLING -->
+  <div class="section" id="section-styling">
+    <img class="category-img" src="https://images.unsplash.com/photo-1607008829749-660a90cc0e60?w=800&q=80" alt="Styling">
+    <div id="cards-styling"></div>
+  </div>
+
+  <!-- FOOTER -->
   <div class="footer">
-    <div class="footer-zeller">&#x1F4B3; Payments via Zeller</div>
-    <div class="footer-powered">Powered by <a href="https://itabs.ai" target="_blank">iTabs</a> &middot; itabs.ai</div>
-    <div class="footer-edit" onclick="openPin()">itabs &middot; edit</div>
+    <div class="zeller-footer">
+      Payments via <span class="zeller-footer-badge">zeller</span>
+    </div>
+    <a href="https://itabs.ai" target="_blank">Powered by iTabs · itabs.ai</a>
+    &nbsp;·&nbsp;
+    <a href="#" onclick="openPinModal(); return false;">edit</a>
   </div>
-
 </div>
 
-<!-- Enquiry Bar -->
+<!-- ENQUIRY BAR -->
 <div class="enquiry-bar" id="enquiryBar">
-  <div class="enquiry-summary" id="enquirySummary"></div>
-  <button class="enquiry-send" onclick="sendEnquiry()">&#x1F4AC; Send Enquiry via WhatsApp</button>
-  <span class="enquiry-clear" onclick="clearAll()">Clear selection</span>
+  <div class="enquiry-inner">
+    <div class="enquiry-info">
+      <div class="enquiry-count" id="enquiryCount">0 services</div>
+      <div class="enquiry-total" id="enquiryTotal">$0</div>
+      <div class="enquiry-time" id="enquiryTime"></div>
+    </div>
+    <button class="pay-btn" onclick="openSummary()">
+      <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+      Pay
+    </button>
+  </div>
 </div>
 
-<!-- Connect Sheet -->
-<div class="overlay" id="connectOverlay" onclick="closeConnect()"></div>
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- CONNECT SHEET -->
 <div class="sheet" id="connectSheet">
   <div class="sheet-handle"></div>
-  <div class="sheet-title">Get in touch</div>
-  <a href="tel:0419915688" class="sheet-action">
-    <div class="sheet-icon">&#x1F4DE;</div>
-    <div><div class="sheet-label">Call</div><div class="sheet-sub">0419 915 688</div></div>
-  </a>
-  <a href="https://wa.me/61419915688" class="sheet-action" target="_blank">
-    <div class="sheet-icon">&#x1F4AC;</div>
-    <div><div class="sheet-label">WhatsApp</div><div class="sheet-sub">Message Studio T</div></div>
-  </a>
-  <a href="https://instagram.com" class="sheet-action" target="_blank">
-    <div class="sheet-icon">&#x1F4F7;</div>
-    <div><div class="sheet-label">Instagram</div><div class="sheet-sub">See the work</div></div>
-  </a>
+  <div class="sheet-title">Contact Studio T</div>
+  <div class="contact-row">
+    <a class="contact-btn" href="tel:0419915688">📞 Call</a>
+    <a class="contact-btn" href="https://wa.me/61419915688" target="_blank">💬 WhatsApp</a>
+  </div>
+  <a class="contact-btn" href="https://instagram.com/studiot" target="_blank" style="text-align:center; display:block; margin-bottom:12px;">📸 Instagram</a>
 </div>
 
-<!-- PIN Modal -->
-<div class="pin-overlay" id="pinOverlay">
+<!-- SUMMARY SHEET -->
+<div class="sheet" id="summarySheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Your Selection</div>
+  <div id="summaryItems"></div>
+  <div class="summary-total">
+    <span>Total</span>
+    <span id="summaryTotal">$0</span>
+  </div>
+  <div class="summary-time" id="summaryTime"></div>
+
+  <div class="zeller-section">
+    <div class="zeller-title">How would you like to proceed?</div>
+    <button class="zeller-pay-btn" onclick="payWithZeller()">
+      <span class="zeller-logo">zel<span>ler</span></span>
+      Pay with Zeller
+    </button>
+    <div class="pay-divider">or</div>
+    <button class="whatsapp-btn" onclick="sendWhatsApp()">💬 Send enquiry via WhatsApp</button>
+  </div>
+</div>
+
+<!-- SUCCESS POPUP -->
+<div class="popup" id="successPopup">
+  <div class="popup-box">
+    <div class="popup-icon">✅</div>
+    <div class="popup-title">All Done!</div>
+    <div class="popup-sub" id="popupSub">Your enquiry has been sent.</div>
+    <button class="popup-close" onclick="closePopup()">Done</button>
+  </div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="pin-modal" id="pinModal">
   <div class="pin-box">
-    <div class="pin-title">Owner access</div>
-    <div class="pin-sub">Enter your 4-digit PIN</div>
-    <input class="pin-input" id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="- - - -">
-    <button class="pin-btn" onclick="checkPin()">Unlock</button>
-    <div class="pin-cancel" onclick="closePin()">Cancel</div>
+    <div class="pin-label">Owner Access</div>
+    <input class="pin-input" type="password" id="pinInput" maxlength="4" placeholder="••••">
+    <button class="pin-unlock" onclick="checkPin()">Unlock</button>
+    <button class="pin-cancel" onclick="closePinModal()">Cancel</button>
   </div>
 </div>
 
-<!-- Editor -->
-<div class="editor-overlay" id="editorOverlay">
-  <div class="editor-sheet">
-    <div class="editor-title">Edit Services</div>
-    <div id="editorItems"></div>
-    <button class="editor-btn" onclick="saveEditor()">Save Changes</button>
-    <button class="editor-cancel" onclick="closeEditor()">Cancel</button>
+<!-- EDITOR PANEL -->
+<div class="editor-panel" id="editorPanel">
+  <div class="editor-header">
+    <div class="editor-title">Edit Studio T</div>
+    <button class="editor-close" onclick="closeEditor()">Done</button>
+  </div>
+  <div class="editor-body">
+
+    <div class="editor-section">
+      <div class="editor-section-title">💙 Zeller Payment Link</div>
+      <div class="zeller-link-field">
+        <div class="zeller-link-label">Your Zeller Payment Link</div>
+        <input class="zeller-link-input" type="url" id="editorZellerLink" placeholder="https://pay.myzeller.com/your-link">
+        <div class="zeller-link-hint">Get this from your Zeller dashboard → Payment Links. Customers tap "Pay with Zeller" and go straight here.</div>
+      </div>
+    </div>
+
+    <div class="editor-section">
+      <div class="editor-section-title">✂️ Cut</div>
+      <div id="editor-cut"></div>
+    </div>
+    <div class="editor-section">
+      <div class="editor-section-title">🎨 Colour</div>
+      <div id="editor-colour"></div>
+    </div>
+    <div class="editor-section">
+      <div class="editor-section-title">✨ Treatment</div>
+      <div id="editor-treatment"></div>
+    </div>
+    <div class="editor-section">
+      <div class="editor-section-title">💫 Styling</div>
+      <div id="editor-styling"></div>
+    </div>
+
+    <button class="editor-save" onclick="saveEditor()">Save Changes</button>
   </div>
 </div>
-
-</div><!-- end phone-frame -->
 
 <script>
-var CORRECT_PIN = '8688';
-var selected = {};
+// ─── DATA ───────────────────────────────────────────────────────────────────
+var defaultMenu = {
+  zellerLink: 'https://pay.myzeller.com/studiot',
+  cut: [
+    { name: "Women's Cut & Blowdry", price: 85, time: 60 },
+    { name: "Men's Cut", price: 45, time: 30 },
+    { name: "Kids Cut", price: 35, time: 20 },
+    { name: "Fringe Trim", price: 15, time: 10 }
+  ],
+  colour: [
+    { name: "Full Colour", price: 120, time: 90 },
+    { name: "Highlights", price: 150, time: 120 },
+    { name: "Balayage", price: 180, time: 150 },
+    { name: "Toner", price: 60, time: 45 }
+  ],
+  treatment: [
+    { name: "Keratin", price: 200, time: 120 },
+    { name: "Deep Conditioning", price: 45, time: 30 },
+    { name: "Scalp Treatment", price: 55, time: 45 }
+  ],
+  styling: [
+    { name: "Blowdry", price: 55, time: 45 },
+    { name: "Upstyle", price: 85, time: 60 },
+    { name: "Event Style", price: 95, time: 75 }
+  ]
+};
 
-function toggleService(btn, id, name, price, mins) {
-  var card = document.getElementById('card-' + id);
-  if (selected[id]) {
-    delete selected[id];
-    btn.textContent = '+ Add';
-    btn.classList.remove('added');
-    card.classList.remove('selected');
+var saved = localStorage.getItem('menu-studio-t');
+var menuData = saved ? JSON.parse(saved) : defaultMenu;
+if (!menuData.zellerLink) menuData.zellerLink = defaultMenu.zellerLink;
+
+var cart = {};
+var PIN = '8688';
+
+// ─── RENDER ─────────────────────────────────────────────────────────────────
+function renderCards() {
+  var categories = ['cut', 'colour', 'treatment', 'styling'];
+  categories.forEach(function(cat) {
+    var container = document.getElementById('cards-' + cat);
+    container.innerHTML = '';
+    menuData[cat].forEach(function(item) {
+      var div = document.createElement('div');
+      div.className = 'service-card';
+      var inCart = cart[item.name] ? true : false;
+      div.innerHTML =
+        '<div class="service-info">' +
+          '<div class="service-name">' + item.name + '</div>' +
+          '<div class="service-meta">' + item.time + ' min</div>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<div class="service-price">$' + item.price + '</div>' +
+          '<button class="add-btn' + (inCart ? ' added' : '') + '" id="btn-' + item.name.replace(/\s+/g, '-') + '" onclick="toggleService(\'' + item.name + '\',' + item.price + ',' + item.time + ')">' +
+            (inCart ? '✓ Added' : '+ Add') +
+          '</button>' +
+        '</div>';
+      container.appendChild(div);
+    });
+  });
+}
+
+// ─── CART ────────────────────────────────────────────────────────────────────
+function toggleService(name, price, time) {
+  if (cart[name]) {
+    delete cart[name];
   } else {
-    selected[id] = { name: name, price: price, mins: mins };
-    btn.textContent = '&#x2713; Added';
-    btn.innerHTML = '&#x2713; Added';
-    btn.classList.add('added');
-    card.classList.add('selected');
+    cart[name] = { price: price, time: time };
   }
-  updateEnquiryBar();
-}
-
-function updateEnquiryBar() {
-  var keys = Object.keys(selected);
-  var bar = document.getElementById('enquiryBar');
-  var summary = document.getElementById('enquirySummary');
-  if (keys.length === 0) {
-    bar.classList.remove('active');
-    return;
-  }
-  bar.classList.add('active');
-  var total = 0;
-  var mins = 0;
-  for (var i = 0; i < keys.length; i++) {
-    total += selected[keys[i]].price;
-    mins += selected[keys[i]].mins;
-  }
-  summary.innerHTML = '<strong>' + keys.length + ' service' + (keys.length > 1 ? 's' : '') + ' selected</strong> &middot; Est. $' + total + ' &middot; ~' + mins + ' min';
-}
-
-function sendEnquiry() {
-  var keys = Object.keys(selected);
-  if (keys.length === 0) return;
-  var msg = 'Hi! I\'d like to book the following services with Studio T:\n\n';
-  var total = 0;
-  var mins = 0;
-  for (var i = 0; i < keys.length; i++) {
-    var s = selected[keys[i]];
-    msg += '- ' + s.name + ' ($' + s.price + ' / ' + s.mins + ' min)\n';
-    total += s.price;
-    mins += s.mins;
-  }
-  msg += '\nEstimated total: $' + total + ' (~' + mins + ' min)\n\nWhen are you available?';
-  var encoded = encodeURIComponent(msg);
-  window.open('https://wa.me/61419915688?text=' + encoded, '_blank');
-}
-
-function clearAll() {
-  var keys = Object.keys(selected);
-  for (var i = 0; i < keys.length; i++) {
-    var card = document.getElementById('card-' + keys[i]);
-    if (card) {
-      card.classList.remove('selected');
-      var btn = card.querySelector('.add-btn');
-      if (btn) { btn.textContent = '+ Add'; btn.classList.remove('added'); }
+  var btn = document.getElementById('btn-' + name.replace(/\s+/g, '-'));
+  if (btn) {
+    if (cart[name]) {
+      btn.textContent = '✓ Added';
+      btn.classList.add('added');
+    } else {
+      btn.textContent = '+ Add';
+      btn.classList.remove('added');
     }
   }
-  selected = {};
-  updateEnquiryBar();
+  updateBar();
 }
 
-function showTab(tab, el) {
-  var sections = document.querySelectorAll('.section');
-  for (var i = 0; i < sections.length; i++) { sections[i].classList.remove('active'); }
-  var tabs = document.querySelectorAll('.tab');
-  for (var i = 0; i < tabs.length; i++) { tabs[i].classList.remove('active'); }
-  document.getElementById('tab-' + tab).classList.add('active');
-  el.classList.add('active');
+function updateBar() {
+  var keys = Object.keys(cart);
+  var total = 0;
+  var time = 0;
+  keys.forEach(function(k) { total += cart[k].price; time += cart[k].time; });
+  var bar = document.getElementById('enquiryBar');
+  if (keys.length > 0) {
+    bar.classList.add('active');
+    document.getElementById('enquiryCount').textContent = keys.length + ' service' + (keys.length > 1 ? 's' : '');
+    document.getElementById('enquiryTotal').textContent = '$' + total;
+    document.getElementById('enquiryTime').textContent = '~' + time + ' min';
+  } else {
+    bar.classList.remove('active');
+  }
 }
 
-function openConnect() { document.getElementById('connectOverlay').classList.add('open'); document.getElementById('connectSheet').classList.add('open'); }
-function closeConnect() { document.getElementById('connectOverlay').classList.remove('open'); document.getElementById('connectSheet').classList.remove('open'); }
-function openPin() { document.getElementById('pinOverlay').classList.add('open'); document.getElementById('pinInput').value = ''; }
-function closePin() { document.getElementById('pinOverlay').classList.remove('open'); }
-function checkPin() { if (document.getElementById('pinInput').value === CORRECT_PIN) { closePin(); openEditor(); } }
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(cat, btn) {
+  document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('section-' + cat).classList.add('active');
+  btn.classList.add('active');
+}
 
-function openEditor() {
-  document.getElementById('editorOverlay').classList.add('open');
+// ─── SHEETS ─────────────────────────────────────────────────────────────────
+function openConnect() {
+  document.getElementById('overlay').classList.add('active');
+  document.getElementById('connectSheet').classList.add('open');
+}
+
+function openSummary() {
+  var keys = Object.keys(cart);
+  var total = 0;
+  var time = 0;
   var html = '';
-  var cards = document.querySelectorAll('.section.active .service-card');
-  for (var i = 0; i < cards.length; i++) {
-    var name = cards[i].querySelector('.service-name').textContent;
-    var price = cards[i].querySelector('.service-price').textContent.replace('$', '');
-    html += '<div style="display:flex;gap:10px;margin-bottom:12px;">';
-    html += '<input style="flex:1;background:#111;border:1px solid #333;border-radius:8px;color:#fff;padding:10px;font-size:14px;" value="' + name + '">';
-    html += '<input style="width:70px;background:#111;border:1px solid #333;border-radius:8px;color:#e91e8c;padding:10px;font-size:14px;text-align:center;" value="' + price + '">';
-    html += '</div>';
-  }
-  document.getElementById('editorItems').innerHTML = html;
+  keys.forEach(function(k) {
+    total += cart[k].price;
+    time += cart[k].time;
+    html += '<div class="summary-item"><span>' + k + '</span><span>$' + cart[k].price + '</span></div>';
+  });
+  document.getElementById('summaryItems').innerHTML = html;
+  document.getElementById('summaryTotal').textContent = '$' + total;
+  document.getElementById('summaryTime').textContent = 'Estimated time: ~' + time + ' minutes';
+  document.getElementById('overlay').classList.add('active');
+  document.getElementById('summarySheet').classList.add('open');
 }
-function closeEditor() { document.getElementById('editorOverlay').classList.remove('open'); }
-function saveEditor() {
-  var cards = document.querySelectorAll('.section.active .service-card');
-  var inputs = document.querySelectorAll('#editorItems input[style*="flex:1"]');
-  var prices = document.querySelectorAll('#editorItems input[style*="width:70px"]');
-  for (var i = 0; i < cards.length; i++) {
-    if (inputs[i]) cards[i].querySelector('.service-name').textContent = inputs[i].value;
-    if (prices[i]) cards[i].querySelector('.service-price').textContent = '$' + prices[i].value;
+
+function closeAll() {
+  document.getElementById('overlay').classList.remove('active');
+  document.querySelectorAll('.sheet').forEach(function(s) { s.classList.remove('open'); });
+}
+
+// ─── ZELLER PAYMENT ──────────────────────────────────────────────────────────
+function payWithZeller() {
+  var link = menuData.zellerLink || 'https://pay.myzeller.com/studiot';
+  closeAll();
+  window.open(link, '_blank');
+}
+
+// ─── WHATSAPP FALLBACK ───────────────────────────────────────────────────────
+function sendWhatsApp() {
+  var keys = Object.keys(cart);
+  var total = 0;
+  var time = 0;
+  var lines = 'Hi Tina! I would like to book the following services:\n\n';
+  keys.forEach(function(k) {
+    total += cart[k].price;
+    time += cart[k].time;
+    lines += '• ' + k + ' — $' + cart[k].price + '\n';
+  });
+  lines += '\nTotal: $' + total + ' (~' + time + ' min)\n\nWhen are you available?';
+  var url = 'https://wa.me/61419915688?text=' + encodeURIComponent(lines);
+  closeAll();
+  window.open(url, '_blank');
+  document.getElementById('successPopup').classList.add('active');
+  document.getElementById('popupSub').textContent = 'Your enquiry has been sent to Tina.';
+}
+
+// ─── POPUP ───────────────────────────────────────────────────────────────────
+function closePopup() {
+  document.getElementById('successPopup').classList.remove('active');
+  cart = {};
+  renderCards();
+  updateBar();
+}
+
+// ─── PIN ─────────────────────────────────────────────────────────────────────
+function openPinModal() { document.getElementById('pinModal').classList.add('active'); }
+function closePinModal() {
+  document.getElementById('pinModal').classList.remove('active');
+  document.getElementById('pinInput').value = '';
+}
+function checkPin() {
+  if (document.getElementById('pinInput').value === PIN) {
+    closePinModal();
+    openEditor();
+  } else {
+    document.getElementById('pinInput').value = '';
   }
+}
+
+// ─── EDITOR ──────────────────────────────────────────────────────────────────
+function openEditor() {
+  document.getElementById('editorZellerLink').value = menuData.zellerLink || '';
+  var categories = ['cut', 'colour', 'treatment', 'styling'];
+  categories.forEach(function(cat) {
+    var container = document.getElementById('editor-' + cat);
+    container.innerHTML = '';
+    menuData[cat].forEach(function(item, i) {
+      var div = document.createElement('div');
+      div.style.marginBottom = '10px';
+      div.innerHTML =
+        '<div class="editor-field"><label>Service name</label><input type="text" id="ed-' + cat + '-name-' + i + '" value="' + item.name + '"></div>' +
+        '<div style="display:flex;gap:8px;">' +
+          '<div class="editor-field" style="flex:1"><label>Price ($)</label><input type="number" id="ed-' + cat + '-price-' + i + '" value="' + item.price + '"></div>' +
+          '<div class="editor-field" style="flex:1"><label>Time (min)</label><input type="number" id="ed-' + cat + '-time-' + i + '" value="' + item.time + '"></div>' +
+        '</div>';
+      container.appendChild(div);
+    });
+  });
+  document.getElementById('editorPanel').classList.add('active');
+}
+
+function closeEditor() { document.getElementById('editorPanel').classList.remove('active'); }
+
+function saveEditor() {
+  menuData.zellerLink = document.getElementById('editorZellerLink').value.trim() || defaultMenu.zellerLink;
+  var categories = ['cut', 'colour', 'treatment', 'styling'];
+  categories.forEach(function(cat) {
+    menuData[cat].forEach(function(item, i) {
+      var nameEl = document.getElementById('ed-' + cat + '-name-' + i);
+      var priceEl = document.getElementById('ed-' + cat + '-price-' + i);
+      var timeEl = document.getElementById('ed-' + cat + '-time-' + i);
+      if (nameEl) item.name = nameEl.value;
+      if (priceEl) item.price = parseFloat(priceEl.value) || item.price;
+      if (timeEl) item.time = parseInt(timeEl.value) || item.time;
+    });
+  });
+  localStorage.setItem('menu-studio-t', JSON.stringify(menuData));
+  cart = {};
+  renderCards();
+  updateBar();
   closeEditor();
 }
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+renderCards();
 </script>
 </body>
 </html>
