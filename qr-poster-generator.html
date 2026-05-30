@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>QR Poster Maker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.tagline {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 6px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 15px;
+  margin-bottom: 14px;
+  outline: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus { border-color: #1a1a1a; }
+
+.color-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.swatch.active { border-color: #1a1a1a; transform: scale(1.1); }
+
+.btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 10px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active { transform: scale(0.98); opacity: 0.85; }
+.btn-generate { background: #1a1a1a; color: #fff; }
+.btn-save { background: #2563eb; color: #fff; display: none; }
+.btn-email { background: #16a34a; color: #fff; display: none; }
+
+.preview-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Poster — fixed proportions, scales to screen */
+.poster-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+#poster {
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 210 / 297;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.p-header {
+  padding: 24px 20px 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.p-eyebrow {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 6px;
+}
+
+.p-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.5px;
+  line-height: 1.1;
+  font-family: Georgia, serif;
+}
+
+.p-subtitle {
+  font-size: 11px;
+  color: rgba(255,255,255,0.85);
+  margin-top: 6px;
+}
+
+.p-body {
+  flex: 1;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+}
+
+.p-scan {
+  font-size: 9px;
+  color: #aaa;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.p-qr-border {
+  padding: 8px;
+  border-radius: 8px;
+  border-width: 3px;
+  border-style: solid;
+}
+
+.p-or {
+  font-size: 9px;
+  color: #aaa;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 10px 0 4px;
+}
+
+.p-url {
+  font-size: 10px;
+  font-weight: 700;
+  word-break: break-all;
+  text-align: center;
+}
+
+.p-footer {
+  padding: 12px 20px;
+  background: #1a1a1a;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.p-cta {
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.p-ctasub {
+  font-size: 9px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 3px;
+}
+
+.hint {
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  margin-bottom: 8px;
+}
+</style>
+</head>
+<body>
+
+<h1>QR Poster Maker</h1>
+<p class="tagline">Fill in, generate, save image, email to print shop.</p>
+
+<div class="card">
+  <label>Business / Stall name</label>
+  <input type="text" id="bizName" placeholder="e.g. Dragon Bowl" />
+
+  <label>Subtitle</label>
+  <input type="text" id="subtitle" placeholder="e.g. Fresh Asian Street Food" />
+
+  <label>Top line (stall number etc.)</label>
+  <input type="text" id="eyebrow" placeholder="e.g. Food Court · Stall 12" />
+
+  <label>Menu URL</label>
+  <input type="text" id="menuUrl" placeholder="https://itabs.ai/menu/..." />
+
+  <label>Call to action</label>
+  <input type="text" id="cta" placeholder="Order from your phone" />
+
+  <label>Sub line</label>
+  <input type="text" id="ctaSub" placeholder="No app needed · Pay at counter" />
+
+  <label>Accent colour</label>
+  <div class="color-row">
+    <div class="swatch active" style="background:#E53935" onclick="setColor(this,'#E53935')"></div>
+    <div class="swatch" style="background:#FB8C00" onclick="setColor(this,'#FB8C00')"></div>
+    <div class="swatch" style="background:#43A047" onclick="setColor(this,'#43A047')"></div>
+    <div class="swatch" style="background:#1E88E5" onclick="setColor(this,'#1E88E5')"></div>
+    <div class="swatch" style="background:#8E24AA" onclick="setColor(this,'#8E24AA')"></div>
+    <div class="swatch" style="background:#00897B" onclick="setColor(this,'#00897B')"></div>
+    <div class="swatch" style="background:#1a1a1a" onclick="setColor(this,'#1a1a1a')"></div>
+  </div>
+</div>
+
+<button class="btn btn-generate" onclick="generatePoster()">Generate poster</button>
+
+<div class="preview-label" id="previewLabel" style="display:none;">Preview</div>
+<div class="poster-wrap">
+  <div id="poster" style="display:none;">
+    <div class="p-header" id="pHeader" style="background:#E53935;">
+      <div class="p-eyebrow" id="pEyebrow">Food Court · Stall 12</div>
+      <div class="p-title" id="pTitle">Dragon Bowl</div>
+      <div class="p-subtitle" id="pSubtitle">Fresh Asian Street Food</div>
+    </div>
+    <div class="p-body">
+      <div class="p-scan">Point your camera here</div>
+      <div class="p-qr-border" id="pQrBorder" style="border-color:#E53935;">
+        <div id="qrCanvas"></div>
+      </div>
+      <div class="p-or">or visit</div>
+      <div class="p-url" id="pUrl" style="color:#E53935;">itabs.ai/menu/dragonbowl</div>
+    </div>
+    <div class="p-footer">
+      <div class="p-cta" id="pCta">📱 Order from your phone</div>
+      <div class="p-ctasub" id="pCtaSub">No app needed · Pay at counter</div>
+    </div>
+  </div>
+</div>
+
+<p class="hint" id="saveHint" style="display:none;">Save the image then attach it to an email for your print shop.</p>
+<button class="btn btn-save" id="saveBtn" onclick="saveImage()">Save image to phone</button>
+<button class="btn btn-email" id="emailBtn" onclick="emailPoster()">Open email to send</button>
+
+<script>
+let accent = '#E53935';
+let qrInstance = null;
+
+function setColor(el, hex) {
+  accent = hex;
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('pHeader').style.background = hex;
+  document.getElementById('pQrBorder').style.borderColor = hex;
+  document.getElementById('pUrl').style.color = hex;
+}
+
+function generatePoster() {
+  const biz = document.getElementById('bizName').value.trim() || 'Dragon Bowl';
+  const sub = document.getElementById('subtitle').value.trim() || 'Fresh Asian Street Food';
+  const eye = document.getElementById('eyebrow').value.trim() || 'Food Court · Stall 12';
+  const url = document.getElementById('menuUrl').value.trim() || 'https://itabs.ai';
+  const cta = document.getElementById('cta').value.trim() || 'Order from your phone';
+  const ctaSub = document.getElementById('ctaSub').value.trim() || 'No app needed · Pay at counter';
+
+  document.getElementById('pTitle').textContent = biz;
+  document.getElementById('pSubtitle').textContent = sub;
+  document.getElementById('pEyebrow').textContent = eye;
+  document.getElementById('pUrl').textContent = url.replace(/^https?:\/\//, '');
+  document.getElementById('pCta').textContent = '📱 ' + cta;
+  document.getElementById('pCtaSub').textContent = ctaSub;
+
+  const qrEl = document.getElementById('qrCanvas');
+  qrEl.innerHTML = '';
+  new QRCode(qrEl, {
+    text: url,
+    width: 140,
+    height: 140,
+    colorDark: '#1a1a1a',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.H
+  });
+
+  document.getElementById('poster').style.display = 'flex';
+  document.getElementById('previewLabel').style.display = 'block';
+  document.getElementById('saveHint').style.display = 'block';
+  document.getElementById('saveBtn').style.display = 'block';
+  document.getElementById('emailBtn').style.display = 'block';
+
+  setTimeout(() => {
+    document.getElementById('poster').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function saveImage() {
+  const poster = document.getElementById('poster');
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Saving...';
+  btn.style.opacity = '0.6';
+
+  html2canvas(poster, {
+    scale: 4,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    const name = (document.getElementById('bizName').value.trim() || 'poster').replace(/\s+/g, '-').toLowerCase();
+    link.download = name + '-qr-poster.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = 'Save image to phone';
+    btn.style.opacity = '1';
+  });
+}
+
+function emailPoster() {
+  const biz = document.getElementById('bizName').value.trim() || 'poster';
+  const subject = encodeURIComponent('Print request — ' + biz + ' QR Poster');
+  const body = encodeURIComponent('Hi,\n\nPlease print the attached QR poster on A4 and laminate.\n\nThanks');
+  window.location.href = 'mailto:?subject=' + subject + '&body=' + body;
+}
+</script>
+</body>
+</html>
