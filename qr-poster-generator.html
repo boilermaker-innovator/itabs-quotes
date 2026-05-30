@@ -307,8 +307,8 @@ function generatePoster() {
   const sub = document.getElementById('subtitle').value.trim();
   const eye = document.getElementById('eyebrow').value.trim();
   const url = document.getElementById('menuUrl').value.trim() || 'https://itabs.ai';
-  const cta = document.getElementById('cta').value.trim();
-  const ctaSub = document.getElementById('ctaSub').value.trim();
+  const cta = document.getElementById('cta').value.trim() || 'Order from your phone';
+  const ctaSub = document.getElementById('ctaSub').value.trim() || 'No app needed · Pay at counter';
 
   const set = (id, val, show) => {
     const el = document.getElementById(id);
