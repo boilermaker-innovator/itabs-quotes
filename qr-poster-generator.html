@@ -303,19 +303,25 @@ function setColor(el, hex) {
 }
 
 function generatePoster() {
-  const biz = document.getElementById('bizName').value.trim() || 'Dragon Bowl';
-  const sub = document.getElementById('subtitle').value.trim() || 'Fresh Asian Street Food';
-  const eye = document.getElementById('eyebrow').value.trim() || 'Food Court · Stall 12';
+  const biz = document.getElementById('bizName').value.trim();
+  const sub = document.getElementById('subtitle').value.trim();
+  const eye = document.getElementById('eyebrow').value.trim();
   const url = document.getElementById('menuUrl').value.trim() || 'https://itabs.ai';
-  const cta = document.getElementById('cta').value.trim() || 'Order from your phone';
-  const ctaSub = document.getElementById('ctaSub').value.trim() || 'No app needed · Pay at counter';
+  const cta = document.getElementById('cta').value.trim();
+  const ctaSub = document.getElementById('ctaSub').value.trim();
 
-  document.getElementById('pTitle').textContent = biz;
-  document.getElementById('pSubtitle').textContent = sub;
-  document.getElementById('pEyebrow').textContent = eye;
-  document.getElementById('pUrl').textContent = url.replace(/^https?:\/\//, '');
-  document.getElementById('pCta').textContent = '📱 ' + cta;
-  document.getElementById('pCtaSub').textContent = ctaSub;
+  const set = (id, val, show) => {
+    const el = document.getElementById(id);
+    el.textContent = val;
+    el.style.display = show ? '' : 'none';
+  };
+
+  set('pTitle', biz, biz);
+  set('pSubtitle', sub, sub);
+  set('pEyebrow', eye, eye);
+  set('pUrl', url.replace(/^https?:\/\//, ''), url);
+  set('pCta', cta ? '📱 ' + cta : '', cta);
+  set('pCtaSub', ctaSub, ctaSub);
 
   const qrEl = document.getElementById('qrCanvas');
   qrEl.innerHTML = '';
